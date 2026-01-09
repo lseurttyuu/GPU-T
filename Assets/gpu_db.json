@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "vendors": {
+    "1002": "AMD",
+    "10DE": "NVIDIA",
+    "8086": "Intel",
+    "1043": "ASUS",
+    "1462": "MSI",
+    "1458": "Gigabyte",
+    "1849": "ASRock",
+    "1DA2": "Sapphire",
+    "1682": "XFX",
+    "196D": "Club 3D",
+    "148C": "PowerColor"
+  },
+  "gpus": {
+    "744C": {
+      "name": "AMD Radeon RX 7900 XTX",
+      "codeName": "Navi 31",
+      "technology": "5 nm",
+      "dieSize": "300 mm²",
+      "releaseDate": "Nov 3, 2022",
+      "transistors": "57700M",
+      "rops": "192",
+      "tmus": "384",
+      "shaders": "6144 Unified",
+      "computeUnits": "96 CU",
+      "memoryType": "GDDR6",
+      "busWidth": "384 Bit",
+      "defGpuClock": "2269 MHz",
+      "defBoostClock": "2499 MHz",
+      "defMemClock": "2500 MHz",
+      "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7900-xtx.c3941"
+    },
+    "744D": {
+      "name": "AMD Radeon RX 7900 XT",
+      "codeName": "Navi 31",
+      "technology": "5 nm",
+      "dieSize": "300 mm²",
+      "releaseDate": "Nov 3, 2022",
+      "transistors": "57700M",
+      "rops": "192",
+      "tmus": "336",
+      "shaders": "5376 Unified",
+      "computeUnits": "84 CU",
+      "memoryType": "GDDR6",
+      "busWidth": "320 Bit",
+      "defGpuClock": "2025 MHz",
+      "defBoostClock": "2394 MHz",
+      "defMemClock": "2500 MHz",
+      "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7900-xt.c3912"
+    },
+    "73BF": {
+      "name": "AMD Radeon RX 6800 XT",
+      "codeName": "Navi 21",
+      "technology": "7 nm",
+      "dieSize": "520 mm²",
+      "releaseDate": "Oct 28, 2020",
+      "transistors": "26800M",
+      "rops": "128",
+      "tmus": "288",
+      "shaders": "4608 Unified",
+      "computeUnits": "72 CU",
+      "memoryType": "GDDR6",
+      "busWidth": "256 Bit",
+      "defGpuClock": "1825 MHz",
+      "defBoostClock": "2250 MHz",
+      "defMemClock": "2000 MHz",
+      "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6800-xt.c3694"
+    }
+  }
+}
