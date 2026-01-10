@@ -3,12 +3,12 @@
         xmlns:vm="using:GPU_T.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" 
-        Width="385" Height="525"
-        CanResize="False"
-        WindowStartupLocation="CenterScreen"
+        mc:Ignorable="d" d:DesignWidth="385" d:DesignHeight="525"
+        Width="385" MinWidth="385" MaxWidth="385"
+        SizeToContent="{Binding WindowSizeMode}" CanResize="False"    WindowStartupLocation="CenterScreen"
         x:Class="GPU_T.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
+        x:Name="MainWnd"
         Icon="/Assets/app_icon.png"
         Title="GPU-T"
         Background="#f1f1f1">
@@ -125,7 +125,7 @@
 
     <Grid RowDefinitions="*,Auto" Margin="4">
         
-        <TabControl Grid.Row="0" Margin="0,0,0,2" Padding="2">
+        <TabControl Grid.Row="0" SelectedIndex="{Binding SelectedTabIndex}" Margin="0,0,0,2" Padding="2">
             <TabItem Header="Graphics Card">
                 
                 <Grid Margin="0,5,0,0">
@@ -390,31 +390,70 @@
             </TabItem>
             
             <TabItem Header="Sensors">
-                <TextBlock Text="Sensors view..." HorizontalAlignment="Center"/>
-            </TabItem>
+        <Grid RowDefinitions="*,Auto">
+            
+            <ScrollViewer Grid.Row="0">
+                <ItemsControl ItemsSource="{Binding Sensors}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="10,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="140"/> <ColumnDefinition Width="60"/>  <ColumnDefinition Width="40"/>  <ColumnDefinition Width="*"/>   </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" Foreground="#333"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Value}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding Unit}" Margin="5,0,0,0" VerticalAlignment="Center" Foreground="#666"/>
+                                
+                                <Border Grid.Column="3" Height="14" Background="#E0E0E0" Margin="5,0,0,0">
+                                    <Rectangle Fill="Red" Width="10" HorizontalAlignment="Left"/>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="1" Margin="10">
+                <CheckBox Content="Log to file" IsEnabled="False"/>
+            </StackPanel>
+        </Grid>
+    </TabItem>
             
              <TabItem Header="Advanced">
                 <TextBlock Text="Advanced view..." HorizontalAlignment="Center"/>
             </TabItem>
         </TabControl>
 
-        <Grid Grid.Row="2" Margin="10,0,10,10">
-            <Grid.ColumnDefinitions>
+        <Grid Grid.Row="1" Margin="10,0,10,0"> <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
+            
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <RowDefinition Height="8"/>    </Grid.RowDefinitions>
 
-            <ComboBox Grid.Column="0" 
+            <ComboBox Grid.Row="0" Grid.Column="0" 
                       Width="270" 
                       ItemsSource="{Binding AvailableGpus}"
                       SelectedItem="{Binding SelectedGpu}"
-                      HorizontalAlignment="Left"/>
-            
-            <Button Grid.Column="1" 
+                      HorizontalAlignment="Left"
+                      Margin="0,0,0,1"/> <Button Grid.Row="0" Grid.Column="1" 
                     Content="Close" 
                     Width="75" 
                     HorizontalContentAlignment="Center"
-                    Command="{Binding CloseAppCommand}"/>
+                    Command="{Binding CloseAppCommand}"
+                    Margin="0,0,0,1"/>
+
+            <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                    Background="Transparent"
+                    Height="8"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Stretch"
+                    Cursor="SizeNorthSouth"
+                    IsVisible="{Binding ShowResizeGrip}"
+                    PointerPressed="ResizeBar_PointerPressed"
+                    PointerMoved="ResizeBar_PointerMoved"
+                    PointerReleased="ResizeBar_PointerReleased"/>
         </Grid>
 
     </Grid>

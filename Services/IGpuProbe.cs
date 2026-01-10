@@ -61,4 +61,6 @@ public interface IGpuProbe
 {
     // Metoda, która przeskanuje system i zwróci dane statyczne
     GpuStaticData LoadStaticData();
+
+    GpuSensorData LoadSensorData();
 }

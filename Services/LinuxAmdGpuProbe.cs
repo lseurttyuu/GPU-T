@@ -9,12 +9,36 @@ namespace GPU_T.Services;
 public class LinuxAmdGpuProbe : IGpuProbe
 {
     private readonly string _basePath;
+    private readonly string _hwmonPath;
 
     // Konstruktor przyjmuje teraz ID karty (domyślnie "card0")
     public LinuxAmdGpuProbe(string cardId = "card0")
     {
         _basePath = $"/sys/class/drm/{cardId}/device";
+        _hwmonPath = FindHwmonPath(_basePath); // <--- Szukamy hwmon przy starcie
     }
+
+    private string FindHwmonPath(string devicePath)
+    {
+        try
+        {
+            string hwmonBase = Path.Combine(devicePath, "hwmon");
+            if (Directory.Exists(hwmonBase))
+            {
+                // Szukamy podkatalogów, np. hwmon0, hwmon1...
+                var dirs = Directory.GetDirectories(hwmonBase);
+                if (dirs.Length > 0)
+                {
+                    // Zazwyczaj jest tylko jeden folder hwmon wewnątrz device
+                    return dirs[0];
+                }
+            }
+        }
+        catch { }
+        return string.Empty;
+    }
+
+
 
     // Metoda statyczna do wykrywania dostępnych GPU
     public static List<string> GetAvailableCards()
@@ -168,6 +192,232 @@ public class LinuxAmdGpuProbe : IGpuProbe
     }
     
     // --- NOWE METODY ODCZYTU Z PLIKÓW ---
+
+
+    // --- IMPLEMENTACJA LOAD SENSOR DATA ---
+    public GpuSensorData LoadSensorData()
+    {
+        // 1. Zegary (Próbujemy czytać freq*_input, jak nie ma to fallback do pp_dpm)
+        double coreClk = ReadFreq("freq1", "sclk"); 
+        double memClk  = ReadFreq("freq2", "mclk");
+
+        // Jeśli freq* nie zwróciły wyniku (0), spróbujmy starej metody z pp_dpm
+        if (coreClk == 0) coreClk = ParseClock(GetCurrentClock("pp_dpm_sclk"));
+        if (memClk == 0)  memClk  = ParseClock(GetCurrentClock("pp_dpm_mclk"));
+
+        // 2. Temperatury (Dynamiczne mapowanie po labelach)
+        double tEdge = 0, tSpot = 0, tMem = 0;
+        
+        // Skanujemy temp1 do temp3 (zazwyczaj tyle ich jest na AMD)
+        for (int i = 1; i <= 3; i++)
+        {
+            string label = ReadFileFromHwmon($"temp{i}_label", "").ToLower();
+            double val = ReadHwmonDouble($"temp{i}_input") / 1000.0;
+
+            if (label.Contains("edge") || label == "") tEdge = val; // Edge to zazwyczaj domyślna
+            else if (label.Contains("junction") || label.Contains("hotspot")) tSpot = val;
+            else if (label.Contains("mem")) tMem = val;
+        }
+        // Fallback: jeśli nadal 0, a pliki istnieją, przypisz "na sztywno" jak w starym kodzie
+        if (tEdge == 0) tEdge = ReadHwmonDouble("temp1_input") / 1000.0;
+
+        // 3. Wentylatory
+        int fanRpm = (int)ReadHwmonDouble("fan1_input");
+        
+        // Obliczanie procentowe wentylatora (PWM)
+        // pwm1 (aktualne) / pwm1_max (maksymalne, zazwyczaj 255) * 100
+        int fanPct = 0;
+        double pwmNow = ReadHwmonDouble("pwm1");
+        double pwmMax = ReadHwmonDouble("pwm1_max");
+        if (pwmMax > 0) fanPct = (int)((pwmNow / pwmMax) * 100.0);
+
+        // 4. Moc (Waty)
+        double powerW = ReadHwmonDouble("power1_average");
+        if (powerW == 0) powerW = ReadHwmonDouble("power1_input"); // Fallback
+        powerW /= 1000000.0; // mikrowaty -> Waty
+
+        // 5. Napięcie (Volty) - in0_input (mV)
+        double voltage = ReadHwmonDouble("in0_input") / 1000.0;
+
+        // 6. Obciążenie (GPU Load)
+        // gpu_busy_percent jest w /device/, a nie w /hwmon/
+        // Musimy użyć ReadFile z _basePath, a nie ReadHwmonDouble
+        int load = 0;
+        int.TryParse(ReadFile("gpu_busy_percent", "0"), out load);
+
+        // 7. Memory Used
+        double memUsedMb = 0;
+        if (long.TryParse(ReadFile("mem_info_vram_used", "0"), out long memBytes))
+        {
+            memUsedMb = memBytes / (1024.0 * 1024.0);
+        }
+
+        // 1. Memory Controller Load
+        int memLoad = 0;
+        int.TryParse(ReadFile("mem_busy_percent", "0"), out memLoad);
+
+        // 2. Memory Dynamic (GTT)
+        double memGttMb = 0;
+        if (long.TryParse(ReadFile("mem_info_gtt_used", "0"), out long gttBytes))
+        {
+            memGttMb = gttBytes / (1024.0 * 1024.0);
+        }
+
+        // 3. System Data (CPU & RAM) - to są dane spoza GPU, więc piszemy osobne metody
+        double cpuTemp = GetCpuTemperature();
+        double sysRam = GetSystemRamUsage();
+
+        return new GpuSensorData
+        {
+            GpuClock = coreClk,
+            MemoryClock = memClk,
+            GpuTemp = tEdge,
+            GpuHotSpot = tSpot,
+            MemoryTemp = tMem,
+            FanRpm = fanRpm,
+            FanPercent = fanPct,
+            BoardPower = powerW,
+            GpuLoad = load,
+            MemoryUsed = memUsedMb,
+            GpuVoltage = voltage,
+
+            MemControllerLoad = memLoad,
+            MemoryUsedDynamic = memGttMb,
+            CpuTemperature = cpuTemp,
+            SystemRamUsed = sysRam
+        };
+    }
+
+
+    private double GetCpuTemperature()
+    {
+        try
+        {
+            // Skanujemy /sys/class/hwmon/ w poszukiwaniu 'k10temp' (AMD) lub 'coretemp' (Intel)
+            var baseDir = "/sys/class/hwmon/";
+            if (Directory.Exists(baseDir))
+            {
+                foreach (var dir in Directory.GetDirectories(baseDir))
+                {
+                    string namePath = Path.Combine(dir, "name");
+                    if (File.Exists(namePath))
+                    {
+                        string name = File.ReadAllText(namePath).Trim();
+                        // Szukamy sterownika CPU
+                        if (name == "k10temp" || name == "coretemp")
+                        {
+                            // Czytamy temp1_input (często Tdie lub Package temp)
+                            string tempPath = Path.Combine(dir, "temp1_input");
+                            if (File.Exists(tempPath))
+                            {
+                                if (double.TryParse(File.ReadAllText(tempPath), out double val))
+                                    return val / 1000.0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
+        return 0;
+    }
+
+    private double GetSystemRamUsage()
+    {
+        try
+        {
+            // Parsujemy /proc/meminfo
+            // MemTotal:       32782780 kB
+            // MemAvailable:   24123123 kB
+            // Used = Total - Available
+            
+            if (File.Exists("/proc/meminfo"))
+            {
+                string[] lines = File.ReadAllLines("/proc/meminfo");
+                double total = 0;
+                double avail = 0;
+
+                foreach (var line in lines)
+                {
+                    if (line.StartsWith("MemTotal:"))
+                        total = ExtractKb(line);
+                    else if (line.StartsWith("MemAvailable:"))
+                        avail = ExtractKb(line);
+                    
+                    if (total > 0 && avail > 0) break; // Mamy komplet
+                }
+                
+                // Zwracamy zużycie w MB
+                return (total - avail) / 1024.0;
+            }
+        }
+        catch { }
+        return 0;
+    }
+
+    private double ExtractKb(string line)
+    {
+        var match = Regex.Match(line, @"(\d+)");
+        if (match.Success && double.TryParse(match.Value, out double val)) return val;
+        return 0;
+    }
+
+    private double ReadFreq(string prefix, string expectedLabelContent)
+    {
+        // Sprawdza czy freq1_label zawiera np. "sclk" i czyta freq1_input
+        string label = ReadFileFromHwmon($"{prefix}_label", "").ToLower();
+        
+        // Czasem label to po prostu "sclk", czasem "gfx_sclk"
+        // Jeśli plik label nie istnieje, ale input tak, to zgadujemy na podstawie numeru
+        if (string.IsNullOrEmpty(label) || label.Contains(expectedLabelContent))
+        {
+            // freq input jest w Hz. Dzielimy przez 1,000,000 żeby mieć MHz
+            return ReadHwmonDouble($"{prefix}_input") / 1000000.0;
+        }
+        return 0;
+    }
+
+
+    private string ReadFileFromHwmon(string filename, string fallback)
+    {
+        if (string.IsNullOrEmpty(_hwmonPath)) return fallback;
+        try {
+            string p = Path.Combine(_hwmonPath, filename);
+            return File.Exists(p) ? File.ReadAllText(p).Trim() : fallback;
+        } catch { return fallback; }
+    }
+    // --- Helpery do Sensorów ---
+
+    private double ReadHwmonDouble(string filename)
+    {
+        if (string.IsNullOrEmpty(_hwmonPath)) return 0;
+        try
+        {
+            string path = Path.Combine(_hwmonPath, filename);
+            if (File.Exists(path))
+            {
+                string text = File.ReadAllText(path).Trim();
+                if (double.TryParse(text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val))
+                {
+                    return val;
+                }
+            }
+        }
+        catch { }
+        return 0;
+    }
+
+    private double ParseClock(string clockString)
+    {
+        // clockString to np. "2304 MHz" -> zwracamy 2304.0
+        var match = Regex.Match(clockString, @"(\d+)");
+        if (match.Success && double.TryParse(match.Value, out double val))
+        {
+            return val;
+        }
+        return 0;
+    }
+
 
 
     // --- Helper Clock ---
