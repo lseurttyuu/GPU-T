@@ -115,6 +115,57 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
 
+
+    [RelayCommand]
+    private void ResetSensors()
+    {
+        if (Sensors != null)
+        {
+            foreach (var sensor in Sensors)
+            {
+                sensor.Reset();
+            }
+        }
+    }
+
+
+
+    private void SensorTimer_Tick(object? sender, EventArgs e)
+    {
+        if (_selectedGpu == null) return;
+        
+        var probe = new LinuxAmdGpuProbe(_selectedGpu.Id, MemoryType); 
+        var data = probe.LoadSensorData();
+
+        // 1. Aktualizacja Głównej Zakładki
+        GpuClock = $"{data.GpuClock.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} MHz";
+        MemoryClock = $"{data.MemoryClock.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} MHz";
+
+        // 2. Aktualizacja Sensorów
+        UpdateSensor("GPU Clock", data.GpuClock);
+        UpdateSensor("Memory Clock", data.MemoryClock);
+        UpdateSensor("GPU Temperature", data.GpuTemp);
+        UpdateSensor("GPU Temperature (Hot Spot)", data.GpuHotSpot);
+        UpdateSensor("Memory Temperature", data.MemoryTemp); // <--- ODŚWIEŻANIE
+        
+        UpdateSensor("Fan Speed (%)", (double)data.FanPercent);
+        UpdateSensor("Fan Speed (RPM)", (double)data.FanRpm);
+        
+        UpdateSensor("GPU Load", (double)data.GpuLoad);
+        UpdateSensor("Memory Controller Load", (double)data.MemControllerLoad);
+        
+        UpdateSensor("Memory Used (Dedicated)", data.MemoryUsed);
+        UpdateSensor("Memory Used (Dynamic)", data.MemoryUsedDynamic);
+        
+        UpdateSensor("Board Power Draw", data.BoardPower);
+        UpdateSensor("GPU Voltage", data.GpuVoltage);
+        
+        UpdateSensor("CPU Temperature", data.CpuTemperature);
+        UpdateSensor("System Memory Used", data.SystemRamUsed);
+    }
+
+
+
     // Metoda Inicjalizująca Sensory (Wywołaj ją w konstruktorze lub LoadGpuData)
     private void InitSensors()
     {
@@ -123,22 +174,23 @@ public partial class MainWindowViewModel : ViewModelBase
             new SensorItemViewModel("GPU Clock", "MHz"),
             new SensorItemViewModel("Memory Clock", "MHz"),
             new SensorItemViewModel("GPU Temperature", "°C"),
-            new SensorItemViewModel("GPU Hot Spot", "°C"),
-            new SensorItemViewModel("Memory Temperature", "°C"),
-            new SensorItemViewModel("CPU Temperature", "°C"), // <-- NEW
+            new SensorItemViewModel("GPU Temperature (Hot Spot)", "°C"),
+            new SensorItemViewModel("Memory Temperature", "°C"), // <--- PRZYWRÓCONE W DOBRYM MIEJSCU
             
-            new SensorItemViewModel("Fan Speed", "RPM"),
             new SensorItemViewModel("Fan Speed (%)", "%"),
+            new SensorItemViewModel("Fan Speed (RPM)", "RPM"),
             
             new SensorItemViewModel("GPU Load", "%"),
-            new SensorItemViewModel("Memory Controller Load", "%"), // <-- NEW
+            new SensorItemViewModel("Memory Controller Load", "%"),
             
-            new SensorItemViewModel("Memory Used (Dedicated)", "MB"), // Zmiana nazwy ze starego "Memory Used"
-            new SensorItemViewModel("Memory Used (Dynamic)", "MB"),   // <-- NEW
-            new SensorItemViewModel("System Memory Used", "MB"),      // <-- NEW
+            new SensorItemViewModel("Memory Used (Dedicated)", "MB"),
+            new SensorItemViewModel("Memory Used (Dynamic)", "MB"),
             
             new SensorItemViewModel("Board Power Draw", "W"),
             new SensorItemViewModel("GPU Voltage", "V"),
+            
+            new SensorItemViewModel("CPU Temperature", "°C"),
+            new SensorItemViewModel("System Memory Used", "MB"),
         };
 
         // Konfiguracja Timera
@@ -150,39 +202,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _sensorTimer.Start();
     }
 
-    private void SensorTimer_Tick(object? sender, EventArgs e)
-    {
-        if (_selectedGpu == null) return;
-
-        // Tworzymy lekką sondę tylko do odczytu sensorów (z tym samym ID co wybrana karta)
-        // Możemy zoptymalizować to trzymając instancję probe w polu klasy, zamiast tworzyć nową.
-        var probe = new LinuxAmdGpuProbe(_selectedGpu.Id); 
-        var data = probe.LoadSensorData();
-
-        // Aktualizacja UI (szukamy po nazwie i wpisujemy wartość)
-        UpdateSensor("GPU Clock", $"{data.GpuClock:0.0}");
-        UpdateSensor("Memory Clock", $"{data.MemoryClock:0.0}");
-        UpdateSensor("GPU Temperature", $"{data.GpuTemp:0.0}");
-        UpdateSensor("GPU Hot Spot", $"{data.GpuHotSpot:0.0}");
-        UpdateSensor("Memory Temperature", $"{data.MemoryTemp:0.0}"); // Jeśli 0, można ukryć
-        UpdateSensor("Fan Speed", $"{data.FanRpm}");
-        UpdateSensor("Fan Speed (%)", $"{data.FanPercent}");
-        UpdateSensor("GPU Load", $"{data.GpuLoad}");
-        UpdateSensor("Memory Used (Dedicated)", $"{data.MemoryUsed:0}"); // Zmiana klucza
-        UpdateSensor("Board Power Draw", $"{data.BoardPower:0.0}");
-        UpdateSensor("GPU Voltage", $"{data.GpuVoltage:0.000}");
-
-        UpdateSensor("Memory Controller Load", $"{data.MemControllerLoad}");
-        UpdateSensor("Memory Used (Dynamic)", $"{data.MemoryUsedDynamic:0}");
-        UpdateSensor("CPU Temperature", $"{data.CpuTemperature:0.0}");
-        UpdateSensor("System Memory Used", $"{data.SystemRamUsed:0}"); // W MB
-        
-        // Przy okazji aktualizujemy snapshoty zegarów w zakładce głównej!
-        GpuClock = $"{data.GpuClock:0} MHz";
-        MemoryClock = $"{data.MemoryClock:0} MHz";
-    }
-
-    private void UpdateSensor(string name, string value)
+    private void UpdateSensor(string name, double value)
     {
         var sensor = Sensors.FirstOrDefault(s => s.Name == name);
         if (sensor != null)

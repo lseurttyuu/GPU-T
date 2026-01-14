@@ -66,8 +66,6 @@
         <Style Selector="CheckBox.GpuZ">
             <Setter Property="MinWidth" Value="13"/>
             <Setter Property="MinHeight" Value="13"/>
-            <Setter Property="Width" Value="13"/>
-            <Setter Property="Height" Value="13"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Margin" Value="0"/>
             <Setter Property="IsHitTestVisible" Value="False"/> 
@@ -75,21 +73,30 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Template">
                 <ControlTemplate>
-                    <Border Name="PART_Border"
-                            Width="13" Height="13"
-                            Background="#FFFFFF"
-                            BorderBrush="#707070"
-                            BorderThickness="1">
-                        <Path Name="PART_CheckMark"
-                              Data="M 2,6 L 5,9 L 10,2"
-                              Stroke="#333333"
-                              StrokeThickness="1.5"
-                              UseLayoutRounding="False"
-                              IsVisible="False"
-                              HorizontalAlignment="Center"
-                              VerticalAlignment="Center"
-                              Margin="-2,-2,0,0"/>
-                    </Border>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Name="PART_Border"
+                                Width="13" Height="13"
+                                Background="#FFFFFF"
+                                BorderBrush="#707070"
+                                BorderThickness="1"
+                                VerticalAlignment="Center">
+                            <Path Name="PART_CheckMark"
+                                  Data="M 2,6 L 5,9 L 10,2"
+                                  Stroke="#333333"
+                                  StrokeThickness="1.5"
+                                  UseLayoutRounding="False"
+                                  IsVisible="False"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Margin="-2,-2,0,0"/>
+                        </Border>
+                        
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          Margin="5,0,0,0"
+                                          VerticalAlignment="Center"
+                                          FontSize="11"
+                                          Foreground="Black"/>
+                    </StackPanel>
                 </ControlTemplate>
             </Setter>
         </Style>
@@ -121,6 +128,45 @@
             <Setter Property="MinHeight" Value="24"/>
             <Setter Property="Padding" Value="6,2"/>
         </Style>
+
+        <Style Selector="Border.SensorFrame">
+            <Setter Property="BorderBrush" Value="#a0a0a0"/>
+            <Setter Property="BorderThickness" Value="1,1,0,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <Style Selector="Border.SensorFrameInner">
+            <Setter Property="BorderBrush" Value="#ffffff"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        </Style>
+
+        <Style Selector="TextBlock.SensorName">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="4,0,0,0"/> <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+
+        <Style Selector="TextBlock.SensorValue">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="0,0,4,0"/> <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+
+<Style Selector="TextBlock.ModeLabel">
+            <Setter Property="FontSize" Value="6"/>
+            <Setter Property="Foreground" Value="#008000"/> <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="2,0,0,0"/> </Style>
+
+        <Style Selector="Button.ResetBtn">
+            <Setter Property="Padding" Value="0,0,0,2"/> <Setter Property="Margin" Value="0"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+
     </Window.Styles>
 
     <Grid RowDefinitions="*,Auto" Margin="4">
@@ -392,30 +438,88 @@
             <TabItem Header="Sensors">
         <Grid RowDefinitions="*,Auto">
             
-            <ScrollViewer Grid.Row="0">
-                <ItemsControl ItemsSource="{Binding Sensors}">
+            <ScrollViewer Grid.Row="0" 
+                          HorizontalScrollBarVisibility="Disabled" 
+                          VerticalScrollBarVisibility="Auto">
+                
+                <ItemsControl ItemsSource="{Binding Sensors}" Margin="6,10,6,0">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid Margin="10,2">
+                            <Grid Margin="0,0,0,7"> 
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="140"/> <ColumnDefinition Width="60"/>  <ColumnDefinition Width="40"/>  <ColumnDefinition Width="*"/>   </Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="148"/> 
+                                    <ColumnDefinition Width="5"/>   
+                                    <ColumnDefinition Width="70"/>  
+                                    <ColumnDefinition Width="5"/>   
+                                    <ColumnDefinition Width="133"/> 
+                                </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" Foreground="#333"/>
-                                <TextBlock Grid.Column="1" Text="{Binding Value}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="2" Text="{Binding Unit}" Margin="5,0,0,0" VerticalAlignment="Center" Foreground="#666"/>
-                                
-                                <Border Grid.Column="3" Height="14" Background="#E0E0E0" Margin="5,0,0,0">
-                                    <Rectangle Fill="Red" Width="10" HorizontalAlignment="Left"/>
+                                <Border Grid.Column="0" Classes="SensorFrame" Height="20">
+                                    <Border Classes="SensorFrameInner">
+                                        <TextBlock Text="{Binding Name}" Classes="SensorName"/>
+                                    </Border>
                                 </Border>
+
+                                <Button Grid.Column="2" 
+                                        Command="{Binding ToggleModeCommand}"
+                                        Padding="0" BorderThickness="0" Background="Transparent"
+                                        CornerRadius="0" Height="20">
+                                    <Border Classes="SensorFrame" Height="20" Width="70">
+                                        <Border Classes="SensorFrameInner">
+                                            <Grid>
+                                                <TextBlock Text="{Binding ModeLabel}" 
+                                                           Classes="ModeLabel"/>
+                                                
+                                                <TextBlock Text="{Binding DisplayValue}" 
+                                                           Classes="SensorValue"/>
+                                            </Grid>
+                                        </Border>
+                                    </Border>
+                                </Button>
+
+                                <Grid Grid.Column="4" Height="20" Width="133">
+                                    
+                                    <Border Background="#f1f1f1" ClipToBounds="True" Margin="1">
+                                        <Polygon Points="{Binding GraphPoints}"
+                                                 Fill="#FF0000"
+                                                 Stroke="#FF0000"
+                                                 StrokeThickness="1"
+                                                 IsHitTestVisible="False"
+                                                 VerticalAlignment="Top"
+                                                 HorizontalAlignment="Left"
+                                                 RenderOptions.BitmapInterpolationMode="LowQuality"/>
+                                    </Border>
+
+                                    <Border Classes="SensorFrame" Background="Transparent">
+                                        <Border Classes="SensorFrameInner" Background="Transparent"/>
+                                    </Border>
+                                    
+                                </Grid>
+
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
 
-            <StackPanel Grid.Row="1" Margin="10">
-                <CheckBox Content="Log to file" IsEnabled="False"/>
-            </StackPanel>
+            <Grid Grid.Row="1" Margin="6,9,10,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <CheckBox Content="Log to file" IsEnabled="False" Classes="GpuZ"/>
+                </StackPanel>
+                
+                <Button Grid.Column="1" 
+                        Content="Reset" 
+                        Width="75" 
+                        Height="22"
+                        FontSize="11"
+                        Classes="ResetBtn"
+                        Command="{Binding ResetSensorsCommand}"/>
+            </Grid>
         </Grid>
     </TabItem>
             

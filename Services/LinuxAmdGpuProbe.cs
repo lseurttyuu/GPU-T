@@ -11,11 +11,28 @@ public class LinuxAmdGpuProbe : IGpuProbe
     private readonly string _basePath;
     private readonly string _hwmonPath;
 
+    // Domyślny mnożnik = 1.0 (dla GDDR5, HBM, kart spoza bazy itp.)
+    private readonly double _memClockMultiplier = 1.0;
+
     // Konstruktor przyjmuje teraz ID karty (domyślnie "card0")
-    public LinuxAmdGpuProbe(string cardId = "card0")
+    public LinuxAmdGpuProbe(string gpuId, string memoryType = "")
     {
-        _basePath = $"/sys/class/drm/{cardId}/device";
-        _hwmonPath = FindHwmonPath(_basePath); // <--- Szukamy hwmon przy starcie
+        _basePath = $"/sys/class/drm/{gpuId}/device";
+        
+        if (Directory.Exists($"{_basePath}/hwmon"))
+        {
+            var dirs = Directory.GetDirectories($"{_basePath}/hwmon");
+            if (dirs.Length > 0) _hwmonPath = dirs[0];
+        }
+
+        // --- LOGIKA MNOŻNIKA ---
+        // Jeśli w bazie JSON (lub z BIOSu) mamy napis "GDDR6", ustawiamy mnożnik x2.
+        // W przeciwnym razie (GDDR5, brak w bazie, inne) zostawiamy 1.0.
+        if (!string.IsNullOrEmpty(memoryType) && 
+            memoryType.Contains("GDDR6", StringComparison.OrdinalIgnoreCase))
+        {
+            _memClockMultiplier = 2.0;
+        }
     }
 
     private string FindHwmonPath(string devicePath)
@@ -117,7 +134,7 @@ public class LinuxAmdGpuProbe : IGpuProbe
 
         if (spec != null)
         {
-            lookupUrl = spec.LookupUrl; // Pobieramy URL z bazy
+            lookupUrl = spec.LookupUrl;
             ropsTmus = $"{spec.Rops} / {spec.Tmus}";
             double boostClock = ExtractNumber(spec.DefBoostClock);
             double memClock = ExtractNumber(spec.DefMemClock);
@@ -125,17 +142,20 @@ public class LinuxAmdGpuProbe : IGpuProbe
             double rops = ExtractNumber(spec.Rops);
             double tmus = ExtractNumber(spec.Tmus);
 
+            // ZMIANA: Używamy ToString(format, InvariantCulture)
             if (boostClock > 0 && rops > 0 && tmus > 0)
             {
-                pixelFill = $"{(boostClock * rops / 1000.0):0.0} GPixel/s";
-                texFill = $"{(boostClock * tmus / 1000.0):0.0} GTexel/s";
+                pixelFill = $"{(boostClock * rops / 1000.0).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} GPixel/s";
+                texFill = $"{(boostClock * tmus / 1000.0).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} GTexel/s";
             }
 
             if (memClock > 0 && busWidth > 0)
             {
                 double multiplier = GetMemoryMultiplier(spec.MemoryType);
                 double bandwidthValue = (memClock * multiplier * busWidth) / 8000.0;
-                bandwidth = $"{bandwidthValue:0.0} GB/s";
+                
+                // ZMIANA: InvariantCulture dla przepustowości
+                bandwidth = $"{bandwidthValue.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} GB/s";
             }
         }
 
@@ -199,11 +219,11 @@ public class LinuxAmdGpuProbe : IGpuProbe
     {
         // 1. Zegary (Próbujemy czytać freq*_input, jak nie ma to fallback do pp_dpm)
         double coreClk = ReadFreq("freq1", "sclk"); 
-        double memClk  = ReadFreq("freq2", "mclk");
+        double memClk  = ReadFreq("freq2", "mclk")*_memClockMultiplier; // GDDR -> mnożymy przez 2
 
         // Jeśli freq* nie zwróciły wyniku (0), spróbujmy starej metody z pp_dpm
         if (coreClk == 0) coreClk = ParseClock(GetCurrentClock("pp_dpm_sclk"));
-        if (memClk == 0)  memClk  = ParseClock(GetCurrentClock("pp_dpm_mclk"));
+        if (memClk == 0)  memClk  = ParseClock(GetCurrentClock("pp_dpm_mclk"))*_memClockMultiplier; // GDDR -> mnożymy przez 2
 
         // 2. Temperatury (Dynamiczne mapowanie po labelach)
         double tEdge = 0, tSpot = 0, tMem = 0;
