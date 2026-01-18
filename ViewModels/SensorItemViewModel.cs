@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
-using Avalonia.Media; // Do RenderOptions (potrzebne w XAML, tu tylko logicznie)
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -21,67 +21,88 @@ public partial class SensorItemViewModel : ViewModelBase
     [ObservableProperty] private string _name;
     [ObservableProperty] private string _unit;
     
-    // --- 1. DANE DO WYKRESU (Tylko widoczne okno) ---
+    // Konfiguracja limitów
+    private readonly bool _isFixedRange; // Czy zakres jest "zabetonowany"
+    
+    // --- 1. DANE DO WYKRESU ---
     private readonly List<double> _graphHistory = new();
-    private const int GraphWidth = 131; // Zmienione na 131
-    private const double GraphHeight = 18.0; // Wewnętrzna wysokość (20px - 2px ramki)
+    private const int GraphWidth = 131; 
+    private const double GraphHeight = 18.0; 
 
-    // Punkty do Polygonu
     [ObservableProperty] private List<Point> _graphPoints;
 
-    // --- 2. DANE STATYSTYCZNE (Globalne, od uruchomienia/resetu) ---
-    // Używamy metody "Running Stats" - O(1) pamięci i CPU.
+    // --- 2. DANE STATYSTYCZNE ---
     private double _globalMin = double.MaxValue;
     private double _globalMax = double.MinValue;
     private double _globalSum = 0;
     private long _globalCount = 0;
     
-    // Globalne Min/Max tylko dla SKALOWANIA wykresu (żeby nie skakał)
+    // Globalne Min/Max dla SKALOWANIA wykresu
+    // Inicjalizujemy je wartościami Max/Min, żeby pierwsze przypisanie zadziałało poprawnie,
+    // chyba że podano limity w konstruktorze (wtedy startujemy od nich).
     private double _scaleMin = double.MaxValue;
     private double _scaleMax = double.MinValue;
-    private bool _hasData = false;
+    private bool _hasInitializedScale = false;
 
     // --- 3. WYŚWIETLANIE ---
     [ObservableProperty] private string _displayValue = "---";
-    
-    // Etykieta trybu (MIN, MAX, AVG) - pusta dla Current
     [ObservableProperty] private string _modeLabel = ""; 
-    
     [ObservableProperty] private SensorMode _currentMode = SensorMode.Current;
 
-    public SensorItemViewModel(string name, string unit)
+    // ZMODYFIKOWANY KONSTRUKTOR
+    public SensorItemViewModel(string name, string unit, double? minLimit = null, double? maxLimit = null, bool isFixed = false)
     {
         _name = name;
         _unit = unit;
         _graphPoints = new List<Point>();
+        
+        _isFixedRange = isFixed;
+
+        // Jeśli podano limity startowe, ustawiamy je od razu
+        if (minLimit.HasValue) _scaleMin = minLimit.Value;
+        if (maxLimit.HasValue) _scaleMax = maxLimit.Value;
+        
+        // Jeśli podano oba, uznajemy skalę za zainicjowaną
+        if (minLimit.HasValue && maxLimit.HasValue) _hasInitializedScale = true;
     }
 
     public void UpdateValue(double rawValue)
     {
-        // A. Aktualizacja wykresu (tylko 133 punkty)
+        // 1. Historia
         _graphHistory.Add(rawValue);
         if (_graphHistory.Count > GraphWidth) _graphHistory.RemoveAt(0);
 
-        // B. Aktualizacja statystyk globalnych (Running Stats)
+        // 2. Statystyki liczbowe (MIN/MAX/AVG tekstu) - to zawsze liczymy z rzeczywistych danych
         _globalCount++;
         _globalSum += rawValue;
         if (rawValue < _globalMin) _globalMin = rawValue;
         if (rawValue > _globalMax) _globalMax = rawValue;
 
-        // C. Aktualizacja skali wykresu (tylko puchnie)
-        if (!_hasData)
+        // 3. Skalowanie Wykresu (Logika Limitów)
+        if (_isFixedRange)
         {
-            _scaleMin = rawValue;
-            _scaleMax = rawValue;
-            _hasData = true;
+            // Jeśli zakres jest sztywny (Fixed), NIE zmieniamy _scaleMin/_scaleMax.
+            // Wykres sam się "przytnie" w metodzie GeneratePolygon (przez clampowanie Y).
         }
         else
         {
-            if (rawValue < _scaleMin) _scaleMin = rawValue;
-            if (rawValue > _scaleMax) _scaleMax = rawValue;
+            // Zakres elastyczny (Expandable)
+            if (!_hasInitializedScale)
+            {
+                // Pierwszy odczyt (jeśli nie podano limitów w konstruktorze)
+                if (_scaleMin == double.MaxValue) _scaleMin = rawValue;
+                if (_scaleMax == double.MinValue) _scaleMax = rawValue;
+                _hasInitializedScale = true;
+            }
+            else
+            {
+                // Kolejne odczyty - rozszerzamy tylko jeśli wartość wyskoczy poza zakres
+                if (rawValue < _scaleMin) _scaleMin = rawValue;
+                if (rawValue > _scaleMax) _scaleMax = rawValue;
+            }
         }
 
-        // D. Odświeżenie widoku
+        // 4. Update UI
         UpdateDisplayString(rawValue);
         GeneratePolygon();
     }
@@ -97,37 +118,48 @@ public partial class SensorItemViewModel : ViewModelBase
             _ => SensorMode.Current
         };
 
-        // Aktualizujemy etykietę i wartość (używając ostatniej znanej wartości bieżącej)
-        if (_graphHistory.Count > 0)
-        {
-            UpdateDisplayString(_graphHistory.Last());
-        }
+        if (_graphHistory.Count > 0) UpdateDisplayString(_graphHistory.Last());
     }
     
     public void Reset()
     {
-        // Czyścimy wszystko
         _graphHistory.Clear();
         _graphPoints = new List<Point>();
         OnPropertyChanged(nameof(GraphPoints));
         
+        // Reset statystyk liczbowych
         _globalMin = double.MaxValue;
         _globalMax = double.MinValue;
         _globalSum = 0;
         _globalCount = 0;
         
-        _scaleMin = double.MaxValue;
-        _scaleMax = double.MinValue;
-        _hasData = false;
-        
         DisplayValue = "---";
         ModeLabel = "";
-        // Opcjonalnie: CurrentMode = SensorMode.Current; // Jeśli chcesz wracać do Current po resecie
-    }
 
+        // Reset skali wykresu
+        // Jeśli mamy zdefiniowane limity w konstruktorze, to do nich wracamy!
+        // Niestety konstruktor już poszedł, więc musimy to sprytnie obsłużyć, 
+        // ale najprościej: po prostu zresetujmy flagę inicjalizacji, 
+        // chyba że jest Fixed (wtedy i tak nic się nie zmienia).
+        
+        if (!_isFixedRange)
+        {
+             // Tutaj mały problem: nie zapamiętaliśmy "startowego min/max" z konstruktora.
+             // Ale w praktyce "Reset" w GPU-Z zazwyczaj zeruje wykres do "pustego".
+             // Uznajmy, że resetujemy tylko statystyki, a skala wykresu zostaje "rozciągnięta" 
+             // albo wraca do stanu początkowego. 
+             // W GPU-Z po resecie skala zazwyczaj zostaje, dopóki nie zrestartujesz apki.
+             // Zostawmy skalę taką jaka jest (najbardziej naturalne), resetując tylko liczby.
+        }
+    }
+    
+    // ... UpdateDisplayString i GeneratePolygon BEZ ZMIAN (są poprawne) ...
+    // Pamiętaj tylko, aby wkleić resztę klasy z poprzedniego etapu!
+    
     private void UpdateDisplayString(double currentValue)
     {
-        if (!_hasData) return;
+        // ... (Wklej kod z poprzedniej odpowiedzi) ...
+         if (!_hasInitializedScale && _graphHistory.Count == 0) return; // Małe zabezpieczenie
 
         double valToShow = currentValue;
         string label = "";
@@ -154,13 +186,10 @@ public partial class SensorItemViewModel : ViewModelBase
         }
 
         ModeLabel = label;
-
-        // Ustalanie formatu
-        string format = "0.0"; // Domyślny
+        string format = "0.0";
         if (Unit == "RPM" || Unit == "%" || Unit == "MB") format = "0";
-        if (Unit == "V") format = "0.000"; // ZMIANA: 3 miejsca po przecinku dla Voltów
+        if (Unit == "V") format = "0.000";
 
-        // ZMIANA: Wymuszenie InvariantCulture (kropka zamiast przecinka)
         DisplayValue = $"{valToShow.ToString(format, System.Globalization.CultureInfo.InvariantCulture)} {Unit}";
     }
 
@@ -168,9 +197,8 @@ public partial class SensorItemViewModel : ViewModelBase
     {
         if (_graphHistory.Count < 2) return;
 
-        // Używamy dokładnych wymiarów wewnętrznych
-        double width = (double)GraphWidth; // 131.0
-        double height = GraphHeight;       // 18.0
+        double width = (double)GraphWidth;
+        double height = GraphHeight;
 
         double min = _scaleMin;
         double max = _scaleMax;
@@ -184,25 +212,19 @@ public partial class SensorItemViewModel : ViewModelBase
         double range = max - min;
         var points = new List<Point>();
 
-        // 1. Punkty zamykające (dół) - dokładnie w narożnikach
         points.Add(new Point(width, height)); 
         
         double startX = width - (_graphHistory.Count - 1);
         if (startX < 0) startX = 0;
         points.Add(new Point(startX, height));
 
-        // 2. Punkty wykresu
         for (int i = 0; i < _graphHistory.Count; i++)
         {
             double val = _graphHistory[i];
             
-            // X: Od prawej
             double x = width - (_graphHistory.Count - 1 - i);
-            
-            // Y: Skalowanie (0 to góra, height to dół)
             double y = height - ((val - min) / range * height);
             
-            // Clamp: Zabezpieczenie na wszelki wypadek
             if (y < 0) y = 0;
             if (y > height) y = height;
 

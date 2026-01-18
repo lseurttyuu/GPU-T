@@ -55,6 +55,7 @@ public record GpuStaticData
     public string LookupUrl { get; init; } = ""; // <--- NOWE
     public string CurrentGpuClock { get; init; } = "0 MHz"; // <--- NOWE
     public string CurrentMemClock { get; init; } = "0 MHz"; // <--- NOWE
+    public string BoostClock { get; init; } = "0 MHz"; // <--- NOWE
 }
 
 public interface IGpuProbe

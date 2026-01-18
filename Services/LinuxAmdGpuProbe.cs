@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq; // Do skanowania katalogów
 using System.Text.RegularExpressions;
@@ -96,6 +97,14 @@ public class LinuxAmdGpuProbe : IGpuProbe
         var ids = GetRawIds();
         var spec = PciIdLookup.GetSpecs(ids.Device);
 
+        double dpmMemMultiplier = 1.0;
+        
+        if (spec != null && !string.IsNullOrEmpty(spec.MemoryType) && 
+            spec.MemoryType.Contains("GDDR6", StringComparison.OrdinalIgnoreCase))
+        {
+            dpmMemMultiplier = 2.0;
+        }
+
         // --- 1. DANE SYSTEMOWE ---
         string vramVendor = ReadFile("mem_info_vram_vendor"); 
         string memTypeDb = spec?.MemoryType ?? "Unknown";
@@ -114,10 +123,13 @@ public class LinuxAmdGpuProbe : IGpuProbe
         string driverDate = GetDriverDate();
         string vulkanApi = GetVulkanApiVersion();
 
-        // --- 3. CLOCKS SNAPSHOT (Jednorazowy odczyt na start) ---
-        // Żeby nie było zer, czytamy aktualny stan. W Sensorach będziemy to robić w pętli.
-        string currentGpuClock = GetCurrentClock("pp_dpm_sclk");
-        string currentMemClock = GetCurrentClock("pp_dpm_mclk");
+// --- 3. DPM CLOCKS (NEW: Scan pp_dpm for max/boost clocks) ---
+        // We scan DPM files to find the max supported clock by the driver.
+        double maxCoreDpm = GetMaxClockFromDpm("pp_dpm_sclk");
+        
+        // IMPORTANT: Multiply DPM memory clock by our multiplier (e.g., x2 for GDDR6)
+        double maxMemDpm = GetMaxClockFromDpm("pp_dpm_mclk") * dpmMemMultiplier;
+
 
         // --- 4. HIP Detection (Zamiast HSA) ---
         // Sprawdzamy czy istnieje biblioteka HIP w systemie
@@ -131,6 +143,33 @@ public class LinuxAmdGpuProbe : IGpuProbe
         string bandwidth = "N/A";
         string ropsTmus = "N/A";
         string lookupUrl = "";
+
+        string gpuClock = "---";
+        string boostClockDisplay = "---";
+        string memClockDisplay = "---";
+
+
+
+        // OVERRIDE WITH DPM DATA IF AVAILABLE
+        if (maxCoreDpm > 0)
+        {
+            // Use InvariantCulture to ensure dots (e.g. "2400 MHz")
+            string coreStr = $"{maxCoreDpm.ToString(CultureInfo.InvariantCulture)} MHz";
+            
+            // GPU-Z often shows the same Max Boost in both "GPU Clock" and "Boost" fields
+            gpuClock = coreStr;
+            boostClockDisplay = coreStr;
+            
+        }
+
+        if (maxMemDpm > 0)
+        {
+            string memStr = $"{maxMemDpm.ToString(CultureInfo.InvariantCulture)} MHz";
+            memClockDisplay = memStr;
+        }
+
+
+
 
         if (spec != null)
         {
@@ -195,8 +234,9 @@ public class LinuxAmdGpuProbe : IGpuProbe
             DefaultMemoryClock = spec?.DefMemClock ?? "N/A",
             
             // Przekazujemy bieżące zegary (snapshot)
-            CurrentGpuClock = currentGpuClock,
-            CurrentMemClock = currentMemClock,
+            CurrentGpuClock = gpuClock,
+            BoostClock = boostClockDisplay,
+            CurrentMemClock = memClockDisplay,
 
             // Zmieniono HSA na HIP
             IsHsaAvailable = isHipAvailable, 
@@ -209,6 +249,41 @@ public class LinuxAmdGpuProbe : IGpuProbe
             IsPhysXEnabled = false,
             IsOpenglAvailable = true
         };
+    }
+
+
+
+
+    // --- NEW HELPER: DPM CLOCK PARSER ---
+    // Reads pp_dpm_sclk/mclk and finds the highest clock state
+    private double GetMaxClockFromDpm(string fileName)
+    {
+        try
+        {
+            string path = Path.Combine(_basePath, fileName);
+            if (!File.Exists(path)) return 0;
+
+            string[] lines = File.ReadAllLines(path);
+            double maxClock = 0;
+
+            foreach (var line in lines)
+            {
+                // Matches "300Mhz" or "2400 Mhz" (case insensitive)
+                var match = Regex.Match(line, @"(\d+)\s*Mhz", RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    if (double.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double val))
+                    {
+                        if (val > maxClock) maxClock = val;
+                    }
+                }
+            }
+            return maxClock;
+        }
+        catch
+        {
+            return 0;
+        }
     }
     
     // --- NOWE METODY ODCZYTU Z PLIKÓW ---

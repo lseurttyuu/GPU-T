@@ -138,8 +138,8 @@ public partial class MainWindowViewModel : ViewModelBase
         var data = probe.LoadSensorData();
 
         // 1. Aktualizacja Głównej Zakładki
-        GpuClock = $"{data.GpuClock.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} MHz";
-        MemoryClock = $"{data.MemoryClock.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} MHz";
+        //GpuClock = $"{data.GpuClock.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} MHz";
+        //MemoryClock = $"{data.MemoryClock.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} MHz";
 
         // 2. Aktualizacja Sensorów
         UpdateSensor("GPU Clock", data.GpuClock);
@@ -171,26 +171,52 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Sensors = new ObservableCollection<SensorItemViewModel>
         {
-            new SensorItemViewModel("GPU Clock", "MHz"),
-            new SensorItemViewModel("Memory Clock", "MHz"),
-            new SensorItemViewModel("GPU Temperature", "°C"),
-            new SensorItemViewModel("GPU Temperature (Hot Spot)", "°C"),
-            new SensorItemViewModel("Memory Temperature", "°C"), // <--- PRZYWRÓCONE W DOBRYM MIEJSCU
+            // Format: Nazwa, Jednostka, Min, Max, IsFixed (true=TAK, false=NIE)
             
-            new SensorItemViewModel("Fan Speed (%)", "%"),
-            new SensorItemViewModel("Fan Speed (RPM)", "RPM"),
+            // GPU Clock | 0 | 100 | NIE
+            new SensorItemViewModel("GPU Clock", "MHz", 0, 100, false),
             
-            new SensorItemViewModel("GPU Load", "%"),
-            new SensorItemViewModel("Memory Controller Load", "%"),
+            // Memory Clock | 0 | 1000 | NIE
+            new SensorItemViewModel("Memory Clock", "MHz", 0, 1000, false),
             
-            new SensorItemViewModel("Memory Used (Dedicated)", "MB"),
-            new SensorItemViewModel("Memory Used (Dynamic)", "MB"),
+            // GPU Temperature | 20 | 60 | NIE
+            new SensorItemViewModel("GPU Temperature", "°C", 20, 60, false),
             
-            new SensorItemViewModel("Board Power Draw", "W"),
-            new SensorItemViewModel("GPU Voltage", "V"),
+            // Hot Spot | 20 | 80 | NIE
+            new SensorItemViewModel("GPU Temperature (Hot Spot)", "°C", 20, 80, false),
             
-            new SensorItemViewModel("CPU Temperature", "°C"),
-            new SensorItemViewModel("System Memory Used", "MB"),
+            // Memory Temperature | 20 | 60 | NIE
+            new SensorItemViewModel("Memory Temperature", "°C", 20, 60, false),
+            
+            // Fan Speed (%) | 0 | 100 | TAK
+            new SensorItemViewModel("Fan Speed (%)", "%", 0, 100, true),
+            
+            // Fan Speed (RPM) | 0 | 1000 | NIE
+            new SensorItemViewModel("Fan Speed (RPM)", "RPM", 0, 1000, false),
+            
+            // GPU Load | 0 | 100 | TAK
+            new SensorItemViewModel("GPU Load", "%", 0, 100, true),
+            
+            // Memory Controller Load | 0 | 100 | TAK
+            new SensorItemViewModel("Memory Controller Load", "%", 0, 100, true),
+            
+            // Memory Used (Dedicated) | 0 | 512 | NIE
+            new SensorItemViewModel("Memory Used (Dedicated)", "MB", 0, 512, false),
+            
+            // Memory Used (Dynamic) | 0 | 128 | NIE
+            new SensorItemViewModel("Memory Used (Dynamic)", "MB", 0, 128, false),
+            
+            // Board Power Draw | 0 | 100 | NIE
+            new SensorItemViewModel("Board Power Draw", "W", 0, 100, false),
+            
+            // GPU Voltage | 0 | 1 | NIE
+            new SensorItemViewModel("GPU Voltage", "V", 0, 1.0, false),
+            
+            // CPU Temperature | 20 | 70 | NIE
+            new SensorItemViewModel("CPU Temperature", "°C", 20, 70, false),
+            
+            // System Memory Used | 0 | 4096 | NIE
+            new SensorItemViewModel("System Memory Used", "MB", 0, 4096, false),
         };
 
         // Konfiguracja Timera
@@ -301,7 +327,7 @@ partial void OnSelectedGpuChanged(GpuListItem? value)
         // --- ZEGARY BIEŻĄCE (SNAPSHOT) ---
         GpuClock = data.CurrentGpuClock;
         MemoryClock = data.CurrentMemClock;
-        BoostClock = "0 MHz"; // Tego nie mamy w prostym odczycie
+        BoostClock = data.BoostClock; // Tego nie mamy w prostym odczycie
 
         // Checkboxy
         IsHsaEnabled = data.IsHsaAvailable; // Teraz to faktycznie HIP (nazwa pola w VM może zostać stara, albo zmień na IsHipEnabled)
