@@ -6,6 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="385" d:DesignHeight="525"
         Width="385" MinWidth="385" MaxWidth="385"
         SizeToContent="{Binding WindowSizeMode}" CanResize="False"    WindowStartupLocation="CenterScreen"
+        Height="{Binding WindowHeight, Mode=TwoWay}"
         x:Class="GPU_T.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         x:Name="MainWnd"
@@ -68,12 +69,13 @@
             <Setter Property="MinHeight" Value="13"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Margin" Value="0"/>
-            <Setter Property="IsHitTestVisible" Value="False"/> 
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
+            
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="Transparent"/>
+
             <Setter Property="Template">
                 <ControlTemplate>
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
                         <Border Name="PART_Border"
                                 Width="13" Height="13"
                                 Background="#FFFFFF"
@@ -108,6 +110,11 @@
         <Style Selector="CheckBox.GpuZ:disabled /template/ Border#PART_Border">
             <Setter Property="BorderBrush" Value="#A0A0A0"/> 
             <Setter Property="Background" Value="#F5F5F5"/> 
+        </Style>
+
+        <Style Selector="CheckBox.GpuZ:pointerover /template/ Border#PART_Border">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#707070"/>
         </Style>
 
         <Style Selector="CheckBox.GpuZ:checked:disabled /template/ Path#PART_CheckMark">
@@ -262,7 +269,7 @@
                             <TextBlock Classes="Label" Text="BIOS Version"/>
                             <TextBox Text="{Binding BiosVersion}" Width="200"/>
                             
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0" IsHitTestVisible="False">
                                 <CheckBox IsChecked="{Binding IsUefiEnabled}" Classes="GpuZ"/>
                                 <TextBlock Text="UEFI" Classes="CheckText"/>
                             </StackPanel>
@@ -392,7 +399,7 @@
 
                     <Border Grid.Row="16" Height="0" Background="#A0A0A0" Margin="0,3,0,2" VerticalAlignment="Center"/>
 
-                    <Grid Grid.Row="17" Margin="0,4">
+                    <Grid Grid.Row="17" Margin="0,4" IsHitTestVisible="False">
                         <StackPanel Orientation="Horizontal">
                              <TextBlock Classes="Label" Text="Computing"/>
                              
@@ -412,7 +419,7 @@
                         </StackPanel>
                     </Grid>
 
-                    <Grid Grid.Row="18" Margin="0,4">
+                    <Grid Grid.Row="18" Margin="0,4" IsHitTestVisible="False">
                          <StackPanel Orientation="Horizontal">
                              <TextBlock Classes="Label" Text="Technologies"/>
                              
@@ -477,7 +484,12 @@
                                     </Border>
                                 </Button>
 
-                                <Grid Grid.Column="4" Height="20" Width="133">
+                                <Grid Grid.Column="4" 
+                                      Height="20" 
+                                      Width="133"
+                                      Background="Transparent"
+                                      PointerMoved="Graph_PointerMoved"
+                                      PointerExited="Graph_PointerExited">
                                     
                                     <Border Background="#f1f1f1" ClipToBounds="True" Margin="1">
                                         <Polygon Points="{Binding GraphPoints}"
@@ -490,7 +502,9 @@
                                                  RenderOptions.BitmapInterpolationMode="LowQuality"/>
                                     </Border>
 
-                                    <Border Classes="SensorFrame" Background="Transparent">
+                                    <Border Classes="SensorFrame" 
+                                            Background="Transparent" 
+                                            IsHitTestVisible="False">
                                         <Border Classes="SensorFrameInner" Background="Transparent"/>
                                     </Border>
                                     
@@ -509,7 +523,11 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <CheckBox Content="Log to file" IsEnabled="False" Classes="GpuZ"/>
+                    <CheckBox Content="Log to file" 
+                              Classes="GpuZ"
+                              IsChecked="{Binding IsLogEnabled, Mode=OneWay}"
+                              Checked="LogCheckBox_Checked"
+                              Unchecked="LogCheckBox_Unchecked"/>
                 </StackPanel>
                 
                 <Button Grid.Column="1" 

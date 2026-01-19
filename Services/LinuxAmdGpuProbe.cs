@@ -36,6 +36,48 @@ public class LinuxAmdGpuProbe : IGpuProbe
         }
     }
 
+
+    public SensorAvailability GetSensorAvailability()
+{
+    var avail = new SensorAvailability();
+
+    // 1. Temperatury (skanowanie etykiet)
+    // Musimy sprawdzić, czy istnieją labelki dla hotspot/junction i mem
+    if (Directory.Exists(_hwmonPath))
+    {
+        // Sprawdzamy temp1 do temp4 (bezpieczny zakres)
+        for (int i = 1; i <= 4; i++)
+        {
+            string labelPath = Path.Combine(_hwmonPath, $"temp{i}_label");
+            if (File.Exists(labelPath))
+            {
+                string label = File.ReadAllText(labelPath).Trim().ToLower();
+                if (label.Contains("junction") || label.Contains("hotspot")) avail.HasHotSpot = true;
+                if (label.Contains("mem")) avail.HasMemTemp = true;
+            }
+        }
+
+        // 2. Wentylator (fan1_input)
+        if (File.Exists(Path.Combine(_hwmonPath, "fan1_input"))) avail.HasFan = true;
+
+        // 3. Moc (power1_average lub power1_input)
+        if (File.Exists(Path.Combine(_hwmonPath, "power1_average")) || 
+            File.Exists(Path.Combine(_hwmonPath, "power1_input"))) avail.HasPower = true;
+
+        // 4. Napięcie (in0_input)
+        if (File.Exists(Path.Combine(_hwmonPath, "in0_input"))) avail.HasVoltage = true;
+    }
+
+    // 5. Obciążenia (poza hwmon, bezpośrednio w device)
+    if (File.Exists(Path.Combine(_basePath, "gpu_busy_percent"))) avail.HasGpuLoad = true;
+    if (File.Exists(Path.Combine(_basePath, "mem_busy_percent"))) avail.HasMemControllerLoad = true;
+    
+    // 6. Pamięć VRAM (zazwyczaj jest, ale sprawdźmy)
+    if (File.Exists(Path.Combine(_basePath, "mem_info_vram_used"))) avail.HasMemUsed = true;
+
+    return avail;
+}
+
     private string FindHwmonPath(string devicePath)
     {
         try
@@ -804,4 +846,19 @@ public class LinuxAmdGpuProbe : IGpuProbe
         catch {}
         return "Unknown";
     }
+}
+
+
+
+// Dodaj tę prostą klasę/strukturę do przechowywania flag dostępności
+public class SensorAvailability
+{
+    public bool HasHotSpot { get; set; }
+    public bool HasMemTemp { get; set; }
+    public bool HasFan { get; set; }
+    public bool HasGpuLoad { get; set; }
+    public bool HasMemControllerLoad { get; set; }
+    public bool HasPower { get; set; }
+    public bool HasVoltage { get; set; }
+    public bool HasMemUsed { get; set; } // Zazwyczaj true dla AMDGPU
 }

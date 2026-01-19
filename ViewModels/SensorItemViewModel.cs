@@ -49,6 +49,13 @@ public partial class SensorItemViewModel : ViewModelBase
     [ObservableProperty] private string _modeLabel = ""; 
     [ObservableProperty] private SensorMode _currentMode = SensorMode.Current;
 
+    public double CurrentValue { get; private set; }
+
+    private bool _isHovering = false;
+
+
+
+
     // ZMODYFIKOWANY KONSTRUKTOR
     public SensorItemViewModel(string name, string unit, double? minLimit = null, double? maxLimit = null, bool isFixed = false)
     {
@@ -66,8 +73,82 @@ public partial class SensorItemViewModel : ViewModelBase
         if (minLimit.HasValue && maxLimit.HasValue) _hasInitializedScale = true;
     }
 
+
+    // Metoda wywoływana, gdy mysz przesuwa się nad wykresem
+    public void ShowHistoryAt(double xPosition, double actualWidth)
+    {
+        if (_graphHistory.Count == 0) return;
+
+        _isHovering = true;
+        ModeLabel = ""; // Ukrywamy etykietę MIN/MAX/AVG
+
+        // MATEMATYKA:
+        // Wykres rysowany jest od prawej (indeks Count-1) do lewej (0).
+        // xPosition to pozycja myszy od lewej strony (0..131).
+        
+        // Wzór z GeneratePolygon to: x = width - (Count - 1 - i)
+        // Przekształcamy, aby znaleźć 'i' (indeks):
+        // x - width = -Count + 1 + i
+        // i = x - width + Count - 1
+        
+        // Ponieważ GraphWidth jest stałe (131), ale actualWidth może się różnić o piksele w renderingu,
+        // użyjmy stałej GraphWidth dla spójności logicznej, lub przeskalujmy.
+        // Zakładamy, że actualWidth jest bliskie GraphWidth.
+        
+        // Indeks w historii, który odpowiada pozycji myszy:
+        // (Im większe X, tym nowsze dane -> większy indeks)
+        // Jeśli mamy pełną historię (131 pkt), to X=0 -> i=0, X=131 -> i=130.
+        // Jeśli historia jest krótka (np. 10 pkt), to wykres jest po prawej.
+        // X=0..120 -> brak danych, X=121 -> i=0.
+        
+        // Przesunięcie wynikające z tego, że wykres jest "przyklejony" do prawej
+        double offsetFromRight = actualWidth - xPosition;
+        int indexFromEnd = (int)Math.Round(offsetFromRight);
+        
+        // Prawdziwy indeks w liście
+        int index = _graphHistory.Count - 1 - indexFromEnd;
+
+        // Zabezpieczenia zakresów
+        if (index < 0 || index >= _graphHistory.Count)
+        {
+            // Mysz jest nad obszarem pustym (jeszcze nie ma danych)
+            DisplayValue = "---"; 
+        }
+        else
+        {
+            double value = _graphHistory[index];
+            string format = GetFormatString(); 
+            
+            // Format "@ 1500.0" (bez jednostki)
+            DisplayValue = $"@ {value.ToString(format, System.Globalization.CultureInfo.InvariantCulture)}";
+        }
+    }
+
+    public void StopHovering()
+    {
+        _isHovering = false;
+        // Przywracamy standardowy widok (Current/Min/Max) dla ostatniej znanej wartości
+        if (_graphHistory.Count > 0)
+        {
+            UpdateDisplayString(CurrentValue); 
+        }
+    }
+
+
+    // Pomocnicza do formatu (wydzielona, żeby nie duplikować)
+    private string GetFormatString()
+    {
+        if (Unit == "RPM" || Unit == "%" || Unit == "MB") return "0";
+        if (Unit == "V") return "0.000";
+        return "0.0";
+    }
+
+
+
     public void UpdateValue(double rawValue)
     {
+
+        CurrentValue = rawValue;
         // 1. Historia
         _graphHistory.Add(rawValue);
         if (_graphHistory.Count > GraphWidth) _graphHistory.RemoveAt(0);
@@ -158,6 +239,8 @@ public partial class SensorItemViewModel : ViewModelBase
     
     private void UpdateDisplayString(double currentValue)
     {
+
+        if (_isHovering) return;
         // ... (Wklej kod z poprzedniej odpowiedzi) ...
          if (!_hasInitializedScale && _graphHistory.Count == 0) return; // Małe zabezpieczenie
 

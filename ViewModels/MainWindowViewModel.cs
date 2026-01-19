@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input; // Potrzebne do RelayCommand
@@ -93,24 +94,101 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private int _selectedTabIndex;
 
     [ObservableProperty] private ObservableCollection<SensorItemViewModel> _sensors;
+
+
+    private double _lastUserHeight = 525-1;
+
+    [ObservableProperty] 
+    private double _windowHeight = 525-1;
     
     private DispatcherTimer _sensorTimer;
+
 
   // Właściwości sterujące oknem (read-only, zależą od SelectedTabIndex)
     public bool ShowResizeGrip => (SelectedTabIndex == 1 || SelectedTabIndex == 2); // 1 to Sensors, 2 to Settings
     public SizeToContent WindowSizeMode => SelectedTabIndex == 0 ? SizeToContent.Height : SizeToContent.Manual;
 
+
+
+    [ObservableProperty] private bool _isLogEnabled; // Spięte z Checkboxem
+    private string _logFilePath = "";
+    
+    // Metoda wywoływana z Code-behind po wybraniu pliku
+    public void StartLogging(string filePath)
+    {
+        _logFilePath = filePath;
+        IsLogEnabled = true;
+        
+        // Zapisz nagłówek na start
+        WriteLogHeader();
+    }
+
+    partial void OnWindowHeightChanged(double value)
+    {
+        // Jeśli jesteśmy na zakładce Sensors (1) lub Advanced (2), 
+        // to zapamiętujemy każdą zmianę wysokości jako "preferencję użytkownika".
+        // Ignorujemy zmiany na zakładce 0, bo tam wysokość wymusza "SizeToContent".
+        if (_selectedTabIndex != 0 && value > 100)
+        {
+            _lastUserHeight = value;
+        }
+    }
+
+    public void StopLogging()
+    {
+        IsLogEnabled = false;
+        _logFilePath = "";
+    }
+
+    private void WriteLogHeader()
+    {
+        if (!IsLogEnabled || string.IsNullOrEmpty(_logFilePath) || Sensors == null) return;
+
+        try
+        {
+            string header = SensorLogService.BuildHeader(Sensors);
+            File.AppendAllText(_logFilePath, header + Environment.NewLine);
+        }
+        catch (Exception ex)
+        {
+            // Opcjonalnie: obsługa błędu zapisu (np. brak uprawnień)
+            Console.WriteLine($"Log write error: {ex.Message}");
+            StopLogging(); // Bezpiecznik
+        }
+    }
+
+
+
+
     // Metoda wywoływana automatycznie przy zmianie tabu (dzięki CommunityToolkit)
     partial void OnSelectedTabIndexChanged(int value)
     {
-        // Powiadamiamy widok, że właściwości okna się zmieniły
+        // 1. Najpierw powiadamiamy widok, że tryb rozmiaru się zmieni
+        // (Ważne, żeby Avalonia wiedziała, czy ma blokować okno czy nie)
         OnPropertyChanged(nameof(ShowResizeGrip));
         OnPropertyChanged(nameof(WindowSizeMode));
-        
-        // Opcjonalnie: Jeśli wracamy na pierwszą zakładkę, wymuś "zwinięcie" okna
+
+        // 2. Logika przywracania wysokości
         if (value == 0)
         {
-            // Czasem trzeba wymusić odświeżenie layoutu, ale binding SizeToContent zazwyczaj wystarcza
+            // IDZIEMY NA GŁÓWNĄ (Graphics Card):
+            // Tutaj nic nie musimy robić z Height, bo WindowSizeMode = SizeToContent.Height
+            // automatycznie "zgniecie" okno do potrzebnej wielkości.
+
+            WindowHeight = double.NaN;
+        }
+        else
+        {
+            // IDZIEMY NA SENSORS lub ADVANCED:
+            // WindowSizeMode zmienia się na Manual (dzięki OnPropertyChanged wyżej).
+            // Teraz musimy ręcznie przywrócić ostatnią zapamiętaną wysokość.
+            
+            // Używamy Dispatchera, aby upewnić się, że zmiana trybu na Manual 
+            // przetworzyła się przed ustawieniem wysokości (dla bezpieczeństwa UI).
+            Dispatcher.UIThread.Post(() =>
+            {
+                WindowHeight = _lastUserHeight;
+            });
         }
     }
 
@@ -162,6 +240,22 @@ public partial class MainWindowViewModel : ViewModelBase
         
         UpdateSensor("CPU Temperature", data.CpuTemperature);
         UpdateSensor("System Memory Used", data.SystemRamUsed);
+
+
+        if (IsLogEnabled && !string.IsNullOrEmpty(_logFilePath) && Sensors != null)
+        {
+            try
+            {
+                string row = SensorLogService.BuildDataRow(Sensors);
+                File.AppendAllText(_logFilePath, row + Environment.NewLine);
+            }
+            catch
+            {
+                // Ignorujemy pojedyncze błędy zapisu (np. plik zablokowany przez inny proces)
+            }
+        }
+
+
     }
 
 
@@ -169,55 +263,65 @@ public partial class MainWindowViewModel : ViewModelBase
     // Metoda Inicjalizująca Sensory (Wywołaj ją w konstruktorze lub LoadGpuData)
     private void InitSensors()
     {
-        Sensors = new ObservableCollection<SensorItemViewModel>
+        // 1. Tworzymy tymczasową sondę, żeby sprawdzić co sprzęt potrafi
+        // (Używamy ID wybranej karty, lub domyślnej jeśli null)
+        string gpuId = _selectedGpu?.Id ?? "card0";
+        var probe = new LinuxAmdGpuProbe(gpuId); 
+        var support = probe.GetSensorAvailability();
+
+        // 2. Budujemy listę warunkowo
+        var list = new ObservableCollection<SensorItemViewModel>();
+
+        // Zawsze dodajemy podstawowe zegary (system zawsze raportuje sclk/mclk w jakiejś formie)
+        list.Add(new SensorItemViewModel("GPU Clock", "MHz", 0, 100, false));
+        list.Add(new SensorItemViewModel("Memory Clock", "MHz", 0, 1000, false));
+        
+        // Zawsze dodajemy GPU Temperature (Edge) - to standard absolutny
+        list.Add(new SensorItemViewModel("GPU Temperature", "°C", 20, 60, false));
+
+        // Warunkowe Hot Spot
+        if (support.HasHotSpot)
+            list.Add(new SensorItemViewModel("GPU Temperature (Hot Spot)", "°C", 20, 80, false));
+
+        // Warunkowe Memory Temp
+        if (support.HasMemTemp)
+            list.Add(new SensorItemViewModel("Memory Temperature", "°C", 20, 60, false));
+
+        // Warunkowe Wentylatory
+        if (support.HasFan)
         {
-            // Format: Nazwa, Jednostka, Min, Max, IsFixed (true=TAK, false=NIE)
-            
-            // GPU Clock | 0 | 100 | NIE
-            new SensorItemViewModel("GPU Clock", "MHz", 0, 100, false),
-            
-            // Memory Clock | 0 | 1000 | NIE
-            new SensorItemViewModel("Memory Clock", "MHz", 0, 1000, false),
-            
-            // GPU Temperature | 20 | 60 | NIE
-            new SensorItemViewModel("GPU Temperature", "°C", 20, 60, false),
-            
-            // Hot Spot | 20 | 80 | NIE
-            new SensorItemViewModel("GPU Temperature (Hot Spot)", "°C", 20, 80, false),
-            
-            // Memory Temperature | 20 | 60 | NIE
-            new SensorItemViewModel("Memory Temperature", "°C", 20, 60, false),
-            
-            // Fan Speed (%) | 0 | 100 | TAK
-            new SensorItemViewModel("Fan Speed (%)", "%", 0, 100, true),
-            
-            // Fan Speed (RPM) | 0 | 1000 | NIE
-            new SensorItemViewModel("Fan Speed (RPM)", "RPM", 0, 1000, false),
-            
-            // GPU Load | 0 | 100 | TAK
-            new SensorItemViewModel("GPU Load", "%", 0, 100, true),
-            
-            // Memory Controller Load | 0 | 100 | TAK
-            new SensorItemViewModel("Memory Controller Load", "%", 0, 100, true),
-            
-            // Memory Used (Dedicated) | 0 | 512 | NIE
-            new SensorItemViewModel("Memory Used (Dedicated)", "MB", 0, 512, false),
-            
-            // Memory Used (Dynamic) | 0 | 128 | NIE
-            new SensorItemViewModel("Memory Used (Dynamic)", "MB", 0, 128, false),
-            
-            // Board Power Draw | 0 | 100 | NIE
-            new SensorItemViewModel("Board Power Draw", "W", 0, 100, false),
-            
-            // GPU Voltage | 0 | 1 | NIE
-            new SensorItemViewModel("GPU Voltage", "V", 0, 1.0, false),
-            
-            // CPU Temperature | 20 | 70 | NIE
-            new SensorItemViewModel("CPU Temperature", "°C", 20, 70, false),
-            
-            // System Memory Used | 0 | 4096 | NIE
-            new SensorItemViewModel("System Memory Used", "MB", 0, 4096, false),
-        };
+            list.Add(new SensorItemViewModel("Fan Speed (%)", "%", 0, 100, true));
+            list.Add(new SensorItemViewModel("Fan Speed (RPM)", "RPM", 0, 1000, false));
+        }
+
+        // Warunkowe Load
+        if (support.HasGpuLoad)
+            list.Add(new SensorItemViewModel("GPU Load", "%", 0, 100, true));
+
+        if (support.HasMemControllerLoad)
+            list.Add(new SensorItemViewModel("Memory Controller Load", "%", 0, 100, true));
+
+        // Warunkowe Memory Usage (Prawie zawsze true na AMDGPU)
+        if (support.HasMemUsed)
+        {
+            list.Add(new SensorItemViewModel("Memory Used (Dedicated)", "MB", 0, 512, false));
+            list.Add(new SensorItemViewModel("Memory Used (Dynamic)", "MB", 0, 128, false));
+        }
+
+        // Warunkowe Power
+        if (support.HasPower)
+            list.Add(new SensorItemViewModel("Board Power Draw", "W", 0, 100, false));
+
+        // Warunkowe Voltage
+        if (support.HasVoltage)
+            list.Add(new SensorItemViewModel("GPU Voltage", "V", 0, 1.0, false));
+
+        // Dane systemowe (CPU/RAM) - dodajemy zawsze, bo to nie zależy od GPU
+        list.Add(new SensorItemViewModel("CPU Temperature", "°C", 20, 70, false));
+        list.Add(new SensorItemViewModel("System Memory Used", "MB", 0, 4096, false));
+
+        // Przypisanie do głównej kolekcji
+        Sensors = list;
 
         // Konfiguracja Timera
         _sensorTimer = new DispatcherTimer
@@ -272,12 +376,17 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
 
-// Ta metoda wywoła się automatycznie, gdy zmienisz wybór w ComboBoxie
-partial void OnSelectedGpuChanged(GpuListItem? value)
+    // Ta metoda wywoła się automatycznie, gdy zmienisz wybór w ComboBoxie
+    partial void OnSelectedGpuChanged(GpuListItem? value)
     {
         if (value != null)
         {
             LoadGpuData(value.Id); // Przekazujemy ID (np. "card0") do logiki ładowania
+
+            if (IsLogEnabled)
+            {
+                WriteLogHeader();
+            }
         }
     }
 
