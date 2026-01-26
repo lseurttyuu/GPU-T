@@ -542,8 +542,66 @@
     </TabItem>
             
              <TabItem Header="Advanced">
-                <TextBlock Text="Advanced view..." HorizontalAlignment="Center"/>
-            </TabItem>
+    <Grid RowDefinitions="Auto, *">
+        
+        <ComboBox Grid.Row="0" 
+                  ItemsSource="{Binding AdvancedCategories}"
+                  SelectedItem="{Binding SelectedAdvancedCategory}"
+                  Width="365" 
+                  Margin="6,10,6,5"/>
+
+        <Border Grid.Row="1" 
+                BorderBrush="#A0A0A0" 
+                BorderThickness="1" 
+                Margin="6,0,6,10">
+            
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding AdvancedItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Background="{Binding Background}">
+                                
+                                <Border IsVisible="{Binding IsHeader}"
+                                        Height="28"
+                                        BorderBrush="#A0A0A0"
+                                        BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding Name}" 
+                                               FontWeight="Bold" 
+                                               Foreground="#000000"
+                                               VerticalAlignment="Bottom"
+                                               Margin="4,0,0,3"/> 
+                                </Border>
+
+                                <Grid ColumnDefinitions="*, *" 
+                                      IsVisible="{Binding !IsHeader}"
+                                      Height="18">
+                                    
+                                    <Border BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                                        <TextBlock Text="{Binding Name}" 
+                                                   Foreground="Black"
+                                                   VerticalAlignment="Center"
+                                                   Margin="4,0,0,0"
+                                                   FontSize="11"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </Border>
+                                    
+                                    <Border Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                                        <TextBlock Text="{Binding Value}" 
+                                                   Foreground="Black"
+                                                   VerticalAlignment="Center"
+                                                   Margin="4,0,0,0"
+                                                   FontSize="11"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</TabItem>
         </TabControl>
 
         <Grid Grid.Row="1" Margin="10,0,10,0"> <Grid.ColumnDefinitions>

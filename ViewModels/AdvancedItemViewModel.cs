@@ -1,0 +1,24 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using Avalonia.Media; // Potrzebne do IBrush i SolidColorBrush
+
+namespace GPU_T.ViewModels;
+
+public partial class AdvancedItemViewModel : ObservableObject
+{
+    [ObservableProperty] private bool _isHeader;
+    [ObservableProperty] private string _name = "";
+    [ObservableProperty] private string _value = "";
+    
+    // Nowa właściwość do sterowania tłem wiersza
+    [ObservableProperty] private IBrush _background;
+
+    public AdvancedItemViewModel(string name, string value, bool isHeader, string hexColor)
+    {
+        IsHeader = isHeader;
+        Name = name;
+        Value = value;
+        
+        // Konwersja hex string na Brush
+        Background = Brush.Parse(hexColor);
+    }
+}

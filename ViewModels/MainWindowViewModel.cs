@@ -1,11 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input; // Potrzebne do RelayCommand
 using GPU_T.Services;
 using Avalonia.Threading; // Do DispatcherTimer
 using System.Linq;
+using System.Diagnostics;
+using System.Text.Json.Nodes; // Do parsowania JSON
 using Avalonia.Controls; // Potrzebne do enum WindowStartupLocation, SizeToContent itp.
 
 namespace GPU_T.ViewModels;
@@ -90,10 +93,182 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private GpuListItem? _selectedGpu; // Znak zapytania, bo może być null na starcie
     private string _currentLookupUrl = "";
 
+    private void AddAdvancedRow(ObservableCollection<AdvancedItemViewModel> list, string name, string value = "", bool isHeader = false)
+    {
+        // Logika zebry: Parzyste = Biały, Nieparzyste = Szary (#F4F4F4)
+        string color = (_advancedRowCounter % 2 == 0) ? "#FFFFFF" : "#F4F4F4";
+        
+        list.Add(new AdvancedItemViewModel(name, value, isHeader, color));
+        
+        _advancedRowCounter++;
+    }
+
 
     [ObservableProperty] private int _selectedTabIndex;
 
+    private int _advancedRowCounter = 0;
+
     [ObservableProperty] private ObservableCollection<SensorItemViewModel> _sensors;
+
+
+    [ObservableProperty] 
+    private ObservableCollection<string> _advancedCategories = new()
+    {
+        "General",
+        "Vulkan",
+        "OpenCL",
+        "Multimedia (VA-API)",
+        "Power & Limits",
+        "PCIe Resizable BAR"
+    };
+
+    [ObservableProperty] 
+    private string _selectedAdvancedCategory = "General";
+
+    [ObservableProperty] 
+    private ObservableCollection<AdvancedItemViewModel> _advancedItems = new();
+
+    // Metoda wywoływana automatycznie przy zmianie wyboru w ComboBoxie
+    partial void OnSelectedAdvancedCategoryChanged(string value)
+    {
+        LoadAdvancedData(value);
+    }
+
+    // Wywołaj to też w OnSelectedTabIndexChanged, żeby odświeżyć dane przy wejściu w zakładkę
+    // Dodaj to do istniejącej metody OnSelectedTabIndexChanged w bloku 'else':
+    /*
+       if (value == 2) // Zakładka Advanced
+       {
+           LoadAdvancedData(SelectedAdvancedCategory);
+       }
+    */
+
+    private void LoadAdvancedData(string category)
+    {
+        var list = new ObservableCollection<AdvancedItemViewModel>();
+        _advancedRowCounter = 0; // Reset licznika kolorów na start
+
+        switch (category)
+        {
+            case "General":
+                PopulateGeneralAdvanced(list);
+                break;
+            case "Vulkan":
+                PopulateVulkanAdvanced(list);
+                break;
+            case "OpenCL":
+                PopulateOpenClAdvanced(list);
+                break;
+            // ... reszta case'ów ...
+            default:
+                AddAdvancedRow(list, "Info", "", true);
+                AddAdvancedRow(list, "Status", "Not implemented");
+                break;
+        }
+
+        AdvancedItems = list;
+    }
+
+    private void PopulateGeneralAdvanced(ObservableCollection<AdvancedItemViewModel> list)
+    {
+        // 1. Sekcja Systemowa (Nagłówek)
+        AddAdvancedRow(list, "System", "", true);
+        
+        // Kernel
+        string kernel = "Unknown";
+        try { kernel = File.ReadAllText("/proc/sys/kernel/osrelease").Trim(); } catch {}
+        AddAdvancedRow(list, "Kernel Version", kernel);
+
+        // Display Server
+        string session = Environment.GetEnvironmentVariable("XDG_SESSION_TYPE") ?? "Unknown";
+        AddAdvancedRow(list, "Display Server", session.ToUpper());
+
+        // Desktop
+        string desktop = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP") ?? "Unknown";
+        AddAdvancedRow(list, "Desktop Environment", desktop);
+
+        // 2. Sekcja Sterowników (Nagłówek)
+        AddAdvancedRow(list, "Graphics Drivers", "", true);
+        
+        // Driver Module (z poprawką ResolveLinkTarget)
+        string driverModule = "Unknown";
+        try 
+        {
+            var driverPath = $"/sys/class/drm/{_selectedGpu?.Id ?? "card0"}/device/driver";
+            var dirInfo = new DirectoryInfo(driverPath);
+            if (dirInfo.Exists)
+            {
+                // .NET 6+
+                var target = dirInfo.ResolveLinkTarget(true); 
+                driverModule = target != null ? target.Name : dirInfo.Name;
+            }
+        } 
+        catch {}
+        AddAdvancedRow(list, "Kernel Driver", driverModule);
+        AddAdvancedRow(list, "OpenGL / Mesa", "Scanning implemented in next step...");
+
+        // 3. Firmware (POPRAWIONA LOGIKA)
+        AddAdvancedRow(list, "Firmware", "", true);
+        
+        string fwDirPath = $"/sys/class/drm/{_selectedGpu?.Id ?? "card0"}/device/fw_version";
+        
+        if (Directory.Exists(fwDirPath))
+        {
+            try
+            {
+                // Pobieramy wszystkie pliki *_fw_version
+                var files = Directory.GetFiles(fwDirPath, "*_fw_version");
+                
+                // Sortujemy alfabetycznie, żeby był porządek
+                Array.Sort(files);
+
+                foreach (var filePath in files)
+                {
+                    // 1. Wyciągamy nazwę (np. "smc_fw_version" -> "SMC")
+                    string fileName = Path.GetFileName(filePath);
+                    string shortName = fileName.Replace("_fw_version", "").ToUpper();
+
+                    // 2. Czytamy zawartość (wersję)
+                    string version = File.ReadAllText(filePath).Trim();
+
+                    AddAdvancedRow(list, shortName, version);
+                }
+
+                if (files.Length == 0)
+                {
+                     AddAdvancedRow(list, "Info", "No firmware files found in directory");
+                }
+            }
+            catch (Exception ex)
+            {
+                AddAdvancedRow(list, "Error", ex.Message);
+            }
+        }
+        else
+        {
+             // Fallback dla starszych kerneli lub innych sterowników, gdzie to może być plik
+             if (File.Exists(fwDirPath))
+             {
+                 AddAdvancedRow(list, "Legacy Info", "Old kernel format detected");
+             }
+             else
+             {
+                 AddAdvancedRow(list, "Firmware Info", "Not available");
+             }
+        }
+    }
+
+
+// Klasa pomocnicza do zbierania danych o GPU z rozsypanych sekcji
+    private class TempGpuData
+    {
+        public string IdHex { get; set; } = "";
+        public List<AdvancedItemViewModel> GeneralRows { get; } = new();
+        public List<AdvancedItemViewModel> MemoryRows { get; } = new();
+        public List<AdvancedItemViewModel> ExtensionRows { get; } = new();
+        public List<AdvancedItemViewModel> FeatureRows { get; } = new();
+    }
+
 
 
     private double _lastUserHeight = 525-1;
@@ -190,6 +365,13 @@ public partial class MainWindowViewModel : ViewModelBase
                 WindowHeight = _lastUserHeight;
             });
         }
+
+        if(value == 2)
+        {
+            LoadAdvancedData(SelectedAdvancedCategory);
+        }
+
+
     }
 
 
@@ -340,6 +522,406 @@ public partial class MainWindowViewModel : ViewModelBase
             sensor.UpdateValue(value);
         }
     }
+
+
+// Konwersja surowej wersji Vulkan (uint32) na format 1.2.3
+    
+
+// Helper do wyciągania wartości po znaku "="
+private string GetVulkanValue(string line)
+{
+    var parts = line.Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
+    if (parts.Length > 1)
+    {
+        return parts[1].Trim();
+    }
+    return "";
+}
+
+private void PopulateVulkanAdvanced(ObservableCollection<AdvancedItemViewModel> list)
+{
+    try
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "vulkaninfo",
+            Arguments = "",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            StandardOutputEncoding = System.Text.Encoding.UTF8
+        };
+
+        using var process = Process.Start(startInfo);
+        if (process == null)
+        {
+            AddAdvancedRow(list, "Error", "Could not start vulkaninfo");
+            return;
+        }
+
+        using StreamReader reader = process.StandardOutput;
+        string? line;
+
+        // --- ZMIENNE STANU ---
+        bool isTargetGpu = false;
+        bool foundAnyMatch = false; 
+        string currentSection = "";   
+        
+        var propsBuffer = new List<(string Key, string Value)>();
+
+        // Zmienne dla Memory HEAPS
+        string pendingHeapName = "";
+        string pendingHeapSize = "";
+        string pendingHeapBudget = "";
+        string pendingHeapUsage = "";
+        List<string> pendingHeapFlags = new List<string>();
+        bool parsingHeapFlags = false;
+
+        // Zmienne dla Memory TYPES
+        string pendingTypeName = ""; 
+        string pendingTypeHeapIndex = ""; 
+        List<string> pendingTypeFlags = new List<string>();
+        bool parsingTypeFlags = false;
+
+        string targetIdHex = "";
+        if (!string.IsNullOrEmpty(DeviceId))
+        {
+            var parts = DeviceId.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length >= 2) targetIdHex = parts[1].Trim().ToUpper();
+        }
+
+        string ExtractValueInParenthesis(string rawLine)
+        {
+            int lastOpen = rawLine.LastIndexOf('(');
+            int lastClose = rawLine.LastIndexOf(')');
+            if (lastOpen != -1 && lastClose > lastOpen)
+                return rawLine.Substring(lastOpen + 1, lastClose - lastOpen - 1);
+            var parts = rawLine.Split('=');
+            if (parts.Length > 1) return parts[1].Trim().Split(' ')[0];
+            return "";
+        }
+
+        // --- FUNKCJE LOKALNE (Zdefiniowane PRZED pętlą) ---
+
+        void CommitHeap()
+        {
+            if (string.IsNullOrEmpty(pendingHeapName)) return;
+
+            string flagsStr = "None";
+            if (pendingHeapFlags.Count > 0)
+            {
+                var cleanFlags = pendingHeapFlags
+                    .Select(f => f.Replace("MEMORY_HEAP_", "").Replace("_BIT", "").Trim())
+                    .Where(f => f != "None");
+                if (cleanFlags.Any()) flagsStr = string.Join(", ", cleanFlags);
+            }
+
+            string details = "";
+            var detailsParts = new List<string>();
+            if (!string.IsNullOrEmpty(pendingHeapBudget)) detailsParts.Add($"Budget: {pendingHeapBudget}");
+            if (!string.IsNullOrEmpty(pendingHeapUsage))  detailsParts.Add($"Usage: {pendingHeapUsage}");
+            
+            if (detailsParts.Count > 0) details = $"({string.Join(", ", detailsParts)})";
+
+            string val = $"{pendingHeapSize} {details} ({flagsStr})".Trim();
+            val = System.Text.RegularExpressions.Regex.Replace(val, @"\s+", " ");
+
+            AddAdvancedRow(list, pendingHeapName, val);
+
+            pendingHeapName = "";
+            pendingHeapSize = "";
+            pendingHeapBudget = "";
+            pendingHeapUsage = "";
+            pendingHeapFlags.Clear();
+            parsingHeapFlags = false;
+        }
+
+        void CommitType()
+        {
+            if (string.IsNullOrEmpty(pendingTypeName)) return;
+
+            // Uładniamy nazwę: "memoryTypes[0]" -> "Type 0"
+            string displayName = pendingTypeName
+                .Replace("memoryTypes", "Type ")
+                .Replace("[", "")
+                .Replace("]", "")
+                .Trim();
+
+            // 1. Najpierw zawsze wiersz z indeksem sterty
+            AddAdvancedRow(list, displayName, $"Heap Index {pendingTypeHeapIndex}");
+
+            // 2. Potem każda flaga w nowym wierszu
+            if (pendingTypeFlags.Count > 0)
+            {
+                var cleanFlags = pendingTypeFlags
+                    .Select(f => f.Replace("MEMORY_PROPERTY_", "").Replace("_BIT", "").Trim())
+                    .Where(f => f != "None");
+
+                foreach (var flag in cleanFlags)
+                {
+                    // Tutaj spełniamy prośbę: ten sam string po lewej, flaga po prawej
+                    AddAdvancedRow(list, displayName, flag);
+                }
+            }
+
+            // Reset zmiennych
+            pendingTypeName = "";
+            pendingTypeHeapIndex = "";
+            pendingTypeFlags.Clear();
+            parsingTypeFlags = false;
+        }
+
+        // Helper do zamykania wszystkiego co otwarte w Memory (teraz widoczny w całym scope)
+        void CloseMemoryBlocks() 
+        {
+            if (currentSection == "MEMORY") 
+            {
+                CommitHeap();
+                CommitType();
+            }
+        }
+
+        // --- GŁÓWNA PĘTLA ---
+
+        while ((line = reader.ReadLine()) != null)
+        {
+            string trimmed = line.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed)) continue;
+
+            // 1. ZMIANA KARTY
+            if (trimmed.StartsWith("GPU id :") || (trimmed.StartsWith("GPU") && trimmed.EndsWith(":") && !trimmed.Contains("=")))
+            {
+                if (isTargetGpu) break; 
+                
+                isTargetGpu = false;
+                propsBuffer.Clear();
+                currentSection = "";
+                continue;
+            }
+
+            // 2. ZMIANA SEKCJI
+            bool sectionChanged = false;
+
+            if (trimmed.StartsWith("VkPhysicalDeviceMemoryProperties:"))
+            {
+                CloseMemoryBlocks();
+                currentSection = "MEMORY";
+                if (isTargetGpu) AddAdvancedRow(list, "Memory Heaps", "", true);
+                sectionChanged = true;
+            }
+            else if (trimmed.StartsWith("VkPhysicalDeviceFeatures:"))
+            {
+                CloseMemoryBlocks();
+                currentSection = "FEATURES";
+                if (isTargetGpu) AddAdvancedRow(list, "Device Features", "", true);
+                sectionChanged = true;
+            }
+            else if (trimmed.StartsWith("VkPhysicalDeviceProperties:") || line.Contains("Device Properties and Extensions:"))
+            {
+                CloseMemoryBlocks();
+                currentSection = "PROPERTIES";
+                sectionChanged = true;
+            }
+            else if (trimmed.StartsWith("Device Extensions:"))
+            {
+                CloseMemoryBlocks();
+                currentSection = "EXTENSIONS";
+                if (isTargetGpu) AddAdvancedRow(list, "Extensions", "", true);
+                sectionChanged = true;
+            }
+            else if (trimmed.EndsWith("Features:") || trimmed.EndsWith("FeaturesEXT:") || trimmed.EndsWith("FeaturesKHR:"))
+            {
+                CloseMemoryBlocks();
+                currentSection = "FEATURES";
+                sectionChanged = true;
+            }
+            else if (trimmed.EndsWith("Properties:") || trimmed.EndsWith("PropertiesEXT:") || trimmed.EndsWith("PropertiesKHR:"))
+            {
+                CloseMemoryBlocks();
+                currentSection = "OTHER_PROPS"; 
+                sectionChanged = true;
+            }
+
+            if (sectionChanged) continue;
+
+
+            // 3. PARSOWANIE
+
+            // --- A. PROPERTIES ---
+            if (currentSection == "PROPERTIES")
+            {
+                if (trimmed.StartsWith("deviceID"))
+                {
+                    string val = GetVulkanValue(trimmed);
+                    string currentIdHex = val.Replace("0x", "").Trim().ToUpper();
+
+                    if (!string.IsNullOrEmpty(targetIdHex) && currentIdHex == targetIdHex)
+                    {
+                        isTargetGpu = true; 
+                        foundAnyMatch = true;
+
+                        AddAdvancedRow(list, "General", "", true);
+                        foreach (var prop in propsBuffer) AddAdvancedRow(list, prop.Key, prop.Value);
+                        propsBuffer.Clear();
+
+                        AddAdvancedRow(list, "Device ID", $"0x{currentIdHex}");
+                    }
+                    else
+                    {
+                        isTargetGpu = false;
+                        propsBuffer.Clear();
+                    }
+                }
+                else
+                {
+                    string k = "", v = "";
+                    if (trimmed.StartsWith("deviceName"))      { k = "Device Name"; v = GetVulkanValue(trimmed); }
+                    else if (trimmed.StartsWith("apiVersion")) { k = "API Version"; v = GetVulkanValue(trimmed); }
+                    else if (trimmed.StartsWith("driverVersion")) { k = "Driver Version"; v = GetVulkanValue(trimmed); }
+                    else if (trimmed.StartsWith("deviceType")) { k = "Device Type"; v = GetVulkanValue(trimmed); }
+                    else if (trimmed.StartsWith("vendorID"))   { k = "Vendor ID"; v = GetVulkanValue(trimmed); }
+
+                    if (!string.IsNullOrEmpty(k))
+                    {
+                        if (isTargetGpu) AddAdvancedRow(list, k, v);
+                        else propsBuffer.Add((k, v));
+                    }
+                }
+            }
+
+            if (!isTargetGpu) continue; 
+
+            // --- B. MEMORY (HEAPS + TYPES) ---
+            if (currentSection == "MEMORY")
+            {
+                // 1. HEAPS
+                if (trimmed.StartsWith("memoryHeaps["))
+                {
+                    CommitHeap(); 
+                    CommitType(); 
+                    pendingHeapName = trimmed.Replace(":", ""); 
+                }
+                else if (trimmed.StartsWith("size") && !string.IsNullOrEmpty(pendingHeapName))
+                {
+                    pendingHeapSize = ExtractValueInParenthesis(line);
+                }
+                else if (trimmed.StartsWith("budget") && !string.IsNullOrEmpty(pendingHeapName))
+                {
+                    pendingHeapBudget = ExtractValueInParenthesis(line);
+                }
+                else if (trimmed.StartsWith("usage") && !string.IsNullOrEmpty(pendingHeapName))
+                {
+                    pendingHeapUsage = ExtractValueInParenthesis(line);
+                }
+                
+                // 2. TYPES
+                else if (trimmed.StartsWith("memoryTypes"))
+                {
+                    if (trimmed.Contains("count ="))
+                    {
+                        CommitHeap(); 
+                        AddAdvancedRow(list, "Memory Types", "", true);
+                    }
+                    else if (trimmed.EndsWith("]:"))
+                    {
+                        CommitType(); 
+                        pendingTypeName = trimmed.Replace(":", ""); 
+                        parsingTypeFlags = false;
+                    }
+                }
+                else if (trimmed.StartsWith("heapIndex"))
+                {
+                    pendingTypeHeapIndex = GetVulkanValue(trimmed);
+                }
+                else if (trimmed.StartsWith("propertyFlags"))
+                {
+                    parsingTypeFlags = true;
+                }
+                else if (trimmed.StartsWith("usable for:"))
+                {
+                    parsingTypeFlags = false;
+                    CommitType(); 
+                }
+                
+                // 3. FLAGI (Wspólne)
+                else
+                {
+                    if (trimmed.StartsWith("flags:") && !string.IsNullOrEmpty(pendingHeapName))
+                    {
+                        parsingHeapFlags = true;
+                    }
+                    else if (parsingHeapFlags && !string.IsNullOrEmpty(pendingHeapName))
+                    {
+                        if (!line.StartsWith("\t") && !line.StartsWith("    ")) parsingHeapFlags = false;
+                        else if (!trimmed.Contains("count =")) pendingHeapFlags.Add(trimmed);
+                    }
+                    else if (parsingTypeFlags && !string.IsNullOrEmpty(pendingTypeName))
+                    {
+                        if (trimmed.StartsWith("MEMORY_PROPERTY_"))
+                        {
+                            pendingTypeFlags.Add(trimmed);
+                        }
+                    }
+                }
+            }
+
+            // --- C. EXTENSIONS ---
+            else if (currentSection == "EXTENSIONS")
+            {
+                if (trimmed.StartsWith("VK_"))
+                {
+                    var parts = trimmed.Split(':');
+                    AddAdvancedRow(list, parts[0].Trim(), "Supported");
+                }
+            }
+
+            // --- D. FEATURES ---
+            else if (currentSection == "FEATURES")
+            {
+                if (trimmed.Contains("=") && !trimmed.StartsWith("Userspace"))
+                {
+                    var kv = trimmed.Split(new[]{'='}, StringSplitOptions.RemoveEmptyEntries);
+                    if (kv.Length == 2)
+                    {
+                        string k = kv[0].Trim();
+                        string val = kv[1].Trim();
+                        if (val == "true") val = "Yes";
+                        else if (val == "false") val = "No";
+                        
+                        AddAdvancedRow(list, k, val);
+                    }
+                }
+            }
+        }
+        
+        CloseMemoryBlocks(); // Koniec pliku
+
+        process.WaitForExit();
+
+        if (!foundAnyMatch)
+        {
+            AddAdvancedRow(list, "Info", "GPU Match Failed");
+            AddAdvancedRow(list, "Target ID", targetIdHex);
+        }
+    }
+    catch (Exception ex)
+    {
+        AddAdvancedRow(list, "Error", $"Parsing failed: {ex.Message}");
+    }
+}
+
+
+
+
+private void PopulateOpenClAdvanced(ObservableCollection<AdvancedItemViewModel> list)
+{
+    
+}
+
+
+
+
 
 
 
