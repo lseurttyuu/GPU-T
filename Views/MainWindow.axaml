@@ -518,9 +518,7 @@
 
             <Grid Grid.Row="1" Margin="6,9,10,10">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/> <ColumnDefinition Width="*"/>    <ColumnDefinition Width="Auto"/> <ColumnDefinition Width="Auto"/> <ColumnDefinition Width="Auto"/> </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <CheckBox Content="Log to file" 
@@ -530,7 +528,23 @@
                               Unchecked="LogCheckBox_Unchecked"/>
                 </StackPanel>
                 
-                <Button Grid.Column="1" 
+                <TextBlock Grid.Column="2" 
+                           Text="Sensor refresh rate:" 
+                           FontSize="11"
+                           VerticalAlignment="Center"
+                           Margin="0,0,5,0"/>
+
+                <ComboBox Grid.Column="3"
+                          ItemsSource="{Binding RefreshRates}"
+                          SelectedItem="{Binding SelectedRefreshRate}"
+                          FontSize="11"
+                          Height="22"
+                          Width="65"
+                          Padding="4,0,0,0"
+                          VerticalContentAlignment="Center"
+                          Margin="0,0,10,0"/>
+                
+                <Button Grid.Column="4" 
                         Content="Reset" 
                         Width="75" 
                         Height="22"

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input; // Potrzebne do RelayCommand
 using GPU_T.Services;
@@ -103,6 +104,39 @@ public partial class MainWindowViewModel : ViewModelBase
         _advancedRowCounter++;
     }
 
+    public class RefreshRateItem
+{
+    public string Label { get; set; } = "";
+    public double Seconds { get; set; }
+    public override string ToString() => Label; // To wyświetli ComboBox
+}
+
+
+[ObservableProperty]
+    private ObservableCollection<RefreshRateItem> _refreshRates = new()
+    {
+        new RefreshRateItem { Label = "0.1 s", Seconds = 0.1 },
+        new RefreshRateItem { Label = "0.2 s", Seconds = 0.2 },
+        new RefreshRateItem { Label = "0.5 s", Seconds = 0.5 },
+        new RefreshRateItem { Label = "1.0 s", Seconds = 1.0 },
+        new RefreshRateItem { Label = "2.0 s", Seconds = 2.0 },
+        new RefreshRateItem { Label = "5.0 s", Seconds = 5.0 },
+        new RefreshRateItem { Label = "10.0 s", Seconds = 10.0 },
+    };
+
+    [ObservableProperty]
+    private RefreshRateItem _selectedRefreshRate;
+
+    // Metoda wywoływana automatycznie przy zmianie wyboru w ComboBox
+    partial void OnSelectedRefreshRateChanged(RefreshRateItem value)
+    {
+        if (_sensorTimer != null && value != null)
+        {
+            // Zmieniamy interwał "w locie"
+            _sensorTimer.Interval = TimeSpan.FromSeconds(value.Seconds);
+        }
+    }
+
 
     [ObservableProperty] private int _selectedTabIndex;
 
@@ -143,6 +177,541 @@ public partial class MainWindowViewModel : ViewModelBase
        }
     */
 
+
+
+
+    // Helper: VAProfileH264ConstrainedBaseline -> H264 Constrained Baseline
+    private string CleanVaProfile(string profile)
+    {
+        string p = profile.Replace("VAProfile", "").Trim();
+        
+        // Wstawiamy spacje przed wielkimi literami (CamelCase -> Spaced), ale inteligentnie
+        // np. H264Main -> H264 Main
+        
+        // Prosta podmiana znanych kodeków dla czytelności
+        p = p.Replace("MPEG2", "MPEG-2 ");
+        p = p.Replace("MPEG4", "MPEG-4 ");
+        p = p.Replace("H264", "H.264 ");
+        p = p.Replace("HEVC", "H.265 (HEVC) ");
+        p = p.Replace("VC1", "VC-1 ");
+        p = p.Replace("VP8", "VP8 ");
+        p = p.Replace("VP9", "VP9 ");
+        p = p.Replace("AV1", "AV1 ");
+        p = p.Replace("JPEGBaseline", "JPEG Baseline");
+        p = p.Replace("None", "None");
+
+        return p.Trim();
+    }
+
+    // Helper: VAEntrypointVLD -> Decode
+    private string CleanVaEntrypoint(string entrypoint)
+    {
+        if (entrypoint.Contains("VLD")) return "Decode";
+        if (entrypoint.Contains("EncSlice")) return "Encode";
+        if (entrypoint.Contains("EncPicture")) return "Encode (Picture)";
+        if (entrypoint.Contains("VideoProc")) return "Video Processing";
+        
+        return entrypoint.Replace("VAEntrypoint", "");
+    }
+
+
+
+    private void PopulateMultimediaAdvanced(ObservableCollection<AdvancedItemViewModel> list)
+    {
+        try
+        {
+            // 1. Znajdź dostępne render nodes (np. /dev/dri/renderD128, renderD129)
+            var renderNodes = Directory.GetFiles("/dev/dri", "renderD*");
+            if (renderNodes.Length == 0)
+            {
+                AddAdvancedRow(list, "Error", "No /dev/dri/renderD* devices found.");
+                return;
+            }
+
+            // Przygotuj słowa kluczowe do szukania (np. "Navi31", "Radeon", "7900")
+            // Używamy tej samej logiki co przy OpenCL
+            var gpuNameParts = _selectedGpu?.DisplayName?
+                .Split(new[] { ' ', '(', ')' }, StringSplitOptions.RemoveEmptyEntries)
+                .Where(p => p.Length > 2 && !p.Equals("AMD", StringComparison.OrdinalIgnoreCase) && !p.Equals("Radeon", StringComparison.OrdinalIgnoreCase))
+                .ToList() ?? new List<string>();
+            
+            // Dodajemy fallbacki techniczne
+            //gpuNameParts.Add("Navi"); 
+            //gpuNameParts.Add("Radeon");
+
+            bool foundDevice = false;
+
+            // 2. Iterujemy po render nodes, aż trafimy na właściwy
+            foreach (var node in renderNodes)
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "vainfo",
+                    // Ważne: Wymuszamy tryb DRM i konkretne urządzenie
+                    Arguments = $"--display drm --device {node}",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = System.Text.Encoding.UTF8
+                };
+
+                // vainfo często zwraca błąd 1 lub pisze na stderr jeśli driver nie pasuje,
+                // więc musimy to obsłużyć miękko.
+                using var process = new Process { StartInfo = startInfo };
+                process.Start();
+                
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd(); 
+                process.WaitForExit();
+
+                // Połącz stdout i stderr, bo driver info czasem leci na stderr
+                string fullOutput = output + "\n" + error;
+
+                // 3. Sprawdzamy czy to nasza karta (szukamy Driver version i nazwy)
+                // Przykład linii: "vainfo: Driver version: Mesa Gallium driver ... for AMD Radeon RX 7900 XTX (navi31...)"
+                bool isMatch = false;
+                
+                // Szukamy linii z wersją sterownika
+                string driverLine = "";
+                using (var reader = new StringReader(fullOutput))
+                {
+                    string? line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (line.Contains("Driver version:"))
+                        {
+                            driverLine = line;
+                            break;
+                        }
+                    }
+                }
+
+                // Weryfikacja
+                if (!string.IsNullOrEmpty(driverLine))
+                {
+                    foreach (var part in gpuNameParts)
+                    {
+                        if (driverLine.Contains(part, StringComparison.OrdinalIgnoreCase))
+                        {
+                            isMatch = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (isMatch)
+                {
+                    foundDevice = true;
+                    
+                    // --- NAGŁÓWEK ---
+                    AddAdvancedRow(list, "General", "", true);
+                    AddAdvancedRow(list, "Device Node", node);
+                    
+                    // Wyciągamy czystą wersję sterownika z długiej linii
+                    // np. "Mesa Gallium driver 23.1.0 for AMD Radeon..."
+                    var driverInfo = driverLine.Split(new[] { ':' }, 2).LastOrDefault()?.Trim() ?? "Unknown";
+                    AddAdvancedRow(list, "Driver Info", driverInfo);
+
+                    AddAdvancedRow(list, "Supported Codecs", "", true);
+
+                    // --- PARSOWANIE PROFILI ---
+                    using (var reader = new StringReader(fullOutput))
+                    {
+                        string? line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            line = line.Trim();
+                            // Szukamy linii: VAProfileH264Main : VAEntrypointVLD
+                            if (line.StartsWith("VAProfile") && line.Contains(":"))
+                            {
+                                var parts = line.Split(':');
+                                if (parts.Length == 2)
+                                {
+                                    string profileRaw = parts[0].Trim();
+                                    string entryRaw = parts[1].Trim();
+
+                                    string profileNice = CleanVaProfile(profileRaw);
+                                    string entryNice = CleanVaEntrypoint(entryRaw);
+
+                                    // Filtrujemy "None" (czasem się zdarza)
+                                    if (profileNice != "None")
+                                    {
+                                        AddAdvancedRow(list, profileNice, entryNice);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Znaleźliśmy i wypisaliśmy - kończymy pętlę (nie szukamy dalej)
+                    break;
+                }
+            }
+
+            if (!foundDevice)
+            {
+                AddAdvancedRow(list, "Info", "No matching VA-API device found.");
+                AddAdvancedRow(list, "Note", "Ensure 'vainfo' is installed (package: libva-utils).");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            AddAdvancedRow(list, "Error", $"VA-API check failed: {ex.Message}");
+        }
+    }
+
+
+
+
+
+private void PopulatePowerLimitsAdvanced(ObservableCollection<AdvancedItemViewModel> list)
+    {
+        try
+        {
+            string cardPath = $"/sys/class/drm/{_selectedGpu?.Id ?? "card0"}/device";
+            string hwmonPath = "";
+
+            // 1. Znajdź właściwy folder hwmon
+            try 
+            {
+                var hwmonDirs = Directory.GetDirectories($"{cardPath}/hwmon");
+                foreach (var dir in hwmonDirs)
+                {
+                    string namePath = Path.Combine(dir, "name");
+                    if (File.Exists(namePath) && File.ReadAllText(namePath).Trim() == "amdgpu")
+                    {
+                        hwmonPath = dir;
+                        break;
+                    }
+                }
+            }
+            catch { }
+
+            if (string.IsNullOrEmpty(hwmonPath))
+            {
+                AddAdvancedRow(list, "Error", "Could not find AMDGPU hwmon directory");
+                return;
+            }
+
+            // --- POWER LIMITS (Tylko konfiguracja, bez bieżącego zużycia) ---
+            AddAdvancedRow(list, "Power Configuration", "", true);
+            
+            string powerCap = ReadSysFs(Path.Combine(hwmonPath, "power1_cap"));
+            string powerCapDefault = ReadSysFs(Path.Combine(hwmonPath, "power1_cap_default"));
+            string powerCapMin = ReadSysFs(Path.Combine(hwmonPath, "power1_cap_min"));
+            string powerCapMax = ReadSysFs(Path.Combine(hwmonPath, "power1_cap_max"));
+
+            if (double.TryParse(powerCap, out double pCap))
+                AddAdvancedRow(list, "Current Limit (TDP)", $"{pCap / 1000000.0:0.0} W");
+            
+            if (double.TryParse(powerCapDefault, out double pDef))
+                AddAdvancedRow(list, "Default Limit", $"{pDef / 1000000.0:0.0} W");
+
+            if (double.TryParse(powerCapMin, out double pMin) && double.TryParse(powerCapMax, out double pMax))
+                AddAdvancedRow(list, "Allowed Range", $"{pMin / 1000000.0:0.0} W - {pMax / 1000000.0:0.0} W");
+
+            // --- FANS CONFIG (Tylko sterowanie, bez bieżących RPM) ---
+            AddAdvancedRow(list, "Fan Control", "", true);
+            string fanMode = ReadSysFs(Path.Combine(hwmonPath, "pwm1_enable"));
+            // 1 = Manual, 2 = Auto
+            AddAdvancedRow(list, "Control Mode", fanMode == "1" ? "Manual" : (fanMode == "2" ? "Auto" : "Unknown"));
+
+            string pwm = ReadSysFs(Path.Combine(hwmonPath, "pwm1"));
+            string pwmMax = ReadSysFs(Path.Combine(hwmonPath, "pwm1_max"));
+            
+            if (double.TryParse(pwm, out double pwmVal) && double.TryParse(pwmMax, out double pwmMaxVal))
+            {
+                double percent = (pwmVal / pwmMaxVal) * 100.0;
+                AddAdvancedRow(list, "Current Signal (PWM)", $"{percent:0}% ({pwmVal}/{pwmMaxVal})");
+            }
+            
+            string fanTarget = ReadSysFs(Path.Combine(hwmonPath, "fan1_target"));
+            if (!string.IsNullOrEmpty(fanTarget))
+            {
+                AddAdvancedRow(list, "Target RPM", $"{fanTarget} RPM");
+            }
+
+            // --- POWER PROFILES ---
+            AddAdvancedRow(list, "Power Profile", "", true);
+            string profilePath = Path.Combine(cardPath, "pp_power_profile_mode");
+            if (File.Exists(profilePath))
+            {
+                try
+                {
+                    var lines = File.ReadAllLines(profilePath);
+                    foreach (var line in lines)
+                    {
+                        if (line.Contains("*"))
+                        {
+                            var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            if (parts.Length >= 2)
+                            {
+                                string activeProfile = parts[1].Replace("*", "").Replace(":", "");
+                                AddAdvancedRow(list, "Active Profile", activeProfile);
+                            }
+                        }
+                    }
+                }
+                catch { AddAdvancedRow(list, "Active Profile", "Error reading profiles"); }
+            }
+            else
+            {
+                AddAdvancedRow(list, "Active Profile", "Not supported / file missing");
+            }
+
+            // --- OVERDRIVE ---
+            string odPath = Path.Combine(cardPath, "pp_od_clk_voltage");
+            if (File.Exists(odPath))
+            {
+                AddAdvancedRow(list, "Overdrive Limits", "", true);
+                try 
+                {
+                    var odLines = File.ReadAllLines(odPath);
+                    foreach (var l in odLines) AddAdvancedRow(list, "OD Info", l);
+                }
+                catch {}
+            }
+            // Jeśli pliku nie ma, po prostu pomijamy sekcję Overdrive (zamiast pisać błąd), 
+            // bo to standardowe zachowanie na nowych kernelach.
+
+            // --- DRIVER FEATURES (PEŁNA LISTA) ---
+            AddAdvancedRow(list, "Driver Features (pp_features)", "", true);
+            string featPath = Path.Combine(cardPath, "pp_features");
+            if (File.Exists(featPath))
+            {
+                 try
+                 {
+                     var lines = File.ReadAllLines(featPath);
+                     // Format linii: "00. FW_DATA_READ         ( 0) : enabled"
+                     
+                     foreach (var line in lines)
+                     {
+                         string l = line.Trim();
+                         if (string.IsNullOrWhiteSpace(l)) continue;
+                         // Pomijamy nagłówki
+                         if (l.StartsWith("features high") || l.StartsWith("No. Feature")) continue;
+
+                         var parts = l.Split(':');
+                         if (parts.Length == 2)
+                         {
+                             string state = parts[1].Trim(); // "enabled"
+                             
+                             // Parsowanie nazwy z lewej strony: "00. FW_DATA_READ         ( 0) "
+                             string leftSide = parts[0];
+                             int dotIndex = leftSide.IndexOf('.');
+                             int parenIndex = leftSide.IndexOf('(');
+                             
+                             if (dotIndex != -1 && parenIndex > dotIndex)
+                             {
+                                 string featureName = leftSide.Substring(dotIndex + 1, parenIndex - dotIndex - 1).Trim();
+                                 AddAdvancedRow(list, featureName, state);
+                             }
+                             else
+                             {
+                                 // Fallback gdyby format był inny
+                                 AddAdvancedRow(list, leftSide.Trim(), state);
+                             }
+                         }
+                     }
+                 }
+                 catch (Exception ex)
+                 {
+                     AddAdvancedRow(list, "Error", $"Features parsing error: {ex.Message}");
+                 }
+            }
+            else
+            {
+                AddAdvancedRow(list, "Features", "Not accessible (pp_features missing)");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            AddAdvancedRow(list, "Error", $"Power/Limits check failed: {ex.Message}");
+        }
+    }
+
+    // Helper do bezpiecznego czytania jednej linii z pliku sysfs
+    private string ReadSysFs(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                return File.ReadAllText(path).Trim();
+        }
+        catch {}
+        return "";
+    }
+
+
+
+
+
+
+private void PopulateResizableBarAdvanced(ObservableCollection<AdvancedItemViewModel> list)
+    {
+        try
+        {
+            string targetBusId = BusId; 
+            
+            if (string.IsNullOrEmpty(targetBusId))
+            {
+                AddAdvancedRow(list, "Error", "Could not determine PCI Bus ID");
+                return;
+            }
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "lspci",
+                Arguments = $"-vv -s {targetBusId}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process == null)
+            {
+                AddAdvancedRow(list, "Error", "Could not start lspci (pciutils required)");
+                return;
+            }
+
+            string output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+
+            // --- ANALIZA DANYCH ---
+
+            var barSizes = new List<(string Name, string SizeText, long SizeBytes)>();
+            bool has64BitBar = false;
+            long maxBarSize = 0;
+            int barCounter = 0; 
+
+            var lines = output.Split('\n');
+            foreach (var line in lines)
+            {
+                string t = line.Trim();
+                
+                // Szukamy linii definiujących pamięć
+                if (t.Contains("Memory at") && t.Contains("[size="))
+                {
+                    int sizeStart = t.LastIndexOf("[size=");
+                    if (sizeStart != -1)
+                    {
+                        int sizeEnd = t.IndexOf(']', sizeStart);
+                        if (sizeEnd != -1)
+                        {
+                            // Wyciągamy SAM rozmiar, np. "32G"
+                            string sizeStr = t.Substring(sizeStart + 6, sizeEnd - sizeStart - 6); 
+                            long bytes = ParseLspciSize(sizeStr);
+                            
+                            if (bytes > maxBarSize) maxBarSize = bytes;
+                            if (t.Contains("64-bit")) has64BitBar = true;
+
+                            // Nazwa BAR
+                            string barName;
+                            if (t.StartsWith("Region"))
+                            {
+                                var parts = t.Split(':');
+                                barName = parts[0].Replace("Region", "BAR");
+                            }
+                            else
+                            {
+                                barName = $"BAR {barCounter}";
+                                barCounter++;
+                            }
+
+                            // ZMIANA: Zapisujemy tylko sizeStr zamiast całego wiersza details
+                            barSizes.Add((barName, sizeStr, bytes));
+                        }
+                    }
+                }
+            }
+
+            // --- STATUS ---
+            // ReBAR > 256MB
+            bool isReBarEnabled = maxBarSize > 268435456; 
+
+            // --- SEKCJA 1: STATUS GŁÓWNY ---
+            AddAdvancedRow(list, "PCI-Express Resizable BAR", "", true);
+            AddAdvancedRow(list, "Resizable BAR", isReBarEnabled ? "Enabled" : "Disabled");
+
+            // --- SEKCJA 2: WYMAGANIA ---
+            AddAdvancedRow(list, "Resizable BAR Requirements", "", true);
+            
+            bool isRdna = DeviceName.Contains("7900") || DeviceName.Contains("Navi") || DeviceName.Contains("RX 6") || DeviceName.Contains("RX 7");
+            AddAdvancedRow(list, "GPU Hardware Support", isRdna ? "Yes" : "Unknown");
+
+            AddAdvancedRow(list, "Above 4G Decode enabled", has64BitBar ? "Yes" : "No/Unknown");
+            AddAdvancedRow(list, "Resizable BAR enabled in BIOS", isReBarEnabled ? "Yes" : "Disabled or Unsupported");
+
+            bool isUefi = Directory.Exists("/sys/firmware/efi");
+            AddAdvancedRow(list, "CSM disabled", isUefi ? "Yes" : "No (Legacy Mode)");
+            
+            // ZMIANA: Poprawna nazwa dla Linuxa :)
+            AddAdvancedRow(list, "Linux running in UEFI Mode", isUefi ? "Yes" : "No"); 
+
+            AddAdvancedRow(list, "64-Bit Operating System", Environment.Is64BitOperatingSystem ? "Yes" : "No");
+
+            string kernelDriver = "";
+            foreach (var l in lines) 
+            {
+                string trimL = l.Trim();
+                if (trimL.StartsWith("Kernel driver in use:")) 
+                    kernelDriver = trimL.Split(':')[1].Trim();
+            }
+            bool driverOk = kernelDriver.Contains("amdgpu");
+            AddAdvancedRow(list, "Graphics Driver Support", driverOk ? "Yes" : $"Unknown ({kernelDriver})");
+
+
+            // --- SEKCJA 3: BAR SIZES ---
+            AddAdvancedRow(list, "PCI-Express BAR Sizes", "", true);
+            if (barSizes.Count > 0)
+            {
+                foreach (var bar in barSizes.OrderBy(b => b.Name))
+                {
+                    // Tutaj teraz trafia np. "32G" zamiast długiego stringa
+                    AddAdvancedRow(list, bar.Name, bar.SizeText); 
+                }
+            }
+            else
+            {
+                AddAdvancedRow(list, "Info", "No memory regions found");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            AddAdvancedRow(list, "Error", $"ReBAR check failed: {ex.Message}");
+        }
+    }
+
+    // Helper do parsowania rozmiarów z lspci (np. "24G", "2M", "16K")
+    private long ParseLspciSize(string sizeStr)
+    {
+        if (string.IsNullOrEmpty(sizeStr)) return 0;
+        
+        char suffix = sizeStr.Last();
+        if (char.IsDigit(suffix)) return long.Parse(sizeStr);
+
+        string numberPart = sizeStr.Substring(0, sizeStr.Length - 1);
+        if (!double.TryParse(numberPart, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double num))
+            return 0;
+
+        return suffix switch
+        {
+            'K' => (long)(num * 1024),
+            'M' => (long)(num * 1024 * 1024),
+            'G' => (long)(num * 1024 * 1024 * 1024),
+            'T' => (long)(num * 1024 * 1024 * 1024 * 1024),
+            _ => (long)num
+        };
+    }
+
+
     private void LoadAdvancedData(string category)
     {
         var list = new ObservableCollection<AdvancedItemViewModel>();
@@ -159,7 +728,15 @@ public partial class MainWindowViewModel : ViewModelBase
             case "OpenCL":
                 PopulateOpenClAdvanced(list);
                 break;
-            // ... reszta case'ów ...
+            case "Multimedia (VA-API)":
+                PopulateMultimediaAdvanced(list);
+                break;
+            case "Power & Limits":
+                PopulatePowerLimitsAdvanced(list);
+                break;
+            case "PCIe Resizable BAR":
+                PopulateResizableBarAdvanced(list);
+                break;
             default:
                 AddAdvancedRow(list, "Info", "", true);
                 AddAdvancedRow(list, "Status", "Not implemented");
@@ -190,7 +767,7 @@ public partial class MainWindowViewModel : ViewModelBase
         // 2. Sekcja Sterowników (Nagłówek)
         AddAdvancedRow(list, "Graphics Drivers", "", true);
         
-        // Driver Module (z poprawką ResolveLinkTarget)
+        // Kernel Driver
         string driverModule = "Unknown";
         try 
         {
@@ -198,16 +775,102 @@ public partial class MainWindowViewModel : ViewModelBase
             var dirInfo = new DirectoryInfo(driverPath);
             if (dirInfo.Exists)
             {
-                // .NET 6+
                 var target = dirInfo.ResolveLinkTarget(true); 
                 driverModule = target != null ? target.Name : dirInfo.Name;
             }
         } 
         catch {}
         AddAdvancedRow(list, "Kernel Driver", driverModule);
-        AddAdvancedRow(list, "OpenGL / Mesa", "Scanning implemented in next step...");
 
-        // 3. Firmware (POPRAWIONA LOGIKA)
+        // --- OPENGL / MESA (IMPLEMENTACJA) ---
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "glxinfo",
+                Arguments = "-B", // -B (Brief) daje mniej śmieci, ale zawiera wszystko co ważne
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process != null)
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+
+                string glVersion = "";
+                string mesaVersion = "";
+                string renderer = "";
+                string directRendering = "No";
+
+                var lines = output.Split('\n');
+                foreach (var line in lines)
+                {
+                    string t = line.Trim();
+                    
+                    if (t.StartsWith("direct rendering:"))
+                    {
+                        directRendering = t.Contains("Yes") ? "Yes" : "No";
+                    }
+                    else if (t.StartsWith("OpenGL core profile version string:"))
+                    {
+                        // Format: "4.6 (Core Profile) Mesa 23.2.1-1ubuntu3.1"
+                        // Wyciągamy "4.6" oraz "23.2.1..."
+                        glVersion = t.Replace("OpenGL core profile version string:", "").Trim().Split(' ')[0];
+                        
+                        // Szukamy słowa Mesa
+                        int mesaIndex = t.IndexOf("Mesa");
+                        if (mesaIndex != -1)
+                        {
+                            mesaVersion = t.Substring(mesaIndex).Replace("Mesa", "").Trim();
+                        }
+                    }
+                    else if (t.StartsWith("OpenGL renderer string:"))
+                    {
+                        // Format: "AMD Radeon RX 7900 XTX (radeonsi, navi31, LLVM 15.0.7, DRM 3.54, ...)"
+                        renderer = t.Replace("OpenGL renderer string:", "").Trim();
+                    }
+                }
+
+                // Wyświetlanie wyników
+                AddAdvancedRow(list, "OpenGL Version", glVersion);
+                AddAdvancedRow(list, "Mesa Version", mesaVersion);
+                
+                // Direct Rendering to ważny sanity check na Linuxie
+                AddAdvancedRow(list, "Direct Rendering", directRendering);
+
+                // Z Renderera często da się wyciągnąć LLVM (ważne dla AMD)
+                if (renderer.Contains("LLVM"))
+                {
+                    // Próba wycięcia samej wersji LLVM
+                    var match = System.Text.RegularExpressions.Regex.Match(renderer, @"LLVM\s+([\d\.]+)");
+                    if (match.Success)
+                    {
+                        AddAdvancedRow(list, "LLVM Version", match.Groups[1].Value);
+                    }
+                }
+                
+                // Jeśli renderer zawiera "llvmpipe", to znaczy że akceleracja nie działa!
+                if (renderer.Contains("llvmpipe"))
+                {
+                    AddAdvancedRow(list, "Warning", "Software Rendering (llvmpipe) detected!");
+                }
+            }
+            else
+            {
+                AddAdvancedRow(list, "OpenGL Info", "Failed to start glxinfo");
+            }
+        }
+        catch
+        {
+            AddAdvancedRow(list, "OpenGL Info", "Not available ('glxinfo' missing?)");
+        }
+
+        // 3. Firmware
         AddAdvancedRow(list, "Firmware", "", true);
         
         string fwDirPath = $"/sys/class/drm/{_selectedGpu?.Id ?? "card0"}/device/fw_version";
@@ -216,28 +879,20 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             try
             {
-                // Pobieramy wszystkie pliki *_fw_version
                 var files = Directory.GetFiles(fwDirPath, "*_fw_version");
-                
-                // Sortujemy alfabetycznie, żeby był porządek
                 Array.Sort(files);
 
                 foreach (var filePath in files)
                 {
-                    // 1. Wyciągamy nazwę (np. "smc_fw_version" -> "SMC")
                     string fileName = Path.GetFileName(filePath);
                     string shortName = fileName.Replace("_fw_version", "").ToUpper();
-
-                    // 2. Czytamy zawartość (wersję)
                     string version = File.ReadAllText(filePath).Trim();
 
                     AddAdvancedRow(list, shortName, version);
                 }
 
                 if (files.Length == 0)
-                {
-                     AddAdvancedRow(list, "Info", "No firmware files found in directory");
-                }
+                    AddAdvancedRow(list, "Info", "No firmware files found");
             }
             catch (Exception ex)
             {
@@ -246,15 +901,10 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         else
         {
-             // Fallback dla starszych kerneli lub innych sterowników, gdzie to może być plik
              if (File.Exists(fwDirPath))
-             {
                  AddAdvancedRow(list, "Legacy Info", "Old kernel format detected");
-             }
              else
-             {
                  AddAdvancedRow(list, "Firmware Info", "Not available");
-             }
         }
     }
 
@@ -1348,6 +1998,9 @@ private void PopulateVulkanAdvanced(ObservableCollection<AdvancedItemViewModel> 
         {
             SelectedGpu = AvailableGpus[0];
         }
+
+        SelectedRefreshRate = RefreshRates.FirstOrDefault(x => x.Seconds == 1.0) ?? RefreshRates[3];
+
         InitSensors();
     }
 
