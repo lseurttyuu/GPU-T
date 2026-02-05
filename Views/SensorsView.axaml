@@ -1,0 +1,122 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GPU_T.ViewModels"
+             x:Class="GPU_T.Views.SensorsView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <Grid RowDefinitions="*,Auto">
+        
+        <ScrollViewer Grid.Row="0" 
+                      HorizontalScrollBarVisibility="Disabled" 
+                      VerticalScrollBarVisibility="Auto">
+            
+            <ItemsControl ItemsSource="{Binding Sensors}" Margin="6,10,6,0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,0,0,7"> 
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="148"/> 
+                                <ColumnDefinition Width="5"/>   
+                                <ColumnDefinition Width="70"/>  
+                                <ColumnDefinition Width="5"/>   
+                                <ColumnDefinition Width="133"/> 
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Classes="SensorFrame" Height="20">
+                                <Border Classes="SensorFrameInner">
+                                    <TextBlock Text="{Binding Name}" Classes="SensorName"/>
+                                </Border>
+                            </Border>
+
+                            <Button Grid.Column="2" 
+                                    Command="{Binding ToggleModeCommand}"
+                                    Padding="0" BorderThickness="0" Background="Transparent"
+                                    CornerRadius="0" Height="20">
+                                <Border Classes="SensorFrame" Height="20" Width="70">
+                                    <Border Classes="SensorFrameInner">
+                                        <Grid>
+                                            <TextBlock Text="{Binding ModeLabel}" 
+                                                       Classes="ModeLabel"/>
+                                            
+                                            <TextBlock Text="{Binding DisplayValue}" 
+                                                       Classes="SensorValue"/>
+                                        </Grid>
+                                    </Border>
+                                </Border>
+                            </Button>
+
+                            <Grid Grid.Column="4" 
+                                  Height="20" 
+                                  Width="133"
+                                  Background="Transparent"
+                                  PointerMoved="Graph_PointerMoved"
+                                  PointerExited="Graph_PointerExited">
+                                
+                                <Border Background="#f1f1f1" ClipToBounds="True" Margin="1">
+                                    <Polygon Points="{Binding GraphPoints}"
+                                             Fill="#FF0000"
+                                             Stroke="#FF0000"
+                                             StrokeThickness="1"
+                                             IsHitTestVisible="False"
+                                             VerticalAlignment="Top"
+                                             HorizontalAlignment="Left"
+                                             RenderOptions.BitmapInterpolationMode="LowQuality"/>
+                                </Border>
+
+                                <Border Classes="SensorFrame" 
+                                        Background="Transparent" 
+                                        IsHitTestVisible="False">
+                                    <Border Classes="SensorFrameInner" Background="Transparent"/>
+                                </Border>
+                                
+                            </Grid>
+
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Grid Grid.Row="1" Margin="6,9,10,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/> 
+                <ColumnDefinition Width="*"/>    
+                <ColumnDefinition Width="Auto"/> 
+                <ColumnDefinition Width="Auto"/> 
+                <ColumnDefinition Width="Auto"/> 
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <CheckBox Content="Log to file" 
+                          Classes="GpuZ"
+                          IsChecked="{Binding IsLogEnabled, Mode=OneWay}"
+                          Checked="LogCheckBox_Checked"
+                          Unchecked="LogCheckBox_Unchecked"/>
+            </StackPanel>
+            
+            <TextBlock Grid.Column="2" 
+                       Text="Sensor refresh rate:" 
+                       FontSize="11"
+                       VerticalAlignment="Center"
+                       Margin="0,0,5,0"/>
+
+            <ComboBox Grid.Column="3"
+                      ItemsSource="{Binding RefreshRates}"
+                      SelectedItem="{Binding SelectedRefreshRate}"
+                      FontSize="11"
+                      Height="22"
+                      Width="65"
+                      Padding="4,0,0,0"
+                      VerticalContentAlignment="Center"
+                      Margin="0,0,10,0"/>
+            
+            <Button Grid.Column="4" 
+                    Content="Reset" 
+                    Width="75" 
+                    Height="22"
+                    FontSize="11"
+                    Classes="ResetBtn"
+                    Command="{Binding ResetSensorsCommand}"/>
+        </Grid>
+    </Grid>
+</UserControl>

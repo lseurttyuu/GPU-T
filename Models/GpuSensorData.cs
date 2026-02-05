@@ -1,4 +1,4 @@
-namespace GPU_T.Services;
+namespace GPU_T.Models;
 
 public record GpuSensorData
 {

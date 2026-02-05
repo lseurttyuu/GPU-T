@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Avalonia.Platform;
+using GPU_T.Models;
 
 namespace GPU_T.Services;
 

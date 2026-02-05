@@ -1,4 +1,4 @@
-namespace GPU_T.Services;
+namespace GPU_T.Models;
 
 // To jest nasz główny model danych technicznych karty
 public record GpuSpec(

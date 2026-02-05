@@ -1,3 +1,5 @@
+using GPU_T.Models;
+
 namespace GPU_T.Services;
 
 public static class PciIdLookup

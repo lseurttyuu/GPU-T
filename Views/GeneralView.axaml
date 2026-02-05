@@ -1,0 +1,265 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GPU_T.ViewModels"
+             x:Class="GPU_T.Views.GeneralView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <Grid Margin="0,5,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="24"/> 
+            <RowDefinition Height="8"/>  
+            <RowDefinition Height="Auto"/> 
+            <RowDefinition Height="Auto"/> 
+        </Grid.RowDefinitions>
+
+        <Image Grid.Row="1" Grid.RowSpan="3" 
+                Source="{Binding VendorLogo}" 
+                Stretch="Uniform" 
+                Width="85"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,2,0,0"/>
+               
+        <Grid Grid.Row="0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Name"/>
+                <TextBox Text="{Binding DeviceName}" Width="200"/>
+            </StackPanel>
+            <Button Content="Lookup"
+                    Classes="HeaderBtn" 
+                    FontSize="11" 
+                    Height="20" 
+                    Width="85" 
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Padding="0"
+                    Margin="0"
+                    Command="{Binding LookupWebCommand}"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="0,0,90,0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="GPU"/>
+                <TextBox Text="{Binding GpuCodeName}" Width="88"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Revision"/>
+                <TextBox Text="{Binding Revision}" Width="59"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="0,0,90,0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Technology"/>
+                <TextBox Text="{Binding Technology}" Width="77"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Die Size"/>
+                <TextBox Text="{Binding DieSize}" Width="59"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="3" Margin="0,0,90,0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Release Date"/>
+                <TextBox Text="{Binding ReleaseDate}" Width="77"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Transistors"/>
+                <TextBox Text="{Binding Transistors}" Width="59"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="4">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="BIOS Version"/>
+                <TextBox Text="{Binding BiosVersion}" Width="200"/>
+                
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0" IsHitTestVisible="False">
+                    <CheckBox IsChecked="{Binding IsUefiEnabled}" Classes="GpuZ"/>
+                    <TextBlock Text="UEFI" Classes="CheckText"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="5">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Subvendor"/>
+                <TextBox Text="{Binding Subvendor}" Width="97"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Device ID"/>
+                <TextBox Text="{Binding DeviceId}" Width="125"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="6">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="ROPs/TMUs"/>
+                <TextBox Text="{Binding RopsTmus}" Width="68"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Bus Interface"/>
+                <TextBox Text="{Binding BusInterface}" Width="140"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="7">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Shaders"/>
+                <TextBox Text="{Binding Shaders}" Width="110"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Compute Units"/>
+                <TextBox Text="{Binding ComputeUnits}" Width="85"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="8">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Pixel Fillrate"/>
+                <TextBox Text="{Binding PixelFillrate}" Width="91"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Texture Fillrate"/>
+                <TextBox Text="{Binding TextureFillrate}" Width="103"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="9">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Memory Type"/>
+                <TextBox Text="{Binding MemoryType}" Width="124"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Bus Width"/>
+                <TextBox Text="{Binding BusWidth}" Width="85"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="10">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Memory Size"/>
+                <TextBox Text="{Binding MemorySize}" Width="94"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Bandwidth"/>
+                <TextBox Text="{Binding Bandwidth}" Width="104"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="11">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Driver Version"/>
+                <TextBox Text="{Binding DriverVersion}" Width="295"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="12">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Driver Date"/>
+                <TextBox Text="{Binding DriverDate}" Width="101"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Vulkan API"/>
+                <TextBox Text="{Binding VulkanApi}" Width="91"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="13">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="GPU Clock"/>
+                <TextBox Text="{Binding GpuClock}" Width="61"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Memory"/>
+                <TextBox Text="{Binding MemoryClock}" Width="61"/>
+                <TextBlock Classes="InnerLabel" Text="Boost"/>
+                <TextBox Text="{Binding BoostClock}" Width="61"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="14">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Default Clock"/>
+                <TextBox Text="{Binding DefaultGpuClock}" Width="61"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Memory"/>
+                <TextBox Text="{Binding DefaultMemoryClock}" Width="61"/>
+                <TextBlock Classes="InnerLabel" Text="Boost"/>
+                <TextBox Text="{Binding DefaultBoostClock}" Width="61"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="15">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="Label" Text="Bus ID"/>
+                <TextBox Text="{Binding BusId}" Width="118"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Classes="InnerLabel" Text="Resizable BAR"/>
+                <TextBox Text="{Binding ResizableBar}" Width="83"/>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="16" Height="0" Background="#A0A0A0" Margin="0,3,0,2" VerticalAlignment="Center"/>
+
+        <Grid Grid.Row="17" Margin="0,4" IsHitTestVisible="False">
+            <StackPanel Orientation="Horizontal">
+                 <TextBlock Classes="Label" Text="Computing"/>
+                 
+                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                     <CheckBox IsChecked="{Binding IsOpenClEnabled}" Classes="GpuZ"/>
+                     <TextBlock Text="OpenCL" Classes="CheckText"/>
+
+                     <CheckBox IsChecked="{Binding IsCudaEnabled}" IsEnabled="False" Classes="GpuZ"/>
+                     <TextBlock Text="CUDA" Classes="CheckText" Opacity="0.5"/>
+                     
+                     <CheckBox IsChecked="{Binding IsRocmEnabled}" Classes="GpuZ"/>
+                     <TextBlock Text="ROCm" Classes="CheckText"/>
+                     
+                     <CheckBox IsChecked="{Binding IsHsaEnabled}" Classes="GpuZ"/>
+                     <TextBlock Text="HIP" Classes="CheckText"/>
+                 </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="18" Margin="0,4" IsHitTestVisible="False">
+             <StackPanel Orientation="Horizontal">
+                 <TextBlock Classes="Label" Text="Technologies"/>
+                 
+                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                     <CheckBox IsChecked="{Binding IsVulkanEnabled}" Classes="GpuZ"/>
+                     <TextBlock Text="Vulkan" Classes="CheckText"/>
+
+                     <CheckBox IsChecked="{Binding IsRayTracingEnabled}" Classes="GpuZ"/>
+                     <TextBlock Text="Ray Tracing" Classes="CheckText"/>
+                     
+                     <CheckBox IsChecked="{Binding IsPhysXEnabled}" IsEnabled="False" Classes="GpuZ"/>
+                     <TextBlock Text="PhysX" Classes="CheckText" Opacity="0.5"/>
+                     
+                     <CheckBox IsChecked="{Binding IsOpenglEnabled}" Classes="GpuZ"/>
+                     <TextBlock Text="OpenGL 4.6" Classes="CheckText"/>
+                 </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

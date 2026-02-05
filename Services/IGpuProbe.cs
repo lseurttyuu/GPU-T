@@ -1,4 +1,6 @@
 using System;
+using GPU_T.Services.Advanced;
+using GPU_T.Models;
 
 namespace GPU_T.Services;
 
@@ -64,4 +66,8 @@ public interface IGpuProbe
     GpuStaticData LoadStaticData();
 
     GpuSensorData LoadSensorData();
+
+    SensorAvailability GetSensorAvailability();
+
+    AdvancedDataProvider? GetAdvancedDataProvider(string category);
 }

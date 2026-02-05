@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace GPU_T.Services;
+namespace GPU_T.Models;
 
 public class GpuDatabaseRoot
 {

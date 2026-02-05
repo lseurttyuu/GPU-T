@@ -3,7 +3,6 @@
              x:Class="GPU_T.App"
              xmlns:local="using:GPU_T"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
         <local:ViewLocator/>
@@ -11,5 +10,161 @@
   
     <Application.Styles>
         <FluentTheme />
+        
+        <Style Selector="Window">
+            <Setter Property="FontFamily" Value="Segoe UI, Sans-Serif"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+
+        <Style Selector="TextBlock.Label">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="Width" Value="74"/>
+        </Style>
+        
+        <Style Selector="TextBlock.InnerLabel">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="8,0,3,0"/>
+        </Style>
+
+        <Style Selector="TextBox">
+            <Setter Property="MinHeight" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="Padding" Value="0,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Margin" Value="0,1"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Background" Value="#f1f1f1"/>
+            <Setter Property="BorderBrush" Value="#a2a2a2"/>
+            <Setter Property="BorderThickness" Value="1,1,0,0"/>
+        </Style>
+
+        <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#f1f1f1"/>
+            <Setter Property="BorderBrush" Value="#a2a2a2"/>
+            <Setter Property="BorderThickness" Value="1,1,0,0"/>
+        </Style>
+
+        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="#f1f1f1"/>
+            <Setter Property="BorderBrush" Value="#a2a2a2"/>
+            <Setter Property="BorderThickness" Value="1,1,0,0"/>
+        </Style>
+
+        <Style Selector="CheckBox.GpuZ">
+            <Setter Property="MinWidth" Value="13"/>
+            <Setter Property="MinHeight" Value="13"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                        <Border Name="PART_Border"
+                                Width="13" Height="13"
+                                Background="#FFFFFF"
+                                BorderBrush="#707070"
+                                BorderThickness="1"
+                                VerticalAlignment="Center">
+                            <Path Name="PART_CheckMark"
+                                  Data="M 2,6 L 5,9 L 10,2"
+                                  Stroke="#333333"
+                                  StrokeThickness="1.5"
+                                  UseLayoutRounding="False"
+                                  IsVisible="False"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Margin="-2,-2,0,0"/>
+                        </Border>
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          Margin="5,0,0,0"
+                                          VerticalAlignment="Center"
+                                          FontSize="11"
+                                          Foreground="Black"/>
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+
+        <Style Selector="CheckBox.GpuZ:checked /template/ Path#PART_CheckMark">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+
+        <Style Selector="CheckBox.GpuZ:disabled /template/ Border#PART_Border">
+            <Setter Property="BorderBrush" Value="#A0A0A0"/> 
+            <Setter Property="Background" Value="#F5F5F5"/> 
+        </Style>
+
+        <Style Selector="CheckBox.GpuZ:pointerover /template/ Border#PART_Border">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#707070"/>
+        </Style>
+
+        <Style Selector="CheckBox.GpuZ:checked:disabled /template/ Path#PART_CheckMark">
+            <Setter Property="IsVisible" Value="True"/>
+            <Setter Property="Opacity" Value="0.5"/>
+            <Setter Property="Stroke" Value="#808080"/> 
+        </Style>
+
+        <Style Selector="TextBlock.CheckText">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="3,0,10,0"/> 
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+        
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="11"/> 
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="MinHeight" Value="24"/>
+            <Setter Property="Padding" Value="6,2"/>
+        </Style>
+
+        <Style Selector="Border.SensorFrame">
+            <Setter Property="BorderBrush" Value="#a0a0a0"/>
+            <Setter Property="BorderThickness" Value="1,1,0,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <Style Selector="Border.SensorFrameInner">
+            <Setter Property="BorderBrush" Value="#ffffff"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        </Style>
+
+        <Style Selector="TextBlock.SensorName">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="4,0,0,0"/> <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+
+        <Style Selector="TextBlock.SensorValue">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="0,0,4,0"/> <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+
+        <Style Selector="TextBlock.ModeLabel">
+            <Setter Property="FontSize" Value="6"/>
+            <Setter Property="Foreground" Value="#008000"/> 
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="2,0,0,0"/> 
+        </Style>
+
+        <Style Selector="Button.ResetBtn">
+            <Setter Property="Padding" Value="0,0,0,2"/> 
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        
     </Application.Styles>
 </Application>
