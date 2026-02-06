@@ -309,18 +309,28 @@ public partial class LinuxAmdGpuProbe
 
     private string GetVulkanApiVersion()
     {
-        try {
+        try 
+        {
             var psi = new ProcessStartInfo("vulkaninfo", "--summary") {
-                RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true
+                RedirectStandardOutput = true, 
+                UseShellExecute = false, 
+                CreateNoWindow = true
             };
             using var p = Process.Start(psi);
             if (p != null) {
                 string output = p.StandardOutput.ReadToEnd();
                 p.WaitForExit();
-                var match = Regex.Match(output, @"apiVersion\s*=\s*([\d\.]+)");
+                
+                // ZMIANA REGEXA:
+                // 1. "apiVersion\s*=\s*" -> Szukamy klucza.
+                // 2. ".*?" -> (Non-greedy) Pomiń wszystko po drodze (np. "4206816 (").
+                // 3. "(\d+\.\d+(?:\.\d+)?)" -> Złap grupę, która MUSI wyglądać jak liczba.liczba(.liczba).
+                var match = Regex.Match(output, @"apiVersion\s*=\s*.*?(\d+\.\d+(?:\.\d+)?)");
+                
                 if (match.Success) return match.Groups[1].Value;
             }
-        } catch {}
+        } 
+        catch {}
         return "N/A";
     }
 
