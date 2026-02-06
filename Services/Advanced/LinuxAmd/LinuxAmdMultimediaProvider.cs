@@ -121,20 +121,20 @@ public class LinuxAmdMultimediaProvider : AdvancedDataProvider
 
 
         private string CleanVaProfile(string profile)
-    {
-        string p = profile.Replace("VAProfile", "").Trim();
-        p = p.Replace("MPEG2", "MPEG-2 ");
-        p = p.Replace("MPEG4", "MPEG-4 ");
-        p = p.Replace("H264", "H.264 ");
-        p = p.Replace("HEVC", "H.265 (HEVC) ");
-        p = p.Replace("VC1", "VC-1 ");
-        p = p.Replace("VP8", "VP8 ");
-        p = p.Replace("VP9", "VP9 ");
-        p = p.Replace("AV1", "AV1 ");
-        p = p.Replace("JPEGBaseline", "JPEG Baseline");
-        p = p.Replace("None", "None");
-        return p.Trim();
-    }
+        {
+            string p = profile.Replace("VAProfile", "").Trim();
+            p = p.Replace("MPEG2", "MPEG-2 ");
+            p = p.Replace("MPEG4", "MPEG-4 ");
+            p = p.Replace("H264", "H.264 ");
+            p = p.Replace("HEVC", "H.265 (HEVC) ");
+            p = p.Replace("VC1", "VC-1 ");
+            p = p.Replace("VP8", "VP8 ");
+            p = p.Replace("VP9", "VP9 ");
+            p = p.Replace("AV1", "AV1 ");
+            p = p.Replace("JPEGBaseline", "JPEG Baseline");
+            p = p.Replace("None", "None");
+            return p.Trim();
+        }
 
     private string CleanVaEntrypoint(string entrypoint)
     {

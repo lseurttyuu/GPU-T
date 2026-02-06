@@ -28,7 +28,7 @@ public class LinuxAmdResizableBarProvider : AdvancedDataProvider
                 deviceName = staticData.DeviceName;
             }
 
-            if (string.IsNullOrEmpty(busId)) { AddRow(list, "Error", "No Bus ID"); return; }
+            if (string.IsNullOrEmpty(busId)) { AddRow(list, "Error", "Could not determine PCI Bus ID"); return; }
 
             var startInfo = new ProcessStartInfo
             {
