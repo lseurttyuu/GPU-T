@@ -9,6 +9,7 @@ public record GpuStaticData
 {
     // === Podstawowe ===
     public string DeviceName { get; init; } = "Unknown";
+    public bool IsExactMatch { get; init; } = true;
     public string DeviceId { get; init; } = "Unknown";
     public string Subvendor { get; init; } = "Unknown";
     public string BiosVersion { get; init; } = "Unknown";

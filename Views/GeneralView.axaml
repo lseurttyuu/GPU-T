@@ -37,9 +37,27 @@
                
         <Grid Grid.Row="0">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Classes="Label" Text="Name"/>
+                
+                <Grid VerticalAlignment="Center">
+                    <TextBlock Text="!" 
+                               Foreground="Red" 
+                               FontWeight="Bold" 
+                               FontSize="20"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Margin="35,-1,0,0" 
+                               IsVisible="{Binding ShowLookupWarning}"
+                               Background="Transparent">
+                        <ToolTip.Tip>
+                            <TextBlock Text="{Binding LookupWarningText}"/>
+                        </ToolTip.Tip>
+                    </TextBlock>
+
+                    <TextBlock Classes="Label" Text="Name"/>
+                </Grid>
                 <TextBox Text="{Binding DeviceName}" Width="200"/>
             </StackPanel>
+            
             <Button Content="Lookup"
                     Classes="HeaderBtn" 
                     FontSize="11" 

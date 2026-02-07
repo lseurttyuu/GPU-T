@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "vendors": {
     "1002": "AMD",
     "10DE": "NVIDIA",
@@ -9,64 +9,5349 @@
     "1458": "Gigabyte",
     "1849": "ASRock",
     "1DA2": "Sapphire",
+    "148C": "PowerColor",
     "1682": "XFX",
     "196D": "Club 3D",
-    "148C": "PowerColor"
+    "1787": "HIS",
+    "1545": "VisionTek",
+    "1D05": "Yeston",
+    "3842": "EVGA",
+    "19DA": "Zotac",
+    "174B": "PC Partner",
+    "1569": "Palit",
+    "10B0": "Gainward",
+    "1626": "Galax / KFA2",
+    "196E": "PNY",
+    "1642": "Colorful",
+    "107D": "Leadtek",
+    "1028": "Dell",
+    "103C": "HP",
+    "17AA": "Lenovo",
+    "106B": "Apple"
   },
   "gpus": {
-    "744C": {
-      "name": "AMD Radeon RX 7900 XTX",
-      "codeName": "Navi 31",
-      "technology": "5 nm",
-      "dieSize": "300 mm²",
-      "releaseDate": "Nov 3, 2022",
-      "transistors": "57700M",
-      "rops": "192",
-      "tmus": "384",
-      "shaders": "6144 Unified",
-      "computeUnits": "96 CU",
-      "memoryType": "GDDR6",
-      "busWidth": "384 Bit",
-      "defGpuClock": "2269 MHz",
-      "defBoostClock": "2499 MHz",
-      "defMemClock": "2500 MHz",
-      "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7900-xtx.c3941"
-    },
-    "744D": {
-      "name": "AMD Radeon RX 7900 XT",
-      "codeName": "Navi 31",
-      "technology": "5 nm",
-      "dieSize": "300 mm²",
-      "releaseDate": "Nov 3, 2022",
-      "transistors": "57700M",
-      "rops": "192",
-      "tmus": "336",
-      "shaders": "5376 Unified",
-      "computeUnits": "84 CU",
-      "memoryType": "GDDR6",
-      "busWidth": "320 Bit",
-      "defGpuClock": "2025 MHz",
-      "defBoostClock": "2394 MHz",
-      "defMemClock": "2500 MHz",
-      "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7900-xt.c3912"
-    },
-    "73BF": {
-      "name": "AMD Radeon RX 6800 XT",
-      "codeName": "Navi 21",
-      "technology": "7 nm",
-      "dieSize": "520 mm²",
-      "releaseDate": "Oct 28, 2020",
-      "transistors": "26800M",
-      "rops": "128",
-      "tmus": "288",
-      "shaders": "4608 Unified",
-      "computeUnits": "72 CU",
-      "memoryType": "GDDR6",
-      "busWidth": "256 Bit",
-      "defGpuClock": "1825 MHz",
-      "defBoostClock": "2250 MHz",
-      "defMemClock": "2000 MHz",
-      "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6800-xt.c3694"
-    }
+    "6610": [
+      {
+        "name": "AMD Radeon R7 350",
+        "revisions": [
+          "00",
+          "87"
+        ],
+        "codeName": "Cape Verde",
+        "technology": "28 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Jul 6th, 2016",
+        "transistors": "1500M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1125 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-350.c3135"
+      }
+    ],
+    "744B": [
+      {
+        "name": "AMD Radeon PRO W7900D",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 31",
+        "technology": "5 nm",
+        "dieSize": "529 mm\u00B2",
+        "releaseDate": "Sep 25th, 2025",
+        "transistors": "57700M",
+        "rops": "192",
+        "tmus": "384",
+        "shaders": "6144 Unified",
+        "computeUnits": "96 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "384 bit",
+        "defGpuClock": "1327 MHz",
+        "defBoostClock": "2156 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w7900d.c4361"
+      }
+    ],
+    "15D8": [
+      {
+        "name": "AMD Radeon RX Vega 11",
+        "revisions": [
+          "C8",
+          "CA"
+        ],
+        "codeName": "Picasso",
+        "technology": "12 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Jul 7th, 2019",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "44",
+        "shaders": "704 Unified",
+        "computeUnits": "11 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1400 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-vega-11.c3593"
+      },
+      {
+        "name": "AMD Radeon Vega 11",
+        "revisions": [
+          "C8",
+          "CA",
+          "D8",
+          "DA"
+        ],
+        "codeName": "Picasso",
+        "technology": "12 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Sep 30th, 2019",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "44",
+        "shaders": "704 Unified",
+        "computeUnits": "11 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1400 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-11.c3595"
+      },
+      {
+        "name": "AMD Radeon Vega 3",
+        "revisions": [
+          "91",
+          "92",
+          "C4",
+          "CC",
+          "CD",
+          "CE",
+          "CF",
+          "D4",
+          "DC",
+          "DD",
+          "DE",
+          "DF",
+          "E4"
+        ],
+        "codeName": "Picasso",
+        "technology": "12 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Nov 20th, 2019",
+        "transistors": "4940M",
+        "rops": "4",
+        "tmus": "12",
+        "shaders": "192 Unified",
+        "computeUnits": "3 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1100 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-3.c3594"
+      },
+      {
+        "name": "AMD Radeon Vega 8",
+        "revisions": [
+          "C9",
+          "CB",
+          "D2",
+          "D9",
+          "DB"
+        ],
+        "codeName": "Picasso",
+        "technology": "12 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Jul 7th, 2019",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1250 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-8.c3286"
+      },
+      {
+        "name": "AMD Radeon RX Vega 11",
+        "revisions": [
+          "C8",
+          "CA"
+        ],
+        "codeName": "Raven",
+        "technology": "14 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "May 10th, 2018",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "44",
+        "shaders": "704 Unified",
+        "computeUnits": "11 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1251 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-vega-11.c3300"
+      },
+      {
+        "name": "AMD Radeon RX Vega 11",
+        "revisions": [
+          "C8",
+          "CA"
+        ],
+        "codeName": "Raven",
+        "technology": "14 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Feb 12th, 2018",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "44",
+        "shaders": "704 Unified",
+        "computeUnits": "11 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1240 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-vega-11.c3054"
+      },
+      {
+        "name": "AMD Radeon Vega 8",
+        "revisions": [
+          "C9",
+          "CB",
+          "D2",
+          "D9",
+          "DB"
+        ],
+        "codeName": "Raven",
+        "technology": "14 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Feb 12th, 2018",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1100 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-8.c3042"
+      }
+    ],
+    "6995": [
+      {
+        "name": "AMD Radeon Pro WX 2100",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Lexa",
+        "technology": "14 nm",
+        "dieSize": "103 mm\u00B2",
+        "releaseDate": "Jun 4th, 2017",
+        "transistors": "2200M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "64 bit",
+        "defGpuClock": "925 MHz",
+        "defBoostClock": "1219 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-wx-2100.c2979"
+      }
+    ],
+    "66AF": [
+      {
+        "name": "AMD Radeon VII",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Vega 20",
+        "technology": "7 nm",
+        "dieSize": "331 mm\u00B2",
+        "releaseDate": "Feb 7th, 2019",
+        "transistors": "13230M",
+        "rops": "64",
+        "tmus": "240",
+        "shaders": "3840 Unified",
+        "computeUnits": "60 CU",
+        "memoryType": "HBM2",
+        "busWidth": "4096 bit",
+        "defGpuClock": "1400 MHz",
+        "defBoostClock": "1750 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vii.c3358"
+      }
+    ],
+    "6921": [
+      {
+        "name": "AMD FirePro W7170M",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Amethyst",
+        "technology": "28 nm",
+        "dieSize": "366 mm\u00B2",
+        "releaseDate": "Oct 2nd, 2015",
+        "transistors": "5000M",
+        "rops": "32",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "723 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/firepro-w7170m.c2768"
+      }
+    ],
+    "6920": [
+      {
+        "name": "AMD Radeon R9 M390X",
+        "revisions": [
+          "01"
+        ],
+        "codeName": "Amethyst",
+        "technology": "28 nm",
+        "dieSize": "366 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "5000M",
+        "rops": "32",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "723 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m390x.c2732"
+      },
+      {
+        "name": "AMD Radeon R9 M395X",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Amethyst",
+        "technology": "28 nm",
+        "dieSize": "366 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "5000M",
+        "rops": "32",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "723 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m395x.c3577"
+      }
+    ],
+    "6862": [
+      {
+        "name": "AMD Radeon Pro SSG",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Vega 10",
+        "technology": "14 nm",
+        "dieSize": "495 mm\u00B2",
+        "releaseDate": "Aug 8th, 2017",
+        "transistors": "12500M",
+        "rops": "64",
+        "tmus": "256",
+        "shaders": "4096 Unified",
+        "computeUnits": "64 CU",
+        "memoryType": "HBM2",
+        "busWidth": "2048 bit",
+        "defGpuClock": "1440 MHz",
+        "defBoostClock": "1500 MHz",
+        "defMemClock": "945 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-ssg.c2998"
+      },
+      {
+        "name": "AMD Radeon Pro SSG",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Fiji",
+        "technology": "28 nm",
+        "dieSize": "596 mm\u00B2",
+        "releaseDate": "Jul 26th, 2016",
+        "transistors": "8900M",
+        "rops": "64",
+        "tmus": "256",
+        "shaders": "4096 Unified",
+        "computeUnits": "64 CU",
+        "memoryType": "HBM",
+        "busWidth": "4096 bit",
+        "defGpuClock": "1000 MHz",
+        "defBoostClock": "1050 MHz",
+        "defMemClock": "500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-ssg.c3978"
+      }
+    ],
+    "6647": [
+      {
+        "name": "AMD Radeon R9 M280X",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Saturn",
+        "technology": "28 nm",
+        "dieSize": "160 mm\u00B2",
+        "releaseDate": "Feb 5th, 2015",
+        "transistors": "2080M",
+        "rops": "16",
+        "tmus": "56",
+        "shaders": "896 Unified",
+        "computeUnits": "14 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "1000 MHz",
+        "defMemClock": "1375 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m280x.c2581"
+      },
+      {
+        "name": "AMD Radeon R9 M280X",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Saturn",
+        "technology": "28 nm",
+        "dieSize": "160 mm\u00B2",
+        "releaseDate": "Feb 5th, 2015",
+        "transistors": "2080M",
+        "rops": "16",
+        "tmus": "56",
+        "shaders": "896 Unified",
+        "computeUnits": "14 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1000 MHz",
+        "defBoostClock": "1100 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m280x.c2807"
+      },
+      {
+        "name": "AMD Radeon R9 M380",
+        "revisions": [
+          "80"
+        ],
+        "codeName": "Strato",
+        "technology": "28 nm",
+        "dieSize": "160 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "2080M",
+        "rops": "16",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "1000 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m380.c2708"
+      }
+    ],
+    "67E3": [
+      {
+        "name": "AMD Radeon Pro WX 4100",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Baffin",
+        "technology": "14 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Nov 10th, 2016",
+        "transistors": "3000M",
+        "rops": "16",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1125 MHz",
+        "defBoostClock": "1201 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-wx-4100.c2874"
+      }
+    ],
+    "6981": [
+      {
+        "name": "AMD Radeon Pro WX 3200",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Polaris 23",
+        "technology": "14 nm",
+        "dieSize": "103 mm\u00B2",
+        "releaseDate": "Jul 2nd, 2019",
+        "transistors": "2200M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1295 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-wx-3200.c3412"
+      }
+    ],
+    "6658": [
+      {
+        "name": "AMD Radeon R7 360",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Tobago",
+        "technology": "28 nm",
+        "dieSize": "160 mm\u00B2",
+        "releaseDate": "Jun 18th, 2015",
+        "transistors": "2080M",
+        "rops": "16",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1000 MHz",
+        "defBoostClock": "1050 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-360.c2733"
+      }
+    ],
+    "6863": [
+      {
+        "name": "AMD Radeon Vega Frontier Edition",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Vega 10",
+        "technology": "14 nm",
+        "dieSize": "495 mm\u00B2",
+        "releaseDate": "Jun 27th, 2017",
+        "transistors": "12500M",
+        "rops": "64",
+        "tmus": "256",
+        "shaders": "4096 Unified",
+        "computeUnits": "64 CU",
+        "memoryType": "HBM2",
+        "busWidth": "2048 bit",
+        "defGpuClock": "1382 MHz",
+        "defBoostClock": "1600 MHz",
+        "defMemClock": "945 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-frontier-edition.c2958"
+      }
+    ],
+    "67B0": [
+      {
+        "name": "AMD Radeon R9 390X",
+        "revisions": [
+          "80"
+        ],
+        "codeName": "Grenada",
+        "technology": "28 nm",
+        "dieSize": "438 mm\u00B2",
+        "releaseDate": "Jun 18th, 2015",
+        "transistors": "6200M",
+        "rops": "64",
+        "tmus": "176",
+        "shaders": "2816 Unified",
+        "computeUnits": "44 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "512 bit",
+        "defGpuClock": "1050 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-390x.c2663"
+      }
+    ],
+    "13C0": [
+      {
+        "name": "AMD Radeon 610M",
+        "revisions": [
+          "D4",
+          "D8",
+          "D9",
+          "DA",
+          "DB",
+          "DC",
+          "DD",
+          "DE",
+          "DF"
+        ],
+        "codeName": "Dragon Range",
+        "technology": "5 nm",
+        "dieSize": "264 mm\u00B2",
+        "releaseDate": "Jan 3rd, 2023",
+        "transistors": "unknown",
+        "rops": "4",
+        "tmus": "8",
+        "shaders": "128 Unified",
+        "computeUnits": "2 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "400 MHz",
+        "defBoostClock": "2200 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-610m.c4021"
+      },
+      {
+        "name": "AMD Radeon 610M",
+        "revisions": [
+          "D4",
+          "D8",
+          "D9",
+          "DA",
+          "DB",
+          "DC",
+          "DD",
+          "DE",
+          "DF"
+        ],
+        "codeName": "Mendocino",
+        "technology": "6 nm",
+        "dieSize": "100 mm\u00B2",
+        "releaseDate": "Sep 20th, 2022",
+        "transistors": "unknown",
+        "rops": "4",
+        "tmus": "8",
+        "shaders": "128 Unified",
+        "computeUnits": "2 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "1500 MHz",
+        "defBoostClock": "1900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-610m.c3994"
+      }
+    ],
+    "67A0": [
+      {
+        "name": "AMD FirePro S9150",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Hawaii",
+        "technology": "28 nm",
+        "dieSize": "438 mm\u00B2",
+        "releaseDate": "Aug 7th, 2014",
+        "transistors": "6200M",
+        "rops": "64",
+        "tmus": "176",
+        "shaders": "2816 Unified",
+        "computeUnits": "44 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "512 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/firepro-s9150.c2608"
+      }
+    ],
+    "6646": [
+      {
+        "name": "AMD Radeon R9 M280X",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Saturn",
+        "technology": "28 nm",
+        "dieSize": "160 mm\u00B2",
+        "releaseDate": "Feb 5th, 2015",
+        "transistors": "2080M",
+        "rops": "16",
+        "tmus": "56",
+        "shaders": "896 Unified",
+        "computeUnits": "14 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "1000 MHz",
+        "defMemClock": "1375 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m280x.c2581"
+      },
+      {
+        "name": "AMD Radeon R9 M280X",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Saturn",
+        "technology": "28 nm",
+        "dieSize": "160 mm\u00B2",
+        "releaseDate": "Feb 5th, 2015",
+        "transistors": "2080M",
+        "rops": "16",
+        "tmus": "56",
+        "shaders": "896 Unified",
+        "computeUnits": "14 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1000 MHz",
+        "defBoostClock": "1100 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m280x.c2807"
+      },
+      {
+        "name": "AMD Radeon R9 M385",
+        "revisions": [
+          "80"
+        ],
+        "codeName": "Strato",
+        "technology": "28 nm",
+        "dieSize": "160 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "2080M",
+        "rops": "16",
+        "tmus": "56",
+        "shaders": "896 Unified",
+        "computeUnits": "14 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "1000 MHz",
+        "defMemClock": "1200 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m385.c2709"
+      },
+      {
+        "name": "AMD FirePro W6150M",
+        "revisions": [
+          "80"
+        ],
+        "codeName": "Emerald",
+        "technology": "28 nm",
+        "dieSize": "160 mm\u00B2",
+        "releaseDate": "Nov 12th, 2015",
+        "transistors": "2080M",
+        "rops": "16",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1075 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1375 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/firepro-w6150m.c2798"
+      }
+    ],
+    "73FF": [
+      {
+        "name": "AMD Radeon RX 6600 LE",
+        "revisions": [
+          "CF"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "Dec 8th, 2023",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1626 MHz",
+        "defBoostClock": "2495 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6600-le.c4223"
+      },
+      {
+        "name": "AMD Radeon RX 6600S",
+        "revisions": [
+          "CB"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "Jan 4th, 2022",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1700 MHz",
+        "defBoostClock": "2000 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6600s.c3869"
+      },
+      {
+        "name": "AMD Radeon RX 6650M",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "Jan 4th, 2022",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "2068 MHz",
+        "defBoostClock": "2416 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6650m.c3863"
+      },
+      {
+        "name": "AMD Radeon RX 6600",
+        "revisions": [
+          "C7"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "Oct 13th, 2021",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1626 MHz",
+        "defBoostClock": "2491 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6600.c3696"
+      },
+      {
+        "name": "AMD Radeon RX 6600 XT",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "Jul 30th, 2021",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1968 MHz",
+        "defBoostClock": "2589 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6600-xt.c3774"
+      }
+    ],
+    "1114": [
+      {
+        "name": "AMD Radeon 860M",
+        "revisions": [
+          "C2",
+          "D2",
+          "E2",
+          "E4"
+        ],
+        "codeName": "Krackan Point",
+        "technology": "4 nm",
+        "dieSize": "unknown",
+        "releaseDate": "Mar 2025",
+        "transistors": "unknown",
+        "rops": "8",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "600 MHz",
+        "defBoostClock": "3000 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-860m.c4289"
+      }
+    ],
+    "6900": [
+      {
+        "name": "AMD Radeon R8 M535DX",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Meso",
+        "technology": "28 nm",
+        "dieSize": "125 mm\u00B2",
+        "releaseDate": "Apr 18th, 2017",
+        "transistors": "1550M",
+        "rops": "8",
+        "tmus": "20",
+        "shaders": "320 Unified",
+        "computeUnits": "5 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "780 MHz",
+        "defBoostClock": "891 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r8-m535dx.c3210"
+      },
+      {
+        "name": "AMD Radeon R7 M465",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Topaz",
+        "technology": "28 nm",
+        "dieSize": "125 mm\u00B2",
+        "releaseDate": "May 15th, 2016",
+        "transistors": "1550M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "64 bit",
+        "defGpuClock": "730 MHz",
+        "defBoostClock": "1024 MHz",
+        "defMemClock": "1125 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m465.c3211"
+      },
+      {
+        "name": "AMD Radeon R7 M340",
+        "revisions": [
+          "83"
+        ],
+        "codeName": "Meso",
+        "technology": "28 nm",
+        "dieSize": "125 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "1550M",
+        "rops": "8",
+        "tmus": "20",
+        "shaders": "320 Unified",
+        "computeUnits": "5 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "943 MHz",
+        "defBoostClock": "1021 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m340.c2687"
+      },
+      {
+        "name": "AMD Radeon R7 M340",
+        "revisions": [
+          "83"
+        ],
+        "codeName": "Opal",
+        "technology": "28 nm",
+        "dieSize": "77 mm\u00B2",
+        "releaseDate": "Dec 6th, 2015",
+        "transistors": "950M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "620 MHz",
+        "defBoostClock": "715 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m340.c3109"
+      },
+      {
+        "name": "AMD Radeon R7 M360",
+        "revisions": [
+          "81"
+        ],
+        "codeName": "Meso",
+        "technology": "28 nm",
+        "dieSize": "125 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "1550M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "1100 MHz",
+        "defBoostClock": "1125 MHz",
+        "defMemClock": "900 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m360.c2686"
+      },
+      {
+        "name": "AMD Radeon R7 M260",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Topaz",
+        "technology": "28 nm",
+        "dieSize": "125 mm\u00B2",
+        "releaseDate": "Jun 11th, 2014",
+        "transistors": "1550M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "940 MHz",
+        "defBoostClock": "980 MHz",
+        "defMemClock": "900 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m260.c2591"
+      },
+      {
+        "name": "AMD Radeon R7 M465",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Litho",
+        "technology": "28 nm",
+        "dieSize": "77 mm\u00B2",
+        "releaseDate": "May 15th, 2016",
+        "transistors": "950M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "825 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m465.c2854"
+      }
+    ],
+    "687F": [
+      {
+        "name": "AMD Radeon RX Vega 64",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Vega 10",
+        "technology": "14 nm",
+        "dieSize": "495 mm\u00B2",
+        "releaseDate": "Aug 7th, 2017",
+        "transistors": "12500M",
+        "rops": "64",
+        "tmus": "256",
+        "shaders": "4096 Unified",
+        "computeUnits": "64 CU",
+        "memoryType": "HBM2",
+        "busWidth": "2048 bit",
+        "defGpuClock": "1247 MHz",
+        "defBoostClock": "1546 MHz",
+        "defMemClock": "945 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-vega-64.c2871"
+      }
+    ],
+    "6867": [
+      {
+        "name": "AMD Radeon Pro Vega 56",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Vega 10",
+        "technology": "14 nm",
+        "dieSize": "495 mm\u00B2",
+        "releaseDate": "Aug 14th, 2017",
+        "transistors": "12500M",
+        "rops": "64",
+        "tmus": "224",
+        "shaders": "3584 Unified",
+        "computeUnits": "56 CU",
+        "memoryType": "HBM2",
+        "busWidth": "2048 bit",
+        "defGpuClock": "1138 MHz",
+        "defBoostClock": "1250 MHz",
+        "defMemClock": "786 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-vega-56.c3099"
+      }
+    ],
+    "7422": [
+      {
+        "name": "AMD Radeon PRO W6400",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 24",
+        "technology": "6 nm",
+        "dieSize": "107 mm\u00B2",
+        "releaseDate": "Jan 19th, 2022",
+        "transistors": "5400M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "64 bit",
+        "defGpuClock": "2039 MHz",
+        "defBoostClock": "2321 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w6400.c3873"
+      }
+    ],
+    "6811": [
+      {
+        "name": "AMD Radeon R9 370 1024SP",
+        "revisions": [
+          "81"
+        ],
+        "codeName": "Trinidad",
+        "technology": "28 nm",
+        "dieSize": "212 mm\u00B2",
+        "releaseDate": "Jun 12th, 2015",
+        "transistors": "2800M",
+        "rops": "32",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "925 MHz",
+        "defBoostClock": "975 MHz",
+        "defMemClock": "1400 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-370-1024sp.c2800"
+      }
+    ],
+    "67C0": [
+      {
+        "name": "AMD Radeon Pro WX 7100",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Ellesmere",
+        "technology": "14 nm",
+        "dieSize": "232 mm\u00B2",
+        "releaseDate": "Nov 10th, 2016",
+        "transistors": "5700M",
+        "rops": "32",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "1188 MHz",
+        "defBoostClock": "1243 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-wx-7100.c2872"
+      }
+    ],
+    "69AF": [
+      {
+        "name": "AMD Radeon Pro Vega 16",
+        "revisions": [
+          "C7"
+        ],
+        "codeName": "Vega 12",
+        "technology": "14 nm",
+        "dieSize": "unknown",
+        "releaseDate": "Nov 14th, 2018",
+        "transistors": "unknown",
+        "rops": "32",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "HBM2",
+        "busWidth": "1024 bit",
+        "defGpuClock": "815 MHz",
+        "defBoostClock": "1190 MHz",
+        "defMemClock": "1200 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-vega-16.c3331"
+      },
+      {
+        "name": "AMD Radeon Pro Vega 20",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Vega 12",
+        "technology": "14 nm",
+        "dieSize": "unknown",
+        "releaseDate": "Nov 14th, 2018",
+        "transistors": "unknown",
+        "rops": "32",
+        "tmus": "80",
+        "shaders": "1280 Unified",
+        "computeUnits": "20 CU",
+        "memoryType": "HBM2",
+        "busWidth": "1024 bit",
+        "defGpuClock": "815 MHz",
+        "defBoostClock": "1283 MHz",
+        "defMemClock": "740 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-vega-20.c3263"
+      }
+    ],
+    "6985": [
+      {
+        "name": "AMD Radeon Pro WX 3100",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Lexa",
+        "technology": "14 nm",
+        "dieSize": "103 mm\u00B2",
+        "releaseDate": "Jun 12th, 2017",
+        "transistors": "2200M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "925 MHz",
+        "defBoostClock": "1219 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-wx-3100.c2978"
+      }
+    ],
+    "7340": [
+      {
+        "name": "AMD Radeon RX 5300M",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Navi 14",
+        "technology": "7 nm",
+        "dieSize": "158 mm\u00B2",
+        "releaseDate": "Nov 13th, 2019",
+        "transistors": "6400M",
+        "rops": "32",
+        "tmus": "88",
+        "shaders": "1408 Unified",
+        "computeUnits": "22 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "96 bit",
+        "defGpuClock": "1000 MHz",
+        "defBoostClock": "1445 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5300m.c3462"
+      },
+      {
+        "name": "AMD Radeon RX 5500 XT",
+        "revisions": [
+          "C5"
+        ],
+        "codeName": "Navi 14",
+        "technology": "7 nm",
+        "dieSize": "158 mm\u00B2",
+        "releaseDate": "Dec 12th, 2019",
+        "transistors": "6400M",
+        "rops": "32",
+        "tmus": "88",
+        "shaders": "1408 Unified",
+        "computeUnits": "22 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1607 MHz",
+        "defBoostClock": "1845 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5500-xt.c3468"
+      },
+      {
+        "name": "AMD Radeon RX 5500M",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Navi 14",
+        "technology": "7 nm",
+        "dieSize": "158 mm\u00B2",
+        "releaseDate": "Oct 7th, 2019",
+        "transistors": "6400M",
+        "rops": "32",
+        "tmus": "88",
+        "shaders": "1408 Unified",
+        "computeUnits": "22 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1375 MHz",
+        "defBoostClock": "1645 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5500m.c3460"
+      }
+    ],
+    "15C8": [
+      {
+        "name": "AMD Radeon 740M",
+        "revisions": [
+          "C1",
+          "C2",
+          "C3",
+          "C4",
+          "C5",
+          "C6",
+          "C7",
+          "C8",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8"
+        ],
+        "codeName": "Phoenix2",
+        "technology": "4 nm",
+        "dieSize": "137 mm\u00B2",
+        "releaseDate": "Jan 31st, 2024",
+        "transistors": "20900M",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "4 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2800 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-740m.c4297"
+      },
+      {
+        "name": "AMD Radeon 740M",
+        "revisions": [
+          "C1",
+          "C2",
+          "C3",
+          "C4",
+          "C5",
+          "C6",
+          "C7",
+          "C8",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8"
+        ],
+        "codeName": "Phoenix",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "25390M",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "4 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2500 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-740m.c4162"
+      },
+      {
+        "name": "AMD Radeon 740M",
+        "revisions": [
+          "C1",
+          "C2",
+          "C3",
+          "C4",
+          "C5",
+          "C6",
+          "C7",
+          "C8",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8"
+        ],
+        "codeName": "Hawk Point",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Dec 6th, 2023",
+        "transistors": "25390M",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "4 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2800 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-740m.c4298"
+      }
+    ],
+    "7300": [
+      {
+        "name": "AMD Radeon Pro Duo",
+        "revisions": [
+          "C9"
+        ],
+        "codeName": "Capsaicin",
+        "technology": "28 nm",
+        "dieSize": "596 mm\u00B2",
+        "releaseDate": "Apr 26th, 2016",
+        "transistors": "8900M",
+        "rops": "64 x2",
+        "tmus": "256 x2",
+        "shaders": "4096 Unified",
+        "computeUnits": "64 CU",
+        "memoryType": "HBM",
+        "busWidth": "4096 bit x2",
+        "defGpuClock": "1000 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-duo.c2828"
+      },
+      {
+        "name": "AMD Radeon R9 FURY X",
+        "revisions": [
+          "C8"
+        ],
+        "codeName": "Fiji",
+        "technology": "28 nm",
+        "dieSize": "596 mm\u00B2",
+        "releaseDate": "Jun 24th, 2015",
+        "transistors": "8900M",
+        "rops": "64",
+        "tmus": "256",
+        "shaders": "4096 Unified",
+        "computeUnits": "64 CU",
+        "memoryType": "HBM",
+        "busWidth": "4096 bit",
+        "defGpuClock": "1050 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-fury-x.c2677"
+      }
+    ],
+    "66A1": [
+      {
+        "name": "AMD Radeon Pro VII",
+        "revisions": [
+          "06"
+        ],
+        "codeName": "Vega 20",
+        "technology": "7 nm",
+        "dieSize": "331 mm\u00B2",
+        "releaseDate": "May 13th, 2020",
+        "transistors": "13230M",
+        "rops": "64",
+        "tmus": "240",
+        "shaders": "3840 Unified",
+        "computeUnits": "60 CU",
+        "memoryType": "HBM2",
+        "busWidth": "4096 bit",
+        "defGpuClock": "1400 MHz",
+        "defBoostClock": "1700 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-vii.c3575"
+      },
+      {
+        "name": "AMD Radeon VII",
+        "revisions": [
+          "06"
+        ],
+        "codeName": "Vega 20",
+        "technology": "7 nm",
+        "dieSize": "331 mm\u00B2",
+        "releaseDate": "Feb 7th, 2019",
+        "transistors": "13230M",
+        "rops": "64",
+        "tmus": "240",
+        "shaders": "3840 Unified",
+        "computeUnits": "60 CU",
+        "memoryType": "HBM2",
+        "busWidth": "4096 bit",
+        "defGpuClock": "1400 MHz",
+        "defBoostClock": "1750 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vii.c3358"
+      }
+    ],
+    "9540": [
+      {
+        "name": "AMD Radeon 550",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Lexa",
+        "technology": "14 nm",
+        "dieSize": "103 mm\u00B2",
+        "releaseDate": "Apr 20th, 2017",
+        "transistors": "2200M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "64 bit",
+        "defGpuClock": "1100 MHz",
+        "defBoostClock": "1183 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-550.c3407"
+      }
+    ],
+    "6901": [
+      {
+        "name": "AMD Radeon R7 M265DX",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Topaz",
+        "technology": "28 nm",
+        "dieSize": "125 mm\u00B2",
+        "releaseDate": "Jun 11th, 2014",
+        "transistors": "1550M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "980 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m265dx.c2653"
+      },
+      {
+        "name": "AMD Radeon R7 M265DX",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Jet",
+        "technology": "28 nm",
+        "dieSize": "56 mm\u00B2",
+        "releaseDate": "Jan 7th, 2014",
+        "transistors": "690M",
+        "rops": "8",
+        "tmus": "20",
+        "shaders": "320 Unified",
+        "computeUnits": "5 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "780 MHz",
+        "defBoostClock": "855 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m265dx.c2804"
+      },
+      {
+        "name": "AMD Radeon R7 M265DX",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Topaz",
+        "technology": "28 nm",
+        "dieSize": "125 mm\u00B2",
+        "releaseDate": "Oct 12th, 2014",
+        "transistors": "1550M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "925 MHz",
+        "defBoostClock": "940 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m265dx.c2656"
+      }
+    ],
+    "7483": [
+      {
+        "name": "AMD Radeon RX 7600M",
+        "revisions": [
+          "CF"
+        ],
+        "codeName": "Navi 33",
+        "technology": "6 nm",
+        "dieSize": "204 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "13300M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1500 MHz",
+        "defBoostClock": "2410 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7600m.c4014"
+      }
+    ],
+    "7590": [
+      {
+        "name": "AMD Radeon RX 9060",
+        "revisions": [
+          "C7"
+        ],
+        "codeName": "Navi 44",
+        "technology": "4 nm",
+        "dieSize": "199 mm\u00B2",
+        "releaseDate": "Aug 5th, 2025",
+        "transistors": "29700M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1700 MHz",
+        "defBoostClock": "2990 MHz",
+        "defMemClock": "2518 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-9060.c4326"
+      },
+      {
+        "name": "AMD Radeon RX 9060 XT LP",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Navi 44",
+        "technology": "4 nm",
+        "dieSize": "199 mm\u00B2",
+        "releaseDate": "Dec 17th, 2025",
+        "transistors": "29700M",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1700 MHz",
+        "defBoostClock": "3130 MHz",
+        "defMemClock": "2518 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-9060-xt-lp.c4380"
+      }
+    ],
+    "743F": [
+      {
+        "name": "AMD Radeon RX 6450M",
+        "revisions": [
+          "CE"
+        ],
+        "codeName": "Navi 24",
+        "technology": "6 nm",
+        "dieSize": "107 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "5400M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "64 bit",
+        "defGpuClock": "2000 MHz",
+        "defBoostClock": "2460 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6450m.c4018"
+      },
+      {
+        "name": "AMD Radeon RX 6550M",
+        "revisions": [
+          "D3"
+        ],
+        "codeName": "Navi 24",
+        "technology": "6 nm",
+        "dieSize": "107 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "5400M",
+        "rops": "32",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "64 bit",
+        "defGpuClock": "2000 MHz",
+        "defBoostClock": "2840 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6550m.c4017"
+      },
+      {
+        "name": "AMD Radeon RX 6400",
+        "revisions": [
+          "C7"
+        ],
+        "codeName": "Navi 24",
+        "technology": "6 nm",
+        "dieSize": "107 mm\u00B2",
+        "releaseDate": "Jan 19th, 2022",
+        "transistors": "5400M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "64 bit",
+        "defGpuClock": "1923 MHz",
+        "defBoostClock": "2321 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6400.c3813"
+      },
+      {
+        "name": "AMD Radeon RX 6500 XT",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Navi 24",
+        "technology": "6 nm",
+        "dieSize": "107 mm\u00B2",
+        "releaseDate": "Jan 19th, 2022",
+        "transistors": "5400M",
+        "rops": "32",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "64 bit",
+        "defGpuClock": "2310 MHz",
+        "defBoostClock": "2815 MHz",
+        "defMemClock": "2248 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6500-xt.c3850"
+      },
+      {
+        "name": "AMD Radeon RX 6500M",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Navi 24",
+        "technology": "6 nm",
+        "dieSize": "107 mm\u00B2",
+        "releaseDate": "Jan 4th, 2022",
+        "transistors": "5400M",
+        "rops": "32",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "64 bit",
+        "defGpuClock": "2000 MHz",
+        "defBoostClock": "2400 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6500m.c3865"
+      }
+    ],
+    "73AF": [
+      {
+        "name": "AMD Radeon RX 6900 XT",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Navi 21",
+        "technology": "7 nm",
+        "dieSize": "520 mm\u00B2",
+        "releaseDate": "Oct 28th, 2020",
+        "transistors": "26800M",
+        "rops": "128",
+        "tmus": "320",
+        "shaders": "5120 Unified",
+        "computeUnits": "80 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1825 MHz",
+        "defBoostClock": "2250 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6900-xt.c3481"
+      }
+    ],
+    "150E": [
+      {
+        "name": "AMD Radeon 860M",
+        "revisions": [
+          "D2"
+        ],
+        "codeName": "Krackan Point",
+        "technology": "4 nm",
+        "dieSize": "unknown",
+        "releaseDate": "Mar 2025",
+        "transistors": "unknown",
+        "rops": "8",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "600 MHz",
+        "defBoostClock": "3000 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-860m.c4289"
+      },
+      {
+        "name": "AMD Radeon 880M",
+        "revisions": [
+          "E3"
+        ],
+        "codeName": "Strix Point",
+        "technology": "4 nm",
+        "dieSize": "233 mm\u00B2",
+        "releaseDate": "Jul 15th, 2024",
+        "transistors": "34000M",
+        "rops": "16",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "400 MHz",
+        "defBoostClock": "2900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-880m.c4225"
+      },
+      {
+        "name": "AMD Radeon 890M",
+        "revisions": [
+          "C1",
+          "C2",
+          "C4",
+          "C6",
+          "D1",
+          "D3",
+          "E1",
+          "E4"
+        ],
+        "codeName": "Strix Point",
+        "technology": "4 nm",
+        "dieSize": "233 mm\u00B2",
+        "releaseDate": "Jul 15th, 2024",
+        "transistors": "34000M",
+        "rops": "32",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "400 MHz",
+        "defBoostClock": "2900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-890m.c4224"
+      }
+    ],
+    "7489": [
+      {
+        "name": "AMD Radeon PRO W7500",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 33",
+        "technology": "6 nm",
+        "dieSize": "204 mm\u00B2",
+        "releaseDate": "Aug 3rd, 2023",
+        "transistors": "13300M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1500 MHz",
+        "defBoostClock": "1700 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w7500.c4170"
+      }
+    ],
+    "6987": [
+      {
+        "name": "AMD Radeon 540",
+        "revisions": [
+          "C7"
+        ],
+        "codeName": "Lexa",
+        "technology": "14 nm",
+        "dieSize": "103 mm\u00B2",
+        "releaseDate": "Apr 20th, 2017",
+        "transistors": "2200M",
+        "rops": "16",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "32 bit",
+        "defGpuClock": "1183 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-540.c4213"
+      }
+    ],
+    "6FDF": [
+      {
+        "name": "AMD Radeon RX 580 2048SP",
+        "revisions": [
+          "EF"
+        ],
+        "codeName": "Polaris 20",
+        "technology": "14 nm",
+        "dieSize": "232 mm\u00B2",
+        "releaseDate": "Oct 15th, 2018",
+        "transistors": "5700M",
+        "rops": "32",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "1168 MHz",
+        "defBoostClock": "1284 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-580-2048sp.c3321"
+      }
+    ],
+    "699F": [
+      {
+        "name": "AMD Radeon 550X",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Lexa",
+        "technology": "14 nm",
+        "dieSize": "103 mm\u00B2",
+        "releaseDate": "Mar 27th, 2019",
+        "transistors": "2200M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1082 MHz",
+        "defBoostClock": "1218 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-550x.c3420"
+      },
+      {
+        "name": "AMD Radeon RX 550X",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Lexa",
+        "technology": "14 nm",
+        "dieSize": "103 mm\u00B2",
+        "releaseDate": "Dec 16th, 2018",
+        "transistors": "2200M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1100 MHz",
+        "defBoostClock": "1183 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-550x.c3194"
+      },
+      {
+        "name": "AMD Radeon 540",
+        "revisions": [
+          "C3",
+          "C7",
+          "C9"
+        ],
+        "codeName": "Lexa",
+        "technology": "14 nm",
+        "dieSize": "103 mm\u00B2",
+        "releaseDate": "Apr 20th, 2017",
+        "transistors": "2200M",
+        "rops": "16",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "32 bit",
+        "defGpuClock": "1183 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-540.c4213"
+      }
+    ],
+    "73E0": [
+      {
+        "name": "AMD Radeon RX 6600M",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "May 31st, 2021",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "2068 MHz",
+        "defBoostClock": "2416 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6600m.c3776"
+      }
+    ],
+    "98E4": [
+      {
+        "name": "AMD Radeon Vega 11",
+        "revisions": [
+          "CA",
+          "EB",
+          "EC"
+        ],
+        "codeName": "Picasso",
+        "technology": "12 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Sep 30th, 2019",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "44",
+        "shaders": "704 Unified",
+        "computeUnits": "11 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1400 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-11.c3595"
+      }
+    ],
+    "7470": [
+      {
+        "name": "AMD Radeon PRO W7700",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 32",
+        "technology": "5 nm",
+        "dieSize": "346 mm\u00B2",
+        "releaseDate": "Nov 13th, 2023",
+        "transistors": "28100M",
+        "rops": "96",
+        "tmus": "192",
+        "shaders": "3072 Unified",
+        "computeUnits": "48 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1900 MHz",
+        "defBoostClock": "2600 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w7700.c4184"
+      }
+    ],
+    "682B": [
+      {
+        "name": "AMD Radeon R7 M465X",
+        "revisions": [
+          "87"
+        ],
+        "codeName": "Tropo",
+        "technology": "28 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "May 15th, 2016",
+        "transistors": "1500M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "925 MHz",
+        "defMemClock": "1125 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m465x.c2855"
+      },
+      {
+        "name": "AMD Radeon R7 350",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Cape Verde",
+        "technology": "28 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Jul 6th, 2016",
+        "transistors": "1500M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1125 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-350.c3135"
+      },
+      {
+        "name": "AMD FirePro W5130M",
+        "revisions": [
+          "87"
+        ],
+        "codeName": "Tropo",
+        "technology": "28 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Oct 2nd, 2015",
+        "transistors": "1500M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "925 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/firepro-w5130m.c2769"
+      }
+    ],
+    "73BF": [
+      {
+        "name": "AMD Radeon RX 6800",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Navi 21",
+        "technology": "7 nm",
+        "dieSize": "520 mm\u00B2",
+        "releaseDate": "Oct 28th, 2020",
+        "transistors": "26800M",
+        "rops": "96",
+        "tmus": "240",
+        "shaders": "3840 Unified",
+        "computeUnits": "60 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1700 MHz",
+        "defBoostClock": "2105 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6800.c3713"
+      },
+      {
+        "name": "AMD Radeon RX 6800 XT",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Navi 21",
+        "technology": "7 nm",
+        "dieSize": "520 mm\u00B2",
+        "releaseDate": "Oct 28th, 2020",
+        "transistors": "26800M",
+        "rops": "128",
+        "tmus": "288",
+        "shaders": "4608 Unified",
+        "computeUnits": "72 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1825 MHz",
+        "defBoostClock": "2250 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6800-xt.c3694"
+      },
+      {
+        "name": "AMD Radeon RX 6900 XT",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Navi 21",
+        "technology": "7 nm",
+        "dieSize": "520 mm\u00B2",
+        "releaseDate": "Oct 28th, 2020",
+        "transistors": "26800M",
+        "rops": "128",
+        "tmus": "320",
+        "shaders": "5120 Unified",
+        "computeUnits": "80 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1825 MHz",
+        "defBoostClock": "2250 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6900-xt.c3481"
+      }
+    ],
+    "6665": [
+      {
+        "name": "AMD Radeon R8 M435DX",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Jet",
+        "technology": "28 nm",
+        "dieSize": "56 mm\u00B2",
+        "releaseDate": "Dec 12th, 2016",
+        "transistors": "690M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "955 MHz",
+        "defBoostClock": "1030 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r8-m435dx.c2944"
+      },
+      {
+        "name": "AMD Radeon R5 M320",
+        "revisions": [
+          "83"
+        ],
+        "codeName": "Jet",
+        "technology": "28 nm",
+        "dieSize": "56 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "690M",
+        "rops": "8",
+        "tmus": "20",
+        "shaders": "320 Unified",
+        "computeUnits": "5 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "780 MHz",
+        "defBoostClock": "855 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r5-m320.c2693"
+      }
+    ],
+    "6660": [
+      {
+        "name": "AMD Radeon R8 M435DX",
+        "revisions": [
+          "83"
+        ],
+        "codeName": "Jet",
+        "technology": "28 nm",
+        "dieSize": "56 mm\u00B2",
+        "releaseDate": "Dec 12th, 2016",
+        "transistors": "690M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "955 MHz",
+        "defBoostClock": "1030 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r8-m435dx.c2944"
+      },
+      {
+        "name": "AMD Radeon R5 M335",
+        "revisions": [
+          "81"
+        ],
+        "codeName": "Exo",
+        "technology": "28 nm",
+        "dieSize": "56 mm\u00B2",
+        "releaseDate": "Oct 21st, 2015",
+        "transistors": "690M",
+        "rops": "8",
+        "tmus": "20",
+        "shaders": "320 Unified",
+        "computeUnits": "5 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "1030 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "900 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r5-m335.c2692"
+      }
+    ],
+    "6608": [
+      {
+        "name": "AMD FirePro W2100",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Oland",
+        "technology": "28 nm",
+        "dieSize": "77 mm\u00B2",
+        "releaseDate": "Aug 12th, 2014",
+        "transistors": "950M",
+        "rops": "8",
+        "tmus": "20",
+        "shaders": "320 Unified",
+        "computeUnits": "5 CU",
+        "memoryType": "DDR3",
+        "busWidth": "128 bit",
+        "defGpuClock": "630 MHz",
+        "defBoostClock": "680 MHz",
+        "defMemClock": "900 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/firepro-w2100.c2612"
+      }
+    ],
+    "73E3": [
+      {
+        "name": "AMD Radeon PRO W6600",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "Jun 8th, 2021",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "2331 MHz",
+        "defBoostClock": "2580 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w6600.c3818"
+      }
+    ],
+    "1506": [
+      {
+        "name": "AMD Radeon 610M",
+        "revisions": [
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "codeName": "Dragon Range",
+        "technology": "5 nm",
+        "dieSize": "264 mm\u00B2",
+        "releaseDate": "Jan 3rd, 2023",
+        "transistors": "unknown",
+        "rops": "4",
+        "tmus": "8",
+        "shaders": "128 Unified",
+        "computeUnits": "2 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "400 MHz",
+        "defBoostClock": "2200 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-610m.c4021"
+      },
+      {
+        "name": "AMD Radeon 610M",
+        "revisions": [
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "codeName": "Mendocino",
+        "technology": "6 nm",
+        "dieSize": "100 mm\u00B2",
+        "releaseDate": "Sep 20th, 2022",
+        "transistors": "unknown",
+        "rops": "4",
+        "tmus": "8",
+        "shaders": "128 Unified",
+        "computeUnits": "2 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "1500 MHz",
+        "defBoostClock": "1900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-610m.c3994"
+      }
+    ],
+    "7312": [
+      {
+        "name": "AMD Radeon Pro W5700",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 10",
+        "technology": "7 nm",
+        "dieSize": "251 mm\u00B2",
+        "releaseDate": "Nov 19th, 2019",
+        "transistors": "10300M",
+        "rops": "64",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1400 MHz",
+        "defBoostClock": "1880 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w5700.c3466"
+      }
+    ],
+    "6649": [
+      {
+        "name": "AMD FirePro W4300",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Bonaire",
+        "technology": "28 nm",
+        "dieSize": "160 mm\u00B2",
+        "releaseDate": "Dec 1st, 2015",
+        "transistors": "2080M",
+        "rops": "16",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "930 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/firepro-w4300.c2781"
+      }
+    ],
+    "67EF": [
+      {
+        "name": "AMD Radeon RX 560X",
+        "revisions": [
+          "E2"
+        ],
+        "codeName": "Polaris 21",
+        "technology": "14 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Apr 11th, 2018",
+        "transistors": "3000M",
+        "rops": "16",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1175 MHz",
+        "defBoostClock": "1275 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-560x.c3193"
+      },
+      {
+        "name": "AMD Radeon RX 560",
+        "revisions": [
+          "E0",
+          "E5"
+        ],
+        "codeName": "Polaris 21",
+        "technology": "14 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Apr 18th, 2017",
+        "transistors": "3000M",
+        "rops": "16",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1175 MHz",
+        "defBoostClock": "1275 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-560.c2940"
+      },
+      {
+        "name": "AMD Radeon RX 460",
+        "revisions": [
+          "C0",
+          "C1",
+          "C5",
+          "CF",
+          "FF"
+        ],
+        "codeName": "Baffin",
+        "technology": "14 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Aug 8th, 2016",
+        "transistors": "3000M",
+        "rops": "16",
+        "tmus": "56",
+        "shaders": "896 Unified",
+        "computeUnits": "14 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1090 MHz",
+        "defBoostClock": "1200 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-460.c2849"
+      }
+    ],
+    "7448": [
+      {
+        "name": "AMD Radeon PRO W7900",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 31",
+        "technology": "5 nm",
+        "dieSize": "529 mm\u00B2",
+        "releaseDate": "Apr 13th, 2023",
+        "transistors": "57700M",
+        "rops": "192",
+        "tmus": "384",
+        "shaders": "6144 Unified",
+        "computeUnits": "96 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "384 bit",
+        "defGpuClock": "1855 MHz",
+        "defBoostClock": "2495 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w7900.c4147"
+      }
+    ],
+    "73A3": [
+      {
+        "name": "AMD Radeon PRO W6800",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 21",
+        "technology": "7 nm",
+        "dieSize": "520 mm\u00B2",
+        "releaseDate": "Jun 8th, 2021",
+        "transistors": "26800M",
+        "rops": "96",
+        "tmus": "240",
+        "shaders": "3840 Unified",
+        "computeUnits": "60 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1575 MHz",
+        "defBoostClock": "2322 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w6800.c3809"
+      }
+    ],
+    "744C": [
+      {
+        "name": "AMD Radeon RX 7900 GRE",
+        "revisions": [
+          "CE"
+        ],
+        "codeName": "Navi 31",
+        "technology": "5 nm",
+        "dieSize": "529 mm\u00B2",
+        "releaseDate": "Jul 27th, 2023",
+        "transistors": "57700M",
+        "rops": "160",
+        "tmus": "320",
+        "shaders": "5120 Unified",
+        "computeUnits": "80 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1287 MHz",
+        "defBoostClock": "2245 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7900-gre.c4166"
+      },
+      {
+        "name": "AMD Radeon RX 7900M",
+        "revisions": [
+          "CF"
+        ],
+        "codeName": "Navi 31",
+        "technology": "5 nm",
+        "dieSize": "529 mm\u00B2",
+        "releaseDate": "Oct 19th, 2023",
+        "transistors": "57700M",
+        "rops": "192",
+        "tmus": "288",
+        "shaders": "4608 Unified",
+        "computeUnits": "72 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1825 MHz",
+        "defBoostClock": "2090 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7900m.c4178"
+      },
+      {
+        "name": "AMD Radeon RX 7900 XT",
+        "revisions": [
+          "CC"
+        ],
+        "codeName": "Navi 31",
+        "technology": "5 nm",
+        "dieSize": "529 mm\u00B2",
+        "releaseDate": "Nov 3rd, 2022",
+        "transistors": "57700M",
+        "rops": "192",
+        "tmus": "336",
+        "shaders": "5376 Unified",
+        "computeUnits": "84 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "320 bit",
+        "defGpuClock": "1387 MHz",
+        "defBoostClock": "2394 MHz",
+        "defMemClock": "2500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7900-xt.c3912"
+      },
+      {
+        "name": "AMD Radeon RX 7900 XTX",
+        "revisions": [
+          "C8"
+        ],
+        "codeName": "Navi 31",
+        "technology": "5 nm",
+        "dieSize": "529 mm\u00B2",
+        "releaseDate": "Nov 3rd, 2022",
+        "transistors": "57700M",
+        "rops": "192",
+        "tmus": "384",
+        "shaders": "6144 Unified",
+        "computeUnits": "96 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "384 bit",
+        "defGpuClock": "1929 MHz",
+        "defBoostClock": "2498 MHz",
+        "defMemClock": "2500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7900-xtx.c3941"
+      }
+    ],
+    "7423": [
+      {
+        "name": "AMD Radeon PRO W6300",
+        "revisions": [
+          "01"
+        ],
+        "codeName": "Navi 24",
+        "technology": "6 nm",
+        "dieSize": "107 mm\u00B2",
+        "releaseDate": "Jan 19th, 2022",
+        "transistors": "5400M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "32 bit",
+        "defGpuClock": "1512 MHz",
+        "defBoostClock": "2040 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w6300.c3982"
+      }
+    ],
+    "6821": [
+      {
+        "name": "AMD Radeon R9 M365X",
+        "revisions": [
+          "87"
+        ],
+        "codeName": "Tropo",
+        "technology": "28 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "1500M",
+        "rops": "16",
+        "tmus": "40",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "925 MHz",
+        "defMemClock": "1125 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m365x.c2761"
+      }
+    ],
+    "1681": [
+      {
+        "name": "AMD Radeon 660M",
+        "revisions": [
+          "D5",
+          "D9"
+        ],
+        "codeName": "Rembrandt\u002B",
+        "technology": "6 nm",
+        "dieSize": "208 mm\u00B2",
+        "releaseDate": "Jan 3rd, 2023",
+        "transistors": "13100M",
+        "rops": "16",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "1500 MHz",
+        "defBoostClock": "1900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-660m.c4136"
+      },
+      {
+        "name": "AMD Radeon 680M",
+        "revisions": [
+          "03",
+          "06",
+          "07",
+          "08",
+          "09",
+          "0A",
+          "0B",
+          "0C",
+          "0D",
+          "C3",
+          "C6",
+          "C7",
+          "C8",
+          "C9",
+          "D4"
+        ],
+        "codeName": "Rembrandt\u002B",
+        "technology": "6 nm",
+        "dieSize": "208 mm\u00B2",
+        "releaseDate": "Jan 3rd, 2023",
+        "transistors": "13100M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "2000 MHz",
+        "defBoostClock": "2200 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-680m.c4135"
+      },
+      {
+        "name": "AMD Radeon 660M",
+        "revisions": [
+          "D5",
+          "D9"
+        ],
+        "codeName": "Rembrandt",
+        "technology": "6 nm",
+        "dieSize": "208 mm\u00B2",
+        "releaseDate": "Jan 4th, 2022",
+        "transistors": "13100M",
+        "rops": "16",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "1500 MHz",
+        "defBoostClock": "1900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-660m.c3870"
+      },
+      {
+        "name": "AMD Radeon 680M",
+        "revisions": [
+          "03",
+          "06",
+          "07",
+          "08",
+          "09",
+          "0A",
+          "0B",
+          "0C",
+          "0D",
+          "C3",
+          "C6",
+          "C7",
+          "C8",
+          "C9",
+          "D4"
+        ],
+        "codeName": "Rembrandt",
+        "technology": "6 nm",
+        "dieSize": "208 mm\u00B2",
+        "releaseDate": "Jan 4th, 2022",
+        "transistors": "13100M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "2000 MHz",
+        "defBoostClock": "2200 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-680m.c3871"
+      }
+    ],
+    "73DF": [
+      {
+        "name": "AMD Radeon RX 6750 XT",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Navi 22",
+        "technology": "7 nm",
+        "dieSize": "335 mm\u00B2",
+        "releaseDate": "Mar 3rd, 2022",
+        "transistors": "17200M",
+        "rops": "64",
+        "tmus": "160",
+        "shaders": "2560 Unified",
+        "computeUnits": "40 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "2150 MHz",
+        "defBoostClock": "2600 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6750-xt.c3879"
+      },
+      {
+        "name": "AMD Radeon RX 6850M XT",
+        "revisions": [
+          "C2"
+        ],
+        "codeName": "Navi 22",
+        "technology": "7 nm",
+        "dieSize": "335 mm\u00B2",
+        "releaseDate": "Jan 4th, 2022",
+        "transistors": "17200M",
+        "rops": "64",
+        "tmus": "160",
+        "shaders": "2560 Unified",
+        "computeUnits": "40 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "2321 MHz",
+        "defBoostClock": "2581 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6850m-xt.c3862"
+      },
+      {
+        "name": "AMD Radeon RX 6700",
+        "revisions": [
+          "DF",
+          "FF"
+        ],
+        "codeName": "Navi 22",
+        "technology": "7 nm",
+        "dieSize": "335 mm\u00B2",
+        "releaseDate": "Jun 9th, 2021",
+        "transistors": "17200M",
+        "rops": "64",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "160 bit",
+        "defGpuClock": "1941 MHz",
+        "defBoostClock": "2450 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6700.c3716"
+      },
+      {
+        "name": "AMD Radeon RX 6700 XT",
+        "revisions": [
+          "C1",
+          "C5"
+        ],
+        "codeName": "Navi 22",
+        "technology": "7 nm",
+        "dieSize": "335 mm\u00B2",
+        "releaseDate": "Mar 3rd, 2021",
+        "transistors": "17200M",
+        "rops": "64",
+        "tmus": "160",
+        "shaders": "2560 Unified",
+        "computeUnits": "40 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "2321 MHz",
+        "defBoostClock": "2581 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6700-xt.c3695"
+      },
+      {
+        "name": "AMD Radeon RX 6700M",
+        "revisions": [
+          "CF"
+        ],
+        "codeName": "Navi 22",
+        "technology": "7 nm",
+        "dieSize": "335 mm\u00B2",
+        "releaseDate": "May 31st, 2021",
+        "transistors": "17200M",
+        "rops": "64",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "160 bit",
+        "defGpuClock": "1489 MHz",
+        "defBoostClock": "2400 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6700m.c3775"
+      },
+      {
+        "name": "AMD Radeon RX 6800M",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Navi 22",
+        "technology": "7 nm",
+        "dieSize": "335 mm\u00B2",
+        "releaseDate": "May 31st, 2021",
+        "transistors": "17200M",
+        "rops": "64",
+        "tmus": "160",
+        "shaders": "2560 Unified",
+        "computeUnits": "40 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "2116 MHz",
+        "defBoostClock": "2390 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6800m.c3786"
+      }
+    ],
+    "692B": [
+      {
+        "name": "AMD FirePro W7100",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Tonga",
+        "technology": "28 nm",
+        "dieSize": "366 mm\u00B2",
+        "releaseDate": "Aug 12th, 2014",
+        "transistors": "5000M",
+        "rops": "32",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "920 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/firepro-w7100.c2610"
+      }
+    ],
+    "6810": [
+      {
+        "name": "AMD Radeon R9 370X",
+        "revisions": [
+          "81"
+        ],
+        "codeName": "Trinidad",
+        "technology": "28 nm",
+        "dieSize": "212 mm\u00B2",
+        "releaseDate": "Aug 27th, 2015",
+        "transistors": "2800M",
+        "rops": "32",
+        "tmus": "80",
+        "shaders": "1280 Unified",
+        "computeUnits": "24 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "980 MHz",
+        "defBoostClock": "1030 MHz",
+        "defMemClock": "1400 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-370x.c2754"
+      }
+    ],
+    "6640": [
+      {
+        "name": "AMD Radeon R9 M380",
+        "revisions": [
+          "80"
+        ],
+        "codeName": "Strato",
+        "technology": "28 nm",
+        "dieSize": "160 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "2080M",
+        "rops": "16",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "1000 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m380.c2708"
+      }
+    ],
+    "67C7": [
+      {
+        "name": "AMD Radeon Pro WX 5100",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Ellesmere",
+        "technology": "14 nm",
+        "dieSize": "232 mm\u00B2",
+        "releaseDate": "Nov 18th, 2016",
+        "transistors": "5700M",
+        "rops": "32",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "713 MHz",
+        "defBoostClock": "1086 MHz",
+        "defMemClock": "1250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-wx-5100.c2873"
+      }
+    ],
+    "6868": [
+      {
+        "name": "AMD Radeon Pro WX 8200",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Vega 10",
+        "technology": "14 nm",
+        "dieSize": "495 mm\u00B2",
+        "releaseDate": "Aug 13th, 2018",
+        "transistors": "12500M",
+        "rops": "64",
+        "tmus": "224",
+        "shaders": "3584 Unified",
+        "computeUnits": "56 CU",
+        "memoryType": "HBM2",
+        "busWidth": "2048 bit",
+        "defGpuClock": "1200 MHz",
+        "defBoostClock": "1500 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-wx-8200.c3303"
+      }
+    ],
+    "7499": [
+      {
+        "name": "AMD Radeon RX 7400",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Navi 33",
+        "technology": "6 nm",
+        "dieSize": "204 mm\u00B2",
+        "releaseDate": "Aug 8th, 2025",
+        "transistors": "13300M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1452 MHz",
+        "defBoostClock": "2300 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7400.c4328"
+      }
+    ],
+    "73EF": [
+      {
+        "name": "AMD Radeon RX 6650 XT",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "May 10th, 2022",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "2055 MHz",
+        "defBoostClock": "2635 MHz",
+        "defMemClock": "2190 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6650-xt.c3898"
+      },
+      {
+        "name": "AMD Radeon RX 6650M",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "Jan 4th, 2022",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "2068 MHz",
+        "defBoostClock": "2416 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6650m.c3863"
+      },
+      {
+        "name": "AMD Radeon RX 6650M XT",
+        "revisions": [
+          "C4"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "Jan 4th, 2022",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "2068 MHz",
+        "defBoostClock": "2416 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6650m-xt.c3864"
+      },
+      {
+        "name": "AMD Radeon RX 6700S",
+        "revisions": [
+          "C2"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "Jan 4th, 2022",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1700 MHz",
+        "defBoostClock": "2000 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6700s.c3868"
+      },
+      {
+        "name": "AMD Radeon RX 6800S",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "Jan 4th, 2022",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1800 MHz",
+        "defBoostClock": "2100 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6800s.c3867"
+      }
+    ],
+    "6600": [
+      {
+        "name": "AMD Radeon R7 M370",
+        "revisions": [
+          "81"
+        ],
+        "codeName": "Litho",
+        "technology": "28 nm",
+        "dieSize": "77 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "950M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "875 MHz",
+        "defBoostClock": "960 MHz",
+        "defMemClock": "900 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m370.c2695"
+      }
+    ],
+    "6663": [
+      {
+        "name": "AMD Radeon R5 M320",
+        "revisions": [
+          "83"
+        ],
+        "codeName": "Jet",
+        "technology": "28 nm",
+        "dieSize": "56 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "690M",
+        "rops": "8",
+        "tmus": "20",
+        "shaders": "320 Unified",
+        "computeUnits": "5 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "780 MHz",
+        "defBoostClock": "855 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r5-m320.c2693"
+      }
+    ],
+    "73E1": [
+      {
+        "name": "AMD Radeon Pro W6600M",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 23",
+        "technology": "7 nm",
+        "dieSize": "237 mm\u00B2",
+        "releaseDate": "Jun 8th, 2021",
+        "transistors": "11060M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1224 MHz",
+        "defBoostClock": "2034 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w6600m.c3819"
+      }
+    ],
+    "7551": [
+      {
+        "name": "AMD Radeon AI PRO R9700",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Navi 48",
+        "technology": "4 nm",
+        "dieSize": "357 mm\u00B2",
+        "releaseDate": "Jul 23rd, 2025",
+        "transistors": "53900M",
+        "rops": "128",
+        "tmus": "256",
+        "shaders": "4096 Unified",
+        "computeUnits": "64 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1660 MHz",
+        "defBoostClock": "2920 MHz",
+        "defMemClock": "2518 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-ai-pro-r9700.c4290"
+      },
+      {
+        "name": "AMD Radeon AI PRO R9700S",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Navi 48",
+        "technology": "4 nm",
+        "dieSize": "357 mm\u00B2",
+        "releaseDate": "Dec 11th, 2025",
+        "transistors": "53900M",
+        "rops": "128",
+        "tmus": "256",
+        "shaders": "4096 Unified",
+        "computeUnits": "64 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1660 MHz",
+        "defBoostClock": "2920 MHz",
+        "defMemClock": "2518 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-ai-pro-r9700s.c4378"
+      }
+    ],
+    "67FF": [
+      {
+        "name": "AMD Radeon RX 560X",
+        "revisions": [
+          "CF"
+        ],
+        "codeName": "Polaris 21",
+        "technology": "14 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Apr 11th, 2018",
+        "transistors": "3000M",
+        "rops": "16",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1175 MHz",
+        "defBoostClock": "1275 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-560x.c3193"
+      },
+      {
+        "name": "AMD Radeon RX 560",
+        "revisions": [
+          "C1",
+          "EF"
+        ],
+        "codeName": "Polaris 21",
+        "technology": "14 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Apr 18th, 2017",
+        "transistors": "3000M",
+        "rops": "16",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1175 MHz",
+        "defBoostClock": "1275 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-560.c2940"
+      }
+    ],
+    "7550": [
+      {
+        "name": "AMD Radeon RX 9070 GRE",
+        "revisions": [
+          "C2"
+        ],
+        "codeName": "Navi 48",
+        "technology": "4 nm",
+        "dieSize": "357 mm\u00B2",
+        "releaseDate": "May 8th, 2025",
+        "transistors": "53900M",
+        "rops": "96",
+        "tmus": "192",
+        "shaders": "3072 Unified",
+        "computeUnits": "48 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "1420 MHz",
+        "defBoostClock": "2790 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-9070-gre.c4291"
+      },
+      {
+        "name": "AMD Radeon RX 9070 XT",
+        "revisions": [
+          "C0",
+          "C3"
+        ],
+        "codeName": "Navi 48",
+        "technology": "4 nm",
+        "dieSize": "357 mm\u00B2",
+        "releaseDate": "Mar 6th, 2025",
+        "transistors": "53900M",
+        "rops": "128",
+        "tmus": "256",
+        "shaders": "4096 Unified",
+        "computeUnits": "64 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1660 MHz",
+        "defBoostClock": "2970 MHz",
+        "defMemClock": "2518 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-9070-xt.c4229"
+      }
+    ],
+    "731F": [
+      {
+        "name": "AMD Radeon RX 5600 OEM",
+        "revisions": [
+          "CB"
+        ],
+        "codeName": "Navi 10",
+        "technology": "7 nm",
+        "dieSize": "251 mm\u00B2",
+        "releaseDate": "Jan 21st, 2020",
+        "transistors": "10300M",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "1130 MHz",
+        "defBoostClock": "1560 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5600-oem.c3475"
+      },
+      {
+        "name": "AMD Radeon RX 5600 XT",
+        "revisions": [
+          "CA"
+        ],
+        "codeName": "Navi 10",
+        "technology": "7 nm",
+        "dieSize": "251 mm\u00B2",
+        "releaseDate": "Jan 21st, 2020",
+        "transistors": "10300M",
+        "rops": "64",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "1130 MHz",
+        "defBoostClock": "1560 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5600-xt.c3474"
+      },
+      {
+        "name": "AMD Radeon RX 5600M",
+        "revisions": [
+          "C2",
+          "C3"
+        ],
+        "codeName": "Navi 10",
+        "technology": "7 nm",
+        "dieSize": "251 mm\u00B2",
+        "releaseDate": "Jul 7th, 2020",
+        "transistors": "10300M",
+        "rops": "64",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "1035 MHz",
+        "defBoostClock": "1265 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5600m.c3492"
+      },
+      {
+        "name": "AMD Radeon RX 5700",
+        "revisions": [
+          "C4"
+        ],
+        "codeName": "Navi 10",
+        "technology": "7 nm",
+        "dieSize": "251 mm\u00B2",
+        "releaseDate": "Jul 7th, 2019",
+        "transistors": "10300M",
+        "rops": "64",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1465 MHz",
+        "defBoostClock": "1725 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5700.c3437"
+      },
+      {
+        "name": "AMD Radeon RX 5700 XT",
+        "revisions": [
+          "C1",
+          "C5"
+        ],
+        "codeName": "Navi 10",
+        "technology": "7 nm",
+        "dieSize": "251 mm\u00B2",
+        "releaseDate": "Jul 7th, 2019",
+        "transistors": "10300M",
+        "rops": "64",
+        "tmus": "160",
+        "shaders": "2560 Unified",
+        "computeUnits": "40 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1605 MHz",
+        "defBoostClock": "1905 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5700-xt.c3339"
+      },
+      {
+        "name": "AMD Radeon RX 5700 XT 50th Anniversary",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Navi 10",
+        "technology": "7 nm",
+        "dieSize": "251 mm\u00B2",
+        "releaseDate": "Jul 7th, 2019",
+        "transistors": "10300M",
+        "rops": "64",
+        "tmus": "160",
+        "shaders": "2560 Unified",
+        "computeUnits": "40 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1680 MHz",
+        "defBoostClock": "1980 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5700-xt-50th-anniversary.c3438"
+      }
+    ],
+    "678A": [
+      {
+        "name": "AMD FirePro S9050",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Tahiti",
+        "technology": "28 nm",
+        "dieSize": "352 mm\u00B2",
+        "releaseDate": "Aug 7th, 2014",
+        "transistors": "4313M",
+        "rops": "32",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "384 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1375 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/firepro-s9050.c2607"
+      }
+    ],
+    "1900": [
+      {
+        "name": "AMD Radeon 760M",
+        "revisions": [
+          "02",
+          "04",
+          "07",
+          "B7",
+          "B8",
+          "C1",
+          "C3",
+          "C6",
+          "C8",
+          "CA",
+          "CD",
+          "D3",
+          "D6",
+          "D8",
+          "DA",
+          "DD",
+          "DF"
+        ],
+        "codeName": "Phoenix",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Jan 31st, 2024",
+        "transistors": "25390M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2599 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-760m.c4248"
+      },
+      {
+        "name": "AMD Radeon 780M",
+        "revisions": [
+          "01",
+          "03",
+          "05",
+          "06",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B9",
+          "BA",
+          "BB",
+          "C0",
+          "C2",
+          "C4",
+          "C5",
+          "C7",
+          "C9",
+          "CB",
+          "CC",
+          "D0",
+          "D1",
+          "D2",
+          "D4",
+          "D5",
+          "D7",
+          "D9",
+          "DB",
+          "DC",
+          "DE"
+        ],
+        "codeName": "Phoenix",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Jan 31st, 2024",
+        "transistors": "25390M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-780m.c4249"
+      },
+      {
+        "name": "AMD Radeon 760M",
+        "revisions": [
+          "02",
+          "04",
+          "07",
+          "B7",
+          "B8",
+          "C1",
+          "C3",
+          "C6",
+          "C8",
+          "CA",
+          "CD",
+          "D3",
+          "D6",
+          "D8",
+          "DA",
+          "DD",
+          "DF"
+        ],
+        "codeName": "Hawk Point",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Dec 6th, 2023",
+        "transistors": "25390M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2599 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-760m.c4222"
+      },
+      {
+        "name": "AMD Radeon 760M",
+        "revisions": [
+          "02",
+          "04",
+          "07",
+          "B7",
+          "B8",
+          "C1",
+          "C3",
+          "C6",
+          "C8",
+          "CA",
+          "CD",
+          "D3",
+          "D6",
+          "D8",
+          "DA",
+          "DD",
+          "DF"
+        ],
+        "codeName": "Phoenix",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "25390M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2599 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-760m.c4022"
+      },
+      {
+        "name": "AMD Radeon 780M",
+        "revisions": [
+          "01",
+          "03",
+          "05",
+          "06",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B9",
+          "BA",
+          "BB",
+          "C0",
+          "C2",
+          "C4",
+          "C5",
+          "C7",
+          "C9",
+          "CB",
+          "CC",
+          "D0",
+          "D1",
+          "D2",
+          "D4",
+          "D5",
+          "D7",
+          "D9",
+          "DB",
+          "DC",
+          "DE"
+        ],
+        "codeName": "Phoenix",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "25390M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2700 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-780m.c4020"
+      },
+      {
+        "name": "AMD Radeon 780M",
+        "revisions": [
+          "01",
+          "03",
+          "05",
+          "06",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B9",
+          "BA",
+          "BB",
+          "C0",
+          "C2",
+          "C4",
+          "C5",
+          "C7",
+          "C9",
+          "CB",
+          "CC",
+          "D0",
+          "D1",
+          "D2",
+          "D4",
+          "D5",
+          "D7",
+          "D9",
+          "DB",
+          "DC",
+          "DE"
+        ],
+        "codeName": "Hawk Point",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Dec 6th, 2023",
+        "transistors": "25390M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2700 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-780m.c4221"
+      }
+    ],
+    "7341": [
+      {
+        "name": "AMD Radeon Pro W5500",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 14",
+        "technology": "7 nm",
+        "dieSize": "158 mm\u00B2",
+        "releaseDate": "Feb 10th, 2020",
+        "transistors": "6400M",
+        "rops": "32",
+        "tmus": "88",
+        "shaders": "1408 Unified",
+        "computeUnits": "22 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1744 MHz",
+        "defBoostClock": "1855 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w5500.c3479"
+      }
+    ],
+    "67DF": [
+      {
+        "name": "AMD Radeon RX 560 XT",
+        "revisions": [
+          "FF"
+        ],
+        "codeName": "Ellesmere",
+        "technology": "14 nm",
+        "dieSize": "232 mm\u00B2",
+        "releaseDate": "Mar 13th, 2019",
+        "transistors": "5700M",
+        "rops": "32",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "1074 MHz",
+        "defBoostClock": "1226 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-560-xt.c3388"
+      },
+      {
+        "name": "AMD Radeon RX 580X",
+        "revisions": [
+          "C3",
+          "E7"
+        ],
+        "codeName": "Polaris 20",
+        "technology": "14 nm",
+        "dieSize": "232 mm\u00B2",
+        "releaseDate": "Apr 11th, 2018",
+        "transistors": "5700M",
+        "rops": "32",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "1257 MHz",
+        "defBoostClock": "1340 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-580x.c3190"
+      },
+      {
+        "name": "AMD Radeon RX 570",
+        "revisions": [
+          "C2"
+        ],
+        "codeName": "Polaris 20",
+        "technology": "14 nm",
+        "dieSize": "232 mm\u00B2",
+        "releaseDate": "Apr 18th, 2017",
+        "transistors": "5700M",
+        "rops": "32",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "1168 MHz",
+        "defBoostClock": "1244 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-570.c2939"
+      },
+      {
+        "name": "AMD Radeon RX 580",
+        "revisions": [
+          "C1",
+          "C4"
+        ],
+        "codeName": "Polaris 20",
+        "technology": "14 nm",
+        "dieSize": "232 mm\u00B2",
+        "releaseDate": "Apr 18th, 2017",
+        "transistors": "5700M",
+        "rops": "32",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "1257 MHz",
+        "defBoostClock": "1340 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-580.c2938"
+      },
+      {
+        "name": "AMD Radeon RX 470",
+        "revisions": [
+          "C5",
+          "CF",
+          "D7"
+        ],
+        "codeName": "Ellesmere",
+        "technology": "14 nm",
+        "dieSize": "232 mm\u00B2",
+        "releaseDate": "Aug 4th, 2016",
+        "transistors": "5700M",
+        "rops": "32",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "926 MHz",
+        "defBoostClock": "1206 MHz",
+        "defMemClock": "1650 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-470.c2861"
+      },
+      {
+        "name": "AMD Radeon RX 480",
+        "revisions": [
+          "C7"
+        ],
+        "codeName": "Ellesmere",
+        "technology": "14 nm",
+        "dieSize": "232 mm\u00B2",
+        "releaseDate": "Jun 29th, 2016",
+        "transistors": "5700M",
+        "rops": "32",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "1120 MHz",
+        "defBoostClock": "1266 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-480.c2848"
+      },
+      {
+        "name": "AMD Radeon Pro 580X",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Ellesmere",
+        "technology": "14 nm",
+        "dieSize": "232 mm\u00B2",
+        "releaseDate": "Mar 18th, 2019",
+        "transistors": "5700M",
+        "rops": "32",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "1100 MHz",
+        "defBoostClock": "1200 MHz",
+        "defMemClock": "1710 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-580x.c3398"
+      }
+    ],
+    "6820": [
+      {
+        "name": "AMD Radeon R9 M375",
+        "revisions": [
+          "81"
+        ],
+        "codeName": "Tropo",
+        "technology": "28 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "1500M",
+        "rops": "16",
+        "tmus": "40",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "DDR3",
+        "busWidth": "128 bit",
+        "defGpuClock": "1000 MHz",
+        "defBoostClock": "1015 MHz",
+        "defMemClock": "900 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m375.c2690"
+      },
+      {
+        "name": "AMD Radeon R9 M375X",
+        "revisions": [
+          "83"
+        ],
+        "codeName": "Tropo",
+        "technology": "28 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "1500M",
+        "rops": "16",
+        "tmus": "40",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "925 MHz",
+        "defBoostClock": "1015 MHz",
+        "defMemClock": "1125 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m375x.c2689"
+      },
+      {
+        "name": "AMD Radeon R9 M275X",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Venus",
+        "technology": "28 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Jan 28th, 2014",
+        "transistors": "1500M",
+        "rops": "16",
+        "tmus": "40",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "925 MHz",
+        "defMemClock": "1125 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-m275x.c2658"
+      },
+      {
+        "name": "AMD FirePro W5170M",
+        "revisions": [
+          "83"
+        ],
+        "codeName": "Tropo",
+        "technology": "28 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Aug 25th, 2014",
+        "transistors": "1500M",
+        "rops": "16",
+        "tmus": "40",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "925 MHz",
+        "defMemClock": "1125 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/firepro-w5170m.c2705"
+      }
+    ],
+    "7347": [
+      {
+        "name": "AMD Radeon Pro W5500M",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 14",
+        "technology": "7 nm",
+        "dieSize": "158 mm\u00B2",
+        "releaseDate": "Feb 10th, 2020",
+        "transistors": "6400M",
+        "rops": "32",
+        "tmus": "88",
+        "shaders": "1408 Unified",
+        "computeUnits": "22 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1448 MHz",
+        "defBoostClock": "1645 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w5500m.c3478"
+      }
+    ],
+    "1586": [
+      {
+        "name": "AMD Radeon 8040S",
+        "revisions": [
+          "D5"
+        ],
+        "codeName": "Strix Halo",
+        "technology": "4 nm",
+        "dieSize": "308 mm\u00B2",
+        "releaseDate": "Jan 6th, 2025",
+        "transistors": "unknown",
+        "rops": "32",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "1295 MHz",
+        "defBoostClock": "2800 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-8040s.c4346"
+      },
+      {
+        "name": "AMD Radeon 8050S",
+        "revisions": [
+          "C2",
+          "C4",
+          "D2",
+          "D4"
+        ],
+        "codeName": "Strix Halo",
+        "technology": "4 nm",
+        "dieSize": "308 mm\u00B2",
+        "releaseDate": "Jan 6th, 2025",
+        "transistors": "unknown",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "1295 MHz",
+        "defBoostClock": "2800 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-8050s.c4271"
+      },
+      {
+        "name": "AMD Radeon 8060S",
+        "revisions": [
+          "C1",
+          "D1"
+        ],
+        "codeName": "Strix Halo",
+        "technology": "4 nm",
+        "dieSize": "308 mm\u00B2",
+        "releaseDate": "Jan 6th, 2025",
+        "transistors": "unknown",
+        "rops": "64",
+        "tmus": "160",
+        "shaders": "2560 Unified",
+        "computeUnits": "40 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "1295 MHz",
+        "defBoostClock": "2900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-8060s.c4270"
+      }
+    ],
+    "6819": [
+      {
+        "name": "AMD Radeon R9 270 1024SP",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Pitcairn",
+        "technology": "28 nm",
+        "dieSize": "212 mm\u00B2",
+        "releaseDate": "Mar 13th, 2015",
+        "transistors": "2800M",
+        "rops": "32",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "16 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "900 MHz",
+        "defBoostClock": "925 MHz",
+        "defMemClock": "1200 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-270-1024sp.c2679"
+      }
+    ],
+    "15BF": [
+      {
+        "name": "AMD Radeon 740M",
+        "revisions": [
+          "C5",
+          "CA",
+          "CE",
+          "D8"
+        ],
+        "codeName": "Phoenix2",
+        "technology": "4 nm",
+        "dieSize": "137 mm\u00B2",
+        "releaseDate": "Jan 31st, 2024",
+        "transistors": "20900M",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "4 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2800 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-740m.c4297"
+      },
+      {
+        "name": "AMD Radeon 760M",
+        "revisions": [
+          "01",
+          "05",
+          "C3",
+          "C8",
+          "CB",
+          "CD",
+          "D1",
+          "D5",
+          "D6",
+          "DB",
+          "DC",
+          "F0"
+        ],
+        "codeName": "Phoenix",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Jan 31st, 2024",
+        "transistors": "25390M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2599 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-760m.c4248"
+      },
+      {
+        "name": "AMD Radeon 780M",
+        "revisions": [
+          "00",
+          "02",
+          "03",
+          "06",
+          "C1",
+          "C2",
+          "C4",
+          "C6",
+          "C7",
+          "C9",
+          "CF",
+          "D0",
+          "D2",
+          "D3",
+          "D4",
+          "D7",
+          "D9",
+          "DA",
+          "DD",
+          "DE"
+        ],
+        "codeName": "Phoenix",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Jan 31st, 2024",
+        "transistors": "25390M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-780m.c4249"
+      },
+      {
+        "name": "AMD Radeon 740M",
+        "revisions": [
+          "C5",
+          "CA",
+          "CE",
+          "D8"
+        ],
+        "codeName": "Phoenix",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "25390M",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "4 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2500 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-740m.c4162"
+      },
+      {
+        "name": "AMD Radeon 740M",
+        "revisions": [
+          "C5",
+          "CA",
+          "CE",
+          "D8"
+        ],
+        "codeName": "Hawk Point",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Dec 6th, 2023",
+        "transistors": "25390M",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "4 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2800 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-740m.c4298"
+      },
+      {
+        "name": "AMD Radeon 760M",
+        "revisions": [
+          "01",
+          "05",
+          "C3",
+          "C8",
+          "CB",
+          "CD",
+          "D1",
+          "D5",
+          "D6",
+          "DB",
+          "DC",
+          "F0"
+        ],
+        "codeName": "Hawk Point",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Dec 6th, 2023",
+        "transistors": "25390M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2599 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-760m.c4222"
+      },
+      {
+        "name": "AMD Radeon 760M",
+        "revisions": [
+          "01",
+          "05",
+          "C3",
+          "C8",
+          "CB",
+          "CD",
+          "D1",
+          "D5",
+          "D6",
+          "DB",
+          "DC",
+          "F0"
+        ],
+        "codeName": "Phoenix",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "25390M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2599 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-760m.c4022"
+      },
+      {
+        "name": "AMD Radeon 780M",
+        "revisions": [
+          "00",
+          "02",
+          "03",
+          "06",
+          "C1",
+          "C2",
+          "C4",
+          "C6",
+          "C7",
+          "C9",
+          "CF",
+          "D0",
+          "D2",
+          "D3",
+          "D4",
+          "D7",
+          "D9",
+          "DA",
+          "DD",
+          "DE"
+        ],
+        "codeName": "Phoenix",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "25390M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2700 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-780m.c4020"
+      },
+      {
+        "name": "AMD Radeon 780M",
+        "revisions": [
+          "00",
+          "02",
+          "03",
+          "06",
+          "C1",
+          "C2",
+          "C4",
+          "C6",
+          "C7",
+          "C9",
+          "CF",
+          "D0",
+          "D2",
+          "D3",
+          "D4",
+          "D7",
+          "D9",
+          "DA",
+          "DD",
+          "DE"
+        ],
+        "codeName": "Hawk Point",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Dec 6th, 2023",
+        "transistors": "25390M",
+        "rops": "32",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "12 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2700 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-780m.c4221"
+      }
+    ],
+    "7480": [
+      {
+        "name": "AMD Radeon RX 7650 GRE",
+        "revisions": [
+          "C2"
+        ],
+        "codeName": "Navi 33",
+        "technology": "6 nm",
+        "dieSize": "204 mm\u00B2",
+        "releaseDate": "Feb 2025",
+        "transistors": "13300M",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1720 MHz",
+        "defBoostClock": "2695 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7650-gre.c4258"
+      },
+      {
+        "name": "AMD Radeon PRO W7600",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Navi 33",
+        "technology": "6 nm",
+        "dieSize": "204 mm\u00B2",
+        "releaseDate": "Aug 3rd, 2023",
+        "transistors": "13300M",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1720 MHz",
+        "defBoostClock": "2440 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w7600.c4169"
+      },
+      {
+        "name": "AMD Radeon RX 7600",
+        "revisions": [
+          "CF"
+        ],
+        "codeName": "Navi 33",
+        "technology": "6 nm",
+        "dieSize": "204 mm\u00B2",
+        "releaseDate": "May 24th, 2023",
+        "transistors": "13300M",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1720 MHz",
+        "defBoostClock": "2655 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7600.c4153"
+      },
+      {
+        "name": "AMD Radeon RX 7600M XT",
+        "revisions": [
+          "C0",
+          "C7"
+        ],
+        "codeName": "Navi 33",
+        "technology": "6 nm",
+        "dieSize": "204 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "13300M",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1280 MHz",
+        "defBoostClock": "2469 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7600m-xt.c4013"
+      },
+      {
+        "name": "AMD Radeon RX 7600S",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Navi 33",
+        "technology": "6 nm",
+        "dieSize": "204 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "13300M",
+        "rops": "64",
+        "tmus": "112",
+        "shaders": "1792 Unified",
+        "computeUnits": "28 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1500 MHz",
+        "defBoostClock": "2200 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7600s.c4016"
+      },
+      {
+        "name": "AMD Radeon RX 7700S",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Navi 33",
+        "technology": "6 nm",
+        "dieSize": "204 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "13300M",
+        "rops": "64",
+        "tmus": "128",
+        "shaders": "2048 Unified",
+        "computeUnits": "32 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "128 bit",
+        "defGpuClock": "1500 MHz",
+        "defBoostClock": "2500 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7700s.c4015"
+      }
+    ],
+    "6822": [
+      {
+        "name": "AMD Radeon E8860",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Venus",
+        "technology": "28 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Jan 25th, 2014",
+        "transistors": "1500M",
+        "rops": "16",
+        "tmus": "40",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "575 MHz",
+        "defBoostClock": "625 MHz",
+        "defMemClock": "1125 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-e8860.c2550"
+      }
+    ],
+    "1901": [
+      {
+        "name": "AMD Radeon 740M",
+        "revisions": [
+          "C2",
+          "C3",
+          "C6",
+          "C7",
+          "C8",
+          "C9",
+          "CA",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9"
+        ],
+        "codeName": "Phoenix2",
+        "technology": "4 nm",
+        "dieSize": "137 mm\u00B2",
+        "releaseDate": "Jan 31st, 2024",
+        "transistors": "20900M",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "4 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2800 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-740m.c4297"
+      },
+      {
+        "name": "AMD Radeon 740M",
+        "revisions": [
+          "C2",
+          "C3",
+          "C6",
+          "C7",
+          "C8",
+          "C9",
+          "CA",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9"
+        ],
+        "codeName": "Phoenix",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Jan 4th, 2023",
+        "transistors": "25390M",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "4 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2500 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-740m.c4162"
+      },
+      {
+        "name": "AMD Radeon 740M",
+        "revisions": [
+          "C2",
+          "C3",
+          "C6",
+          "C7",
+          "C8",
+          "C9",
+          "CA",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9"
+        ],
+        "codeName": "Hawk Point",
+        "technology": "4 nm",
+        "dieSize": "178 mm\u00B2",
+        "releaseDate": "Dec 6th, 2023",
+        "transistors": "25390M",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "4 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "800 MHz",
+        "defBoostClock": "2800 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-740m.c4298"
+      }
+    ],
+    "6607": [
+      {
+        "name": "AMD Radeon R5 M240",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Jet",
+        "technology": "28 nm",
+        "dieSize": "56 mm\u00B2",
+        "releaseDate": "Sep 18th, 2014",
+        "transistors": "690M",
+        "rops": "8",
+        "tmus": "20",
+        "shaders": "320 Unified",
+        "computeUnits": "5 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "1000 MHz",
+        "defBoostClock": "1030 MHz",
+        "defMemClock": "900 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r5-m240.c2416"
+      }
+    ],
+    "67C4": [
+      {
+        "name": "AMD Radeon Pro WX 7100",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Ellesmere",
+        "technology": "14 nm",
+        "dieSize": "232 mm\u00B2",
+        "releaseDate": "Nov 10th, 2016",
+        "transistors": "5700M",
+        "rops": "32",
+        "tmus": "144",
+        "shaders": "2304 Unified",
+        "computeUnits": "36 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "256 bit",
+        "defGpuClock": "1188 MHz",
+        "defBoostClock": "1243 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-wx-7100.c2872"
+      }
+    ],
+    "164E": [
+      {
+        "name": "AMD Radeon 610M",
+        "revisions": [
+          "D8",
+          "D9",
+          "DA",
+          "DB",
+          "DC"
+        ],
+        "codeName": "Dragon Range",
+        "technology": "5 nm",
+        "dieSize": "264 mm\u00B2",
+        "releaseDate": "Jan 3rd, 2023",
+        "transistors": "unknown",
+        "rops": "4",
+        "tmus": "8",
+        "shaders": "128 Unified",
+        "computeUnits": "2 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "400 MHz",
+        "defBoostClock": "2200 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-610m.c4021"
+      },
+      {
+        "name": "AMD Radeon 610M",
+        "revisions": [
+          "D8",
+          "D9",
+          "DA",
+          "DB",
+          "DC"
+        ],
+        "codeName": "Mendocino",
+        "technology": "6 nm",
+        "dieSize": "100 mm\u00B2",
+        "releaseDate": "Sep 20th, 2022",
+        "transistors": "unknown",
+        "rops": "4",
+        "tmus": "8",
+        "shaders": "128 Unified",
+        "computeUnits": "2 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "1500 MHz",
+        "defBoostClock": "1900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-610m.c3994"
+      }
+    ],
+    "682C": [
+      {
+        "name": "AMD FirePro W4100",
+        "revisions": [
+          "ANY"
+        ],
+        "codeName": "Cape Verde",
+        "technology": "28 nm",
+        "dieSize": "123 mm\u00B2",
+        "releaseDate": "Aug 13th, 2014",
+        "transistors": "1500M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "630 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/firepro-w4100.c2611"
+      }
+    ],
+    "6605": [
+      {
+        "name": "AMD Radeon R7 M340",
+        "revisions": [
+          "81"
+        ],
+        "codeName": "Meso",
+        "technology": "28 nm",
+        "dieSize": "125 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "1550M",
+        "rops": "8",
+        "tmus": "20",
+        "shaders": "320 Unified",
+        "computeUnits": "5 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "943 MHz",
+        "defBoostClock": "1021 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m340.c2687"
+      },
+      {
+        "name": "AMD Radeon R7 M340",
+        "revisions": [
+          "81"
+        ],
+        "codeName": "Opal",
+        "technology": "28 nm",
+        "dieSize": "77 mm\u00B2",
+        "releaseDate": "Dec 6th, 2015",
+        "transistors": "950M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "620 MHz",
+        "defBoostClock": "715 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m340.c3109"
+      }
+    ],
+    "747E": [
+      {
+        "name": "AMD Radeon RX 7700",
+        "revisions": [
+          "DB"
+        ],
+        "codeName": "Navi 32",
+        "technology": "5 nm",
+        "dieSize": "346 mm\u00B2",
+        "releaseDate": "Sep 18th, 2025",
+        "transistors": "28100M",
+        "rops": "96",
+        "tmus": "160",
+        "shaders": "2560 Unified",
+        "computeUnits": "40 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1900 MHz",
+        "defBoostClock": "2600 MHz",
+        "defMemClock": "2430 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7700.c4159"
+      },
+      {
+        "name": "AMD Radeon RX 7800M",
+        "revisions": [
+          "D8"
+        ],
+        "codeName": "Navi 32",
+        "technology": "5 nm",
+        "dieSize": "346 mm\u00B2",
+        "releaseDate": "Sep 11th, 2024",
+        "transistors": "28100M",
+        "rops": "96",
+        "tmus": "240",
+        "shaders": "3840 Unified",
+        "computeUnits": "60 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "1295 MHz",
+        "defBoostClock": "2335 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7800m.c4257"
+      },
+      {
+        "name": "AMD Radeon RX 7700 XT",
+        "revisions": [
+          "FF"
+        ],
+        "codeName": "Navi 32",
+        "technology": "5 nm",
+        "dieSize": "346 mm\u00B2",
+        "releaseDate": "Aug 25th, 2023",
+        "transistors": "28100M",
+        "rops": "96",
+        "tmus": "216",
+        "shaders": "3456 Unified",
+        "computeUnits": "54 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "1435 MHz",
+        "defBoostClock": "2544 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7700-xt.c3911"
+      },
+      {
+        "name": "AMD Radeon RX 7800 XT",
+        "revisions": [
+          "C8"
+        ],
+        "codeName": "Navi 32",
+        "technology": "5 nm",
+        "dieSize": "346 mm\u00B2",
+        "releaseDate": "Aug 25th, 2023",
+        "transistors": "28100M",
+        "rops": "96",
+        "tmus": "240",
+        "shaders": "3840 Unified",
+        "computeUnits": "60 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1295 MHz",
+        "defBoostClock": "2430 MHz",
+        "defMemClock": "2438 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7800-xt.c3839"
+      }
+    ],
+    "6604": [
+      {
+        "name": "AMD Radeon R7 M350",
+        "revisions": [
+          "81"
+        ],
+        "codeName": "Meso",
+        "technology": "28 nm",
+        "dieSize": "125 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "1550M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "1000 MHz",
+        "defBoostClock": "1015 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r7-m350.c2745"
+      }
+    ],
+    "6861": [
+      {
+        "name": "AMD Radeon Pro WX 9100",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Vega 10",
+        "technology": "14 nm",
+        "dieSize": "495 mm\u00B2",
+        "releaseDate": "Jul 10th, 2017",
+        "transistors": "12500M",
+        "rops": "64",
+        "tmus": "256",
+        "shaders": "4096 Unified",
+        "computeUnits": "64 CU",
+        "memoryType": "HBM2",
+        "busWidth": "2048 bit",
+        "defGpuClock": "1200 MHz",
+        "defBoostClock": "1500 MHz",
+        "defMemClock": "945 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-wx-9100.c2989"
+      }
+    ],
+    "73A5": [
+      {
+        "name": "AMD Radeon RX 6950 XT",
+        "revisions": [
+          "C0"
+        ],
+        "codeName": "Navi 21",
+        "technology": "7 nm",
+        "dieSize": "520 mm\u00B2",
+        "releaseDate": "May 10th, 2022",
+        "transistors": "26800M",
+        "rops": "128",
+        "tmus": "320",
+        "shaders": "5120 Unified",
+        "computeUnits": "80 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1860 MHz",
+        "defBoostClock": "2310 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6950-xt.c3875"
+      }
+    ],
+    "15DD": [
+      {
+        "name": "AMD Radeon RX Vega 11",
+        "revisions": [
+          "C1",
+          "C6",
+          "C8",
+          "C9",
+          "CA",
+          "CB",
+          "D3",
+          "D6"
+        ],
+        "codeName": "Picasso",
+        "technology": "12 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Jul 7th, 2019",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "44",
+        "shaders": "704 Unified",
+        "computeUnits": "11 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1400 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-vega-11.c3593"
+      },
+      {
+        "name": "AMD Radeon Vega 10 Mobile",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Picasso-M",
+        "technology": "12 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Jan 6th, 2019",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "40",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1400 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-10-mobile.c3591"
+      },
+      {
+        "name": "AMD Radeon Vega 10 Mobile",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Raven-M",
+        "technology": "14 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Jan 8th, 2019",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "40",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1301 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-10-mobile.c3288"
+      },
+      {
+        "name": "AMD Radeon Vega 10 Mobile",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Picasso-M",
+        "technology": "12 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Apr 8th, 2019",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "40",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1400 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-10-mobile.c3598"
+      },
+      {
+        "name": "AMD Radeon Vega 11",
+        "revisions": [
+          "C1",
+          "C4",
+          "C5",
+          "C6",
+          "C8",
+          "C9",
+          "CA",
+          "CB",
+          "D3",
+          "D6"
+        ],
+        "codeName": "Picasso",
+        "technology": "12 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Sep 30th, 2019",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "44",
+        "shaders": "704 Unified",
+        "computeUnits": "11 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1400 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-11.c3595"
+      },
+      {
+        "name": "AMD Radeon Vega 3",
+        "revisions": [
+          "CE",
+          "CF",
+          "D8"
+        ],
+        "codeName": "Picasso",
+        "technology": "12 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Nov 20th, 2019",
+        "transistors": "4940M",
+        "rops": "4",
+        "tmus": "12",
+        "shaders": "192 Unified",
+        "computeUnits": "3 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1100 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-3.c3594"
+      },
+      {
+        "name": "AMD Radeon Vega 8",
+        "revisions": [
+          "83",
+          "C2",
+          "D1",
+          "D5",
+          "D7"
+        ],
+        "codeName": "Picasso",
+        "technology": "12 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Jul 7th, 2019",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1250 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-8.c3286"
+      },
+      {
+        "name": "AMD Radeon RX Vega 11",
+        "revisions": [
+          "C1",
+          "C6",
+          "C8",
+          "C9",
+          "CA",
+          "CB",
+          "D3",
+          "D6"
+        ],
+        "codeName": "Raven",
+        "technology": "14 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "May 10th, 2018",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "44",
+        "shaders": "704 Unified",
+        "computeUnits": "11 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1251 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-vega-11.c3300"
+      },
+      {
+        "name": "AMD Radeon RX Vega 11",
+        "revisions": [
+          "C1",
+          "C6",
+          "C8",
+          "C9",
+          "CA",
+          "CB",
+          "D3",
+          "D6"
+        ],
+        "codeName": "Raven",
+        "technology": "14 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Feb 12th, 2018",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "44",
+        "shaders": "704 Unified",
+        "computeUnits": "11 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1240 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-vega-11.c3054"
+      },
+      {
+        "name": "AMD Radeon Vega 8",
+        "revisions": [
+          "83",
+          "C2",
+          "D1",
+          "D5",
+          "D7"
+        ],
+        "codeName": "Raven",
+        "technology": "14 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Feb 12th, 2018",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1100 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-vega-8.c3042"
+      },
+      {
+        "name": "AMD Radeon RX Vega 10 Mobile",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Raven-M",
+        "technology": "14 nm",
+        "dieSize": "210 mm\u00B2",
+        "releaseDate": "Oct 26th, 2017",
+        "transistors": "4940M",
+        "rops": "8",
+        "tmus": "40",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1301 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-vega-10-mobile.c3053"
+      }
+    ],
+    "6907": [
+      {
+        "name": "AMD Radeon R5 M255",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Topaz",
+        "technology": "28 nm",
+        "dieSize": "125 mm\u00B2",
+        "releaseDate": "Oct 12th, 2014",
+        "transistors": "1550M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "DDR3",
+        "busWidth": "128 bit",
+        "defGpuClock": "925 MHz",
+        "defBoostClock": "940 MHz",
+        "defMemClock": "1000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r5-m255.c2573"
+      },
+      {
+        "name": "AMD Radeon R5 M315",
+        "revisions": [
+          "87"
+        ],
+        "codeName": "Meso",
+        "technology": "28 nm",
+        "dieSize": "125 mm\u00B2",
+        "releaseDate": "May 5th, 2015",
+        "transistors": "1550M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "970 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "900 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r5-m315.c2895"
+      }
+    ],
+    "745E": [
+      {
+        "name": "AMD Radeon PRO W7800",
+        "revisions": [
+          "CC"
+        ],
+        "codeName": "Navi 31",
+        "technology": "5 nm",
+        "dieSize": "529 mm\u00B2",
+        "releaseDate": "Apr 13th, 2023",
+        "transistors": "57700M",
+        "rops": "128",
+        "tmus": "280",
+        "shaders": "4480 Unified",
+        "computeUnits": "70 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1895 MHz",
+        "defBoostClock": "2525 MHz",
+        "defMemClock": "2250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w7800.c4148"
+      }
+    ]
   }
 }

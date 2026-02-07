@@ -16,7 +16,9 @@ public partial class LinuxAmdGpuProbe
         }
 
         var ids = GetRawIds();
-        var spec = PciIdLookup.GetSpecs(ids.Device);
+        string revId = ReadFile("revision").Replace("0x", "").ToUpper();
+
+        var spec = PciIdLookup.GetSpecs(ids.Device, revId);
 
         double dpmMemMultiplier = 1.0;
         
@@ -106,6 +108,7 @@ public partial class LinuxAmdGpuProbe
         return new GpuStaticData
         {
             DeviceName = spec?.Name ?? "Unknown AMD GPU",
+            IsExactMatch = spec?.IsExactMatch ?? true,
             DeviceId = $"{ids.Vendor} {ids.Device} - {ids.SubVendor} {ids.SubDevice}",
             Subvendor = PciIdLookup.LookupVendorName(ids.SubVendor),
             BusId = GetBusId(),
@@ -118,7 +121,7 @@ public partial class LinuxAmdGpuProbe
             LookupUrl = lookupUrl,
 
             GpuCodeName = spec?.CodeName ?? "N/A",
-            Revision = ReadFile("revision", "N/A").Replace("0x", "").ToUpper(),
+            Revision = revId,
             Technology = spec?.Technology ?? "N/A",
             DieSize = spec?.DieSize ?? "N/A",
             ReleaseDate = spec?.ReleaseDate ?? "N/A",
@@ -262,13 +265,63 @@ public partial class LinuxAmdGpuProbe
     {
         try
         {
-            long total = long.Parse(ReadFile("mem_info_vram_total", "0"));
-            long visible = long.Parse(ReadFile("mem_info_vis_vram_total", "0"));
-            if (total == 0) return "N/A";
-            if (visible > (total * 0.9)) return "Enabled";
+            // 1. Pobieramy całkowitą ilość VRAM (w bajtach) z pliku sterownika
+            long totalVram = long.Parse(ReadFile("mem_info_vram_total", "0"));
+            if (totalVram == 0) return "N/A";
+
+            // 2. Czytamy plik 'resource', który definiuje fizyczne regiony pamięci PCI (BARs)
+            // Format pliku: start_address end_address flags (hex)
+            string resourceContent = ReadFile("resource");
+
+            if (string.IsNullOrWhiteSpace(resourceContent)) return "Unknown";
+
+            long maxBarSize = 0;
+            var lines = resourceContent.Split('\n');
+
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 2)
+                {
+                    try
+                    {
+                        // Konwersja z HEX na long
+                        long start = Convert.ToInt64(parts[0], 16);
+                        long end = Convert.ToInt64(parts[1], 16);
+
+                        // Obliczamy rozmiar regionu: (koniec - początek) + 1
+                        long size = (end - start) + 1;
+
+                        if (size > maxBarSize) maxBarSize = size;
+                    }
+                    catch
+                    {
+                        // Ignorujemy błędy parsowania pojedynczych linii
+                        continue;
+                    }
+                }
+            }
+
+            // 3. Logika Decyzyjna
+            // Standardowy BAR (bez ReBar) ma zazwyczaj dokładnie 256 MB (268,435,456 bajtów).
+            // Jeśli największy BAR pokrywa ponad 90% całkowitego VRAM, to ReBar jest w pełni aktywny.
+            
+            if (maxBarSize > (totalVram * 0.9))
+            {
+                return "Enabled";
+            }
+            
+            // Opcjonalnie: Można by tu dodać wykrywanie "częściowego" ReBar (np. 1GB na karcie 8GB),
+            // ale zazwyczaj interesuje nas Enabled vs Disabled.
+            
             return "Disabled";
         }
-        catch { return "Unknown"; }
+        catch 
+        { 
+            return "Unknown"; 
+        }
     }
 
     private string GetRealDriverVersion()

@@ -27,6 +27,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<GpuListItem> _availableGpus;
     [ObservableProperty] private GpuListItem? _selectedGpu;
     [ObservableProperty] private string _deviceName = "Detecting...";
+    [ObservableProperty] private bool _showLookupWarning;
     [ObservableProperty] private IImage? _vendorLogo;
 
     // Architektura
@@ -88,6 +89,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] private int _selectedTabIndex;
     [ObservableProperty] private double _windowHeight = 525 - 1;
+
+    public string LookupWarningText => "Could not detect your GPU specific variant.\nInformation shown on this tab may be incorrect.";
 
     public bool ShowResizeGrip => (SelectedTabIndex == 1 || SelectedTabIndex == 2);
     public SizeToContent WindowSizeMode => SelectedTabIndex == 0 ? SizeToContent.Height : SizeToContent.Manual;
@@ -207,6 +210,7 @@ public partial class MainWindowViewModel : ViewModelBase
         var data = probe.LoadStaticData();
 
         DeviceName = data.DeviceName;
+        ShowLookupWarning = !data.IsExactMatch;
         _currentLookupUrl = data.LookupUrl;
         
         DeviceId = data.DeviceId;
