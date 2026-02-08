@@ -4,8 +4,17 @@ using System.Text.RegularExpressions;
 
 namespace GPU_T.Services.Probes.LinuxAmd;
 
+/// <summary>
+/// Provides helper methods for Linux AMD GPU probe operations, including file reading and value extraction.
+/// </summary>
 public partial class LinuxAmdGpuProbe
 {
+    /// <summary>
+    /// Reads the contents of a file in the GPU sysfs base path, returning a fallback value if unavailable.
+    /// </summary>
+    /// <param name="filename">The file name to read.</param>
+    /// <param name="fallback">The fallback value if the file is not found or unreadable.</param>
+    /// <returns>The trimmed file content or the fallback value.</returns>
     private string ReadFile(string filename, string fallback = "N/A")
     {
         try
@@ -17,6 +26,11 @@ public partial class LinuxAmdGpuProbe
         return fallback;
     }
 
+    /// <summary>
+    /// Extracts the first numeric value from the input string.
+    /// </summary>
+    /// <param name="input">The input string to parse.</param>
+    /// <returns>The extracted number as a double, or 0 if not found.</returns>
     private double ExtractNumber(string input)
     {
         if (string.IsNullOrEmpty(input)) return 0;
@@ -26,6 +40,11 @@ public partial class LinuxAmdGpuProbe
         return 0;
     }
 
+    /// <summary>
+    /// Determines the memory clock multiplier based on the memory type string.
+    /// </summary>
+    /// <param name="memoryType">The memory type descriptor.</param>
+    /// <returns>The multiplier as a double.</returns>
     private double GetMemoryMultiplier(string memoryType)
     {
         if (string.IsNullOrEmpty(memoryType)) return 1;
@@ -37,6 +56,11 @@ public partial class LinuxAmdGpuProbe
         return 1.0; 
     }
 
+    /// <summary>
+    /// Parses the first integer value from a clock string.
+    /// </summary>
+    /// <param name="clockString">The clock string to parse.</param>
+    /// <returns>The parsed clock value as a double, or 0 if not found.</returns>
     private double ParseClock(string clockString)
     {
         var match = Regex.Match(clockString, @"(\d+)");

@@ -1,9 +1,11 @@
+<!-- UserControl bound to MainWindowViewModel; this view presents static GPU metadata and capability flags. -->
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:GPU_T.ViewModels"
              x:Class="GPU_T.Views.GeneralView"
              x:DataType="vm:MainWindowViewModel">
 
+    <!-- Grid organizes labeled fields into fixed-height rows for concise property display. -->
     <Grid Margin="0,5,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="24"/> 
@@ -27,6 +29,7 @@
             <RowDefinition Height="Auto"/> 
         </Grid.RowDefinitions>
 
+        <!-- Vendor logo visual bound to VendorLogo; positioned to avoid overlapping labels. -->
         <Image Grid.Row="1" Grid.RowSpan="3" 
                 Source="{Binding VendorLogo}" 
                 Stretch="Uniform" 
@@ -35,6 +38,7 @@
                 VerticalAlignment="Top"
                 Margin="0,2,0,0"/>
                
+        <!-- Header row: device name editing and Lookup command action exposed by the view model. -->
         <Grid Grid.Row="0">
             <StackPanel Orientation="Horizontal">
                 
@@ -240,6 +244,7 @@
 
         <Border Grid.Row="16" Height="0" Background="#A0A0A0" Margin="0,3,0,2" VerticalAlignment="Center"/>
 
+        <!-- Computing capabilities section is non-interactive in this view; uses bindings for display-only flags. -->
         <Grid Grid.Row="17" Margin="0,4" IsHitTestVisible="False">
             <StackPanel Orientation="Horizontal">
                  <TextBlock Classes="Label" Text="Computing"/>
@@ -260,6 +265,7 @@
             </StackPanel>
         </Grid>
 
+        <!-- Technology flags area is display-only and reflects capability support exposed by the view model. -->
         <Grid Grid.Row="18" Margin="0,4" IsHitTestVisible="False">
              <StackPanel Orientation="Horizontal">
                  <TextBlock Classes="Label" Text="Technologies"/>

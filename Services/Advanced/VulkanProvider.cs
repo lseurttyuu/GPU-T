@@ -9,11 +9,13 @@ using GPU_T.ViewModels;
 
 namespace GPU_T.Services.Advanced;
 
+/// <summary>
+/// Provides advanced Vulkan GPU property and memory information by parsing vulkaninfo output.
+/// </summary>
 public class VulkanProvider : AdvancedDataProvider
 {
     private string _targetIdHex = "";
     
-    // Pola pomocnicze parsera
     private string _pendingHeapName = "";
     private string _pendingHeapSize = "";
     private string _pendingHeapBudget = "";
@@ -28,13 +30,17 @@ public class VulkanProvider : AdvancedDataProvider
 
     private string _currentSection = "";
 
+    /// <summary>
+    /// Loads advanced GPU data for the selected GPU and populates the provided list.
+    /// </summary>
+    /// <param name="list">Collection to populate with advanced GPU items.</param>
+    /// <param name="selectedGpu">Selected GPU descriptor.</param>
     public override void LoadData(ObservableCollection<AdvancedItemViewModel> list, GpuListItem? selectedGpu)
     {
         ResetCounter();
         _targetIdHex = "";
         
-        // Wyciągnij ID z DeviceId (z ViewModela, tu musimy je pobrać ponownie lub przekazać)
-        // Dla uproszczenia pobierzemy je ponownie z LinuxAmdGpuProbe, bo GpuListItem ma tylko "card0"
+        // Extracts the device ID from static probe data for target GPU matching.
         if (selectedGpu != null)
         {
             var probe = GpuProbeFactory.Create(selectedGpu.Id);
@@ -49,6 +55,10 @@ public class VulkanProvider : AdvancedDataProvider
         RunVulkanInfo(list);
     }
 
+    /// <summary>
+    /// Runs vulkaninfo and parses its output to extract advanced GPU properties.
+    /// </summary>
+    /// <param name="list">Collection to populate with parsed items.</param>
     private void RunVulkanInfo(ObservableCollection<AdvancedItemViewModel> list)
     {
         try
@@ -143,6 +153,13 @@ public class VulkanProvider : AdvancedDataProvider
         }
     }
 
+    /// <summary>
+    /// Checks for section changes in vulkaninfo output and updates parsing state.
+    /// </summary>
+    /// <param name="trimmed">Current line trimmed.</param>
+    /// <param name="list">Collection to populate.</param>
+    /// <param name="isTargetGpu">Indicates if parsing target GPU.</param>
+    /// <returns>True if section changed, otherwise false.</returns>
     private bool CheckSectionChange(string trimmed, ObservableCollection<AdvancedItemViewModel> list, bool isTargetGpu)
     {
         if (trimmed.StartsWith("VkPhysicalDeviceMemoryProperties:")) { CloseMemoryBlocks(list); _currentSection = "MEMORY"; if (isTargetGpu) AddRow(list, "Memory Heaps", "", true); return true; }
@@ -154,6 +171,13 @@ public class VulkanProvider : AdvancedDataProvider
         return false;
     }
 
+    /// <summary>
+    /// Parses GPU properties from vulkaninfo output.
+    /// </summary>
+    /// <param name="trimmed">Current line trimmed.</param>
+    /// <param name="list">Collection to populate.</param>
+    /// <param name="isTargetGpu">Indicates if parsing target GPU.</param>
+    /// <param name="buffer">Buffer for properties.</param>
     private void ParseProperties(string trimmed, ObservableCollection<AdvancedItemViewModel> list, bool isTargetGpu, List<(string, string)> buffer)
     {
         string k = "", v = "";
@@ -170,6 +194,12 @@ public class VulkanProvider : AdvancedDataProvider
         }
     }
 
+    /// <summary>
+    /// Parses memory heap and type information from vulkaninfo output.
+    /// </summary>
+    /// <param name="trimmed">Current line trimmed.</param>
+    /// <param name="line">Original line.</param>
+    /// <param name="list">Collection to populate.</param>
     private void ParseMemory(string trimmed, string line, ObservableCollection<AdvancedItemViewModel> list)
     {
         if (trimmed.StartsWith("memoryHeaps[")) { CommitHeap(list); CommitType(list); _pendingHeapName = trimmed.Replace(":", ""); }
@@ -192,11 +222,21 @@ public class VulkanProvider : AdvancedDataProvider
         }
     }
 
+    /// <summary>
+    /// Parses extension information from vulkaninfo output.
+    /// </summary>
+    /// <param name="trimmed">Current line trimmed.</param>
+    /// <param name="list">Collection to populate.</param>
     private void ParseExtensions(string trimmed, ObservableCollection<AdvancedItemViewModel> list)
     {
         if (trimmed.StartsWith("VK_")) { var parts = trimmed.Split(':'); AddRow(list, parts[0].Trim(), "Supported"); }
     }
 
+    /// <summary>
+    /// Parses feature information from vulkaninfo output.
+    /// </summary>
+    /// <param name="trimmed">Current line trimmed.</param>
+    /// <param name="list">Collection to populate.</param>
     private void ParseFeatures(string trimmed, ObservableCollection<AdvancedItemViewModel> list)
     {
         if (trimmed.Contains("=") && !trimmed.StartsWith("Userspace"))
@@ -212,8 +252,19 @@ public class VulkanProvider : AdvancedDataProvider
         }
     }
 
-    private void CloseMemoryBlocks(ObservableCollection<AdvancedItemViewModel> list) { if (_currentSection == "MEMORY") { CommitHeap(list); CommitType(list); } }
+    /// <summary>
+    /// Closes memory parsing blocks and commits pending heap/type data.
+    /// </summary>
+    /// <param name="list">Collection to populate.</param>
+    private void CloseMemoryBlocks(ObservableCollection<AdvancedItemViewModel> list)
+    {
+        if (_currentSection == "MEMORY") { CommitHeap(list); CommitType(list); }
+    }
 
+    /// <summary>
+    /// Commits pending heap information to the list.
+    /// </summary>
+    /// <param name="list">Collection to populate.</param>
     private void CommitHeap(ObservableCollection<AdvancedItemViewModel> list)
     {
         if (string.IsNullOrEmpty(_pendingHeapName)) return;
@@ -237,6 +288,10 @@ public class VulkanProvider : AdvancedDataProvider
         _pendingHeapFlags.Clear(); _parsingHeapFlags = false;
     }
 
+    /// <summary>
+    /// Commits pending memory type information to the list.
+    /// </summary>
+    /// <param name="list">Collection to populate.</param>
     private void CommitType(ObservableCollection<AdvancedItemViewModel> list)
     {
         if (string.IsNullOrEmpty(_pendingTypeName)) return;
@@ -251,6 +306,16 @@ public class VulkanProvider : AdvancedDataProvider
         _pendingTypeName = ""; _pendingTypeHeapIndex = ""; _pendingTypeFlags.Clear(); _parsingTypeFlags = false;
     }
 
+    /// <summary>
+    /// Extracts value from a line with '=' separator.
+    /// </summary>
+    /// <param name="line">Line to parse.</param>
+    /// <returns>Extracted value.</returns>
     private string GetValue(string line) { var p = line.Split('='); return p.Length > 1 ? p[1].Trim() : ""; }
+    /// <summary>
+    /// Extracts value inside parentheses from a line.
+    /// </summary>
+    /// <param name="l">Line to parse.</param>
+    /// <returns>Extracted value.</returns>
     private string ExtractParen(string l) { int s = l.LastIndexOf('('), e = l.LastIndexOf(')'); return s != -1 && e > s ? l.Substring(s + 1, e - s - 1) : ""; }
 }

@@ -1,3 +1,4 @@
+<!-- Root window bound to MainWindowViewModel. Window size and height are driven by view-model bindings; Title and Icon are application-level settings. -->
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:GPU_T.ViewModels"
@@ -16,26 +17,33 @@
         Title="GPU-T"
         Background="#f1f1f1">
 
+    <!-- Design-time DataContext to enable designer previews for the MainWindowViewModel. -->
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
+    <!-- Main layout grid: primary content area (TabControl) and a bottom control bar for GPU selection and actions. -->
     <Grid RowDefinitions="*,Auto" Margin="4">
         
+        <!-- Primary navigation tabs. Selection is driven by SelectedTabIndex on the view model. Each tab hosts a dedicated UserControl. -->
         <TabControl Grid.Row="0" SelectedIndex="{Binding SelectedTabIndex}" Margin="0,0,0,2" Padding="2">
+            <!-- Graphics Card tab: hosts the general information view. -->
             <TabItem Header="Graphics Card">
                 <views:GeneralView/>
             </TabItem>
             
+            <!-- Sensors tab: hosts the sensors view which manages graph interactions and logging. -->
             <TabItem Header="Sensors">
                 <views:SensorsView/>
             </TabItem>
             
+            <!-- Advanced tab: hosts advanced configuration and diagnostics. -->
             <TabItem Header="Advanced">
                 <views:AdvancedView/>
             </TabItem>
         </TabControl>
 
+        <!-- Bottom control bar containing GPU selector and Close button; layout uses columns for responsive alignment. -->
         <Grid Grid.Row="1" Margin="10,0,10,0"> 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -47,6 +55,7 @@
                 <RowDefinition Height="8"/>    
             </Grid.RowDefinitions>
 
+            <!-- GPU selector bound to AvailableGpus and SelectedGpu on the view model. -->
             <ComboBox Grid.Row="0" Grid.Column="0" 
                       Width="270" 
                       ItemsSource="{Binding AvailableGpus}"
@@ -54,6 +63,7 @@
                       HorizontalAlignment="Left"
                       Margin="0,0,0,1"/> 
             
+            <!-- Close action bound to CloseAppCommand on the view model. -->
             <Button Grid.Row="0" Grid.Column="1" 
                     Content="Close" 
                     Width="75" 
@@ -61,6 +71,10 @@
                     Command="{Binding CloseAppCommand}"
                     Margin="0,0,0,1"/>
 
+            <!--
+                Invisible draggable border used as a resize grip.
+                Visibility is controlled by ShowResizeGrip; pointer events are handled in the code-behind to implement custom resizing behavior.
+            -->
             <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
                     Background="Transparent"
                     Height="8"

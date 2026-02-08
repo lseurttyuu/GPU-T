@@ -1,18 +1,24 @@
+<!-- filepath: /home/mike/Dokumenty/Visual Studio Code/Projekty/GPU-T/Views/SensorsView.axaml -->
+<!-- UserControl bound to MainWindowViewModel; presents a scrollable list of sensor entries with interactive miniature graphs and logging controls. -->
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:GPU_T.ViewModels"
              x:Class="GPU_T.Views.SensorsView"
              x:DataType="vm:MainWindowViewModel">
 
+    <!-- Two-row layout: scrollable sensor list and a persistent control bar with logging and refresh settings. -->
     <Grid RowDefinitions="*,Auto">
         
+        <!-- Scrollable region containing sensor items; virtualization/stacking behavior is managed by ItemsControl. -->
         <ScrollViewer Grid.Row="0" 
                       HorizontalScrollBarVisibility="Disabled" 
                       VerticalScrollBarVisibility="Auto">
             
+            <!-- ItemsControl bound to Sensors collection. Each item uses a compact template with name, mode toggle, and a lightweight graph. -->
             <ItemsControl ItemsSource="{Binding Sensors}" Margin="6,10,6,0">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
+                        <!-- Item layout uses fixed column widths to align label, mode button, and graph consistently across rows. -->
                         <Grid Margin="0,0,0,7"> 
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="148"/> 
@@ -45,6 +51,7 @@
                                 </Border>
                             </Button>
 
+                            <!-- Interactive graph region: pointer events are handled in the view to forward hover coordinates to the view model. -->
                             <Grid Grid.Column="4" 
                                   Height="20" 
                                   Width="133"
@@ -52,6 +59,7 @@
                                   PointerMoved="Graph_PointerMoved"
                                   PointerExited="Graph_PointerExited">
                                 
+                                <!-- Clipped drawing surface bound to GraphPoints; the polygon is a low-cost visual representation of recent history. -->
                                 <Border Background="#f1f1f1" ClipToBounds="True" Margin="1">
                                     <Polygon Points="{Binding GraphPoints}"
                                              Fill="#FF0000"
@@ -77,6 +85,7 @@
             </ItemsControl>
         </ScrollViewer>
 
+        <!-- Bottom control bar: logging toggle (routed to code-behind for file selection), refresh rate selection, and actions. -->
         <Grid Grid.Row="1" Margin="6,9,10,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/> 

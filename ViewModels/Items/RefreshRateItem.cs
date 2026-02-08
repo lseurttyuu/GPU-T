@@ -14,6 +14,5 @@ public class RefreshRateItem
     public string Label { get; set; } = "";
     public double Seconds { get; set; }
     
-    // Nadpisujemy ToString, aby ComboBox wyświetlał samą etykietę
     public override string ToString() => Label;
 }

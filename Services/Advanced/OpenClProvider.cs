@@ -7,11 +7,18 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using GPU_T.ViewModels;
 
-
 namespace GPU_T.Services.Advanced;
 
+/// <summary>
+/// Provides advanced OpenCL GPU property and memory information by orchestrating and parsing 'clinfo' JSON output.
+/// </summary>
 public class OpenClProvider : AdvancedDataProvider
 {
+    /// <summary>
+    /// Executes the 'clinfo' process, parses the JSON output, and populates the collection with OpenCL details for the selected GPU.
+    /// </summary>
+    /// <param name="list">The target collection for the UI data rows.</param>
+    /// <param name="selectedGpu">The descriptor of the currently selected GPU.</param>
     public override void LoadData(ObservableCollection<AdvancedItemViewModel> list, GpuListItem? selectedGpu)
     {
         ResetCounter();
@@ -33,6 +40,7 @@ public class OpenClProvider : AdvancedDataProvider
 
             if (string.IsNullOrWhiteSpace(rawOutput)) { AddRow(list, "Error", "clinfo returned empty output"); return; }
             
+            // clinfo may output warning text before the actual JSON payload; locate the JSON start.
             int jsonStartIndex = rawOutput.IndexOf('{');
             
             if (jsonStartIndex == -1) { AddRow(list, "Error", "No valid JSON found"); return; }
@@ -47,6 +55,7 @@ public class OpenClProvider : AdvancedDataProvider
 
             JsonNode? refClover = null, refRusticl = null, refAmdApp = null;
             
+            // Categorize available OpenCL platforms to correlate devices with their drivers later.
             foreach (var p in platforms)
             {
                 string pName = p?["CL_PLATFORM_NAME"]?.ToString() ?? "";
@@ -56,7 +65,7 @@ public class OpenClProvider : AdvancedDataProvider
                 else if (refAmdApp == null && !pName.Contains("Clover") && !pName.Contains("rusticl")) refAmdApp = p;
             }
 
-            // Pobierz nazwę karty z ViewModela (tutaj musimy ją mieć, więc trick z Probe)
+            // Retrieve the authoritative device name for the selected GPU ID to filter the OpenCL device list.
             string appGpuName = "Unknown";
             if (selectedGpu != null)
             {
@@ -79,29 +88,29 @@ public class OpenClProvider : AdvancedDataProvider
                     JsonNode? platform = null;
                     string impl = "Unknown";
 
-                    // 1. RUSTICL (radeonsi + ver >= 3.0)
+                    // Determine the OpenCL implementation based on device name heuristics and versioning.
+                    // 1. Rusticl: Identified by 'radeonsi' and OpenCL version >= 3.0.
                     if (devName.Contains("radeonsi", StringComparison.OrdinalIgnoreCase) && verNum >= 3.0f)
                     {
                         impl = "Rusticl";
                         platform = refRusticl;
                     }
-                    // 2. CLOVER (radeonsi + ver < 2.0) - USUNIĘTO WARUNEK "Mesa"
+                    // 2. Clover: Identified by 'radeonsi' and OpenCL version < 2.0.
                     else if (devName.Contains("radeonsi", StringComparison.OrdinalIgnoreCase) && verNum < 2.0f)
                     {
                         impl = "Clover";
                         platform = refClover;
                     }
-                    // 3. AMD APP (Brak "radeonsi")
+                    // 3. AMD APP: Default proprietary driver when 'radeonsi' is absent.
                     else if (!devName.Contains("radeonsi", StringComparison.OrdinalIgnoreCase))
                     {
                         impl = "AMD APP";
                         platform = refAmdApp;
-                        
                     }
 
                     if (platform != null)
                     {
-                        // Matchowanie nazwy
+                        // Match the OpenCL device against the selected GPU name to ensure we only display relevant data.
                         string dispName = devName;
                         var board = device["CL_DEVICE_BOARD_NAME_AMD"]?.ToString();
                         if (!string.IsNullOrEmpty(board)) dispName = board;
@@ -121,11 +130,18 @@ public class OpenClProvider : AdvancedDataProvider
         catch (Exception ex) { AddRow(list, "Error", $"OpenCL logic failed: {ex.Message}"); }
     }
 
+    /// <summary>
+    /// Populates the ViewModel collection with detailed OpenCL properties, memory stats, and capabilities.
+    /// </summary>
+    /// <param name="list">The target collection.</param>
+    /// <param name="device">The JSON node representing the OpenCL device.</param>
+    /// <param name="platform">The JSON node representing the OpenCL platform.</param>
+    /// <param name="implType">The determined implementation type (e.g., Rusticl, Clover).</param>
     private void RenderDevice(ObservableCollection<AdvancedItemViewModel> list, JsonNode device, JsonNode? platform, string implType)
     {
         string platformName = platform?["CL_PLATFORM_NAME"]?.ToString() ?? "Unknown";
         
-        // --- NAGŁÓWEK ---
+        // --- HEADER ---
         AddRow(list, $"Implementation: {implType}", "", true); 
 
         // --- GENERAL ---
@@ -149,7 +165,7 @@ public class OpenClProvider : AdvancedDataProvider
         AddRow(list, "Compute Units", device["CL_DEVICE_MAX_COMPUTE_UNITS"]?.ToString());
         AddRow(list, "Max Clock", $"{device["CL_DEVICE_MAX_CLOCK_FREQUENCY"]} MHz");
         
-        // AMD Specifics
+        // AMD Specific properties
         var simdPerCu = device["CL_DEVICE_SIMD_PER_COMPUTE_UNIT_AMD"];
         if (simdPerCu != null) AddRow(list, "SIMD per CU", simdPerCu.ToString());
         
@@ -166,7 +182,7 @@ public class OpenClProvider : AdvancedDataProvider
             AddRow(list, "GFX IP (AMD)", ipVer);
         }
 
-        // --- FLOATING POINT CONFIG (ROZBITE NA WIERSZE) ---
+        // --- FLOATING POINT CONFIG ---
         AddRow(list, "Floating Point Capabilities", "", true);
         RenderFlagsList(list, "Single Precision (FP32)", device["CL_DEVICE_SINGLE_FP_CONFIG"], "CL_FP_");
         RenderFlagsList(list, "Double Precision (FP64)", device["CL_DEVICE_DOUBLE_FP_CONFIG"], "CL_FP_");
@@ -187,7 +203,7 @@ public class OpenClProvider : AdvancedDataProvider
         if (long.TryParse(device["CL_DEVICE_LOCAL_MEM_SIZE"]?.ToString(), out long localMem))
             AddRow(list, "Local Memory", $"{FormatSizeKb(localMem)} ({device["CL_DEVICE_LOCAL_MEM_TYPE"]?.ToString()?.Replace("CL_", "")})"); 
 
-        // --- SVM & QUEUES (ROZBITE NA WIERSZE) ---
+        // --- SVM & QUEUES ---
         AddRow(list, "Queue & SVM", "", true);
         RenderFlagsList(list, "SVM Support", device["CL_DEVICE_SVM_CAPABILITIES"], "CL_DEVICE_SVM_");
         RenderFlagsList(list, "Queue On Host", device["CL_DEVICE_QUEUE_ON_HOST_PROPERTIES"], "CL_QUEUE_");
@@ -207,7 +223,7 @@ public class OpenClProvider : AdvancedDataProvider
         if (workItemSizes != null)
             AddRow(list, "Max Work Item Sizes", string.Join(" x ", workItemSizes));
 
-        // WARUNKOWE WYŚWIETLANIE OBRAZÓW (dla Clover i innych bez wsparcia)
+        // Conditionally render image support details; older drivers like Clover might lack support.
         string imgSupport = device["CL_DEVICE_IMAGE_SUPPORT"]?.ToString()?.ToLower() ?? "false";
         if (imgSupport == "true")
         {
@@ -254,8 +270,14 @@ public class OpenClProvider : AdvancedDataProvider
         AddRow(list, " ", " "); 
     }
 
-
-    // Helper do wyświetlania flag w osobnych wierszach (jak w GPU-Z / Vulkan Memory)
+    /// <summary>
+    /// Renders capability flags as individual rows, mirroring the style of tools like GPU-Z.
+    /// Handles JSON polymorphism where flags may appear as objects or arrays.
+    /// </summary>
+    /// <param name="list">The target collection.</param>
+    /// <param name="headerName">The category header name.</param>
+    /// <param name="node">The JSON node containing the flags.</param>
+    /// <param name="prefixToRemove">The API prefix to strip for readability (e.g., "CL_FP_").</param>
     private void RenderFlagsList(ObservableCollection<AdvancedItemViewModel> list, string headerName, JsonNode? node, string prefixToRemove)
     {
         if (node == null)
@@ -266,26 +288,22 @@ public class OpenClProvider : AdvancedDataProvider
 
         JsonArray? items = null;
 
-        // Przypadek 1: Obiekt z kluczem (np. "config", "capabilities", "queue_prop")
+        // Case 1: Node is an object containing specific keys (config, capabilities, queue_prop).
         if (node is JsonObject obj)
         {
             if (obj.ContainsKey("config")) items = obj["config"] as JsonArray;
             else if (obj.ContainsKey("capabilities")) items = obj["capabilities"] as JsonArray;
             else if (obj.ContainsKey("queue_prop")) items = obj["queue_prop"] as JsonArray;
         }
-        // Przypadek 2: Bezpośrednia tablica (rzadziej w clinfo, ale możliwe)
+        // Case 2: Node is a direct array (less common in current clinfo versions but possible).
         else if (node is JsonArray arr)
         {
             items = arr;
         }
 
-        // Renderowanie
         if (items != null && items.Count > 0)
         {
-            // Opcja A: Pierwszy element w linii nagłówka, reszta pod spodem (oszczędność miejsca)
-            // Opcja B: Nagłówek w osobnej linii, flagi pod spodem (czytelniej) -> Wybieramy opcję C (jak w Vulkan)
-            
-            // Opcja C: Powtarzamy nagłówek dla każdej flagi
+            // Iterate and display each flag with the header repeated for clarity.
             foreach (var item in items)
             {
                 string flagName = item?.ToString().Replace(prefixToRemove, "").Trim() ?? "";
@@ -297,14 +315,16 @@ public class OpenClProvider : AdvancedDataProvider
         }
         else
         {
-            // Jeśli pusta lista lub wartość 0
+            // Handle empty lists or '0' raw values indicating no support.
             string val = node["raw"]?.ToString();
             if (val == "0") AddRow(list, headerName, "None");
             else AddRow(list, headerName, "No capabilities reported");
         }
     }
 
-
+    /// <summary>
+    /// Extracts the numeric version from an OpenCL version string (e.g., "OpenCL 3.0").
+    /// </summary>
     private float ParseVer(string s)
     {
         var m = Regex.Match(s ?? "", @"OpenCL\s+(\d+\.\d+)");

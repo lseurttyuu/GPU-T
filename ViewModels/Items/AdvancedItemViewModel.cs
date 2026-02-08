@@ -9,7 +9,6 @@ public partial class AdvancedItemViewModel : ObservableObject
     [ObservableProperty] private string _name = "";
     [ObservableProperty] private string _value = "";
     
-    // Nowa właściwość do sterowania tłem wiersza
     [ObservableProperty] private IBrush _background;
 
     public AdvancedItemViewModel(string name, string value, bool isHeader, string hexColor)
@@ -18,7 +17,6 @@ public partial class AdvancedItemViewModel : ObservableObject
         Name = name;
         Value = value;
         
-        // Konwersja hex string na Brush
         Background = Brush.Parse(hexColor);
     }
 }

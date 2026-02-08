@@ -1,28 +1,37 @@
+<!-- filepath: /home/mike/Dokumenty/Visual Studio Code/Projekty/GPU-T/Views/AdvancedView.axaml -->
+<!-- UserControl bound to MainWindowViewModel; provides categorized advanced properties with a selectable category filter. -->
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:GPU_T.ViewModels"
              x:Class="GPU_T.Views.AdvancedView"
              x:DataType="vm:MainWindowViewModel">
 
+    <!-- Two-row layout: category selector (top) and a bordered scrollable content area (bottom). -->
     <Grid RowDefinitions="Auto, *">
         
+        <!-- Category selector bound to AdvancedCategories and SelectedAdvancedCategory on the view model. -->
         <ComboBox Grid.Row="0" 
                   ItemsSource="{Binding AdvancedCategories}"
                   SelectedItem="{Binding SelectedAdvancedCategory}"
                   Width="365" 
                   Margin="6,10,6,5"/>
 
+        <!-- Container providing a framed scrolling region for advanced items; interior content is driven by AdvancedItems. -->
         <Border Grid.Row="1" 
                 BorderBrush="#A0A0A0" 
                 BorderThickness="1" 
                 Margin="6,0,6,10">
             
+            <!-- Scrollable list of advanced entries; virtualization behavior is controlled by ItemsControl usage. -->
             <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <!-- ItemsControl bound to AdvancedItems; each data item renders either a header or a name/value row based on IsHeader. -->
                 <ItemsControl ItemsSource="{Binding AdvancedItems}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
+                            <!-- Per-item container: Background is bound to the item to allow alternating or grouped visuals. -->
                             <Grid Background="{Binding Background}">
                                 
+                                <!-- Header row: visible when IsHeader is true; displays the section title. -->
                                 <Border IsVisible="{Binding IsHeader}"
                                         Height="28"
                                         BorderBrush="#A0A0A0"
@@ -34,6 +43,7 @@
                                                Margin="4,0,0,3"/> 
                                 </Border>
 
+                                <!-- Standard name/value row: rendered when IsHeader is false; two-column layout aligns labels and values. -->
                                 <Grid ColumnDefinitions="*, *" 
                                       IsVisible="{Binding !IsHeader}"
                                       Height="18">

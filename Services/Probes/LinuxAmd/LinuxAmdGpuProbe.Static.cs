@@ -6,8 +6,18 @@ using System.Diagnostics;
 
 namespace GPU_T.Services.Probes.LinuxAmd;
 
+/// <summary>
+/// Provides static hardware and capability discovery for AMD GPUs on Linux.
+/// Contains logic to read sysfs, invoke platform utilities, and compute derived specifications.
+/// </summary>
 public partial class LinuxAmdGpuProbe
 {
+    /// <summary>
+    /// Loads static data describing the GPU, driver, and capabilities.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="GpuStaticData"/> instance populated from sysfs, vendor databases, and utility probes.
+    /// </returns>
     public GpuStaticData LoadStaticData()
     {
         if (!Directory.Exists(_basePath))
@@ -22,13 +32,13 @@ public partial class LinuxAmdGpuProbe
 
         double dpmMemMultiplier = 1.0;
         
+        // Apply multiplier when detected memory type implies effective DPM frequency doubling (e.g., GDDR6).
         if (spec != null && !string.IsNullOrEmpty(spec.MemoryType) && 
             spec.MemoryType.Contains("GDDR6", StringComparison.OrdinalIgnoreCase))
         {
             dpmMemMultiplier = 2.0;
         }
 
-        // --- DANE SYSTEMOWE ---
         string vramVendor = ReadFile("mem_info_vram_vendor"); 
         string memTypeDb = spec?.MemoryType ?? "Unknown";
         string finalMemType = !string.IsNullOrEmpty(vramVendor) && vramVendor != "N/A"
@@ -45,11 +55,10 @@ public partial class LinuxAmdGpuProbe
         string driverDate = GetDriverDate();
         string vulkanApi = GetVulkanApiVersion();
 
-        // --- ZEGARY DPM ---
         double maxCoreDpm = GetMaxClockFromDpm("pp_dpm_sclk");
         double maxMemDpm = GetMaxClockFromDpm("pp_dpm_mclk") * dpmMemMultiplier;
 
-        // --- DETEKCJA FUNKCJI ---
+        // Detect presence of optional runtime libraries or capabilities; these checks reflect user-facing feature toggles.
         bool isHipAvailable = File.Exists("/opt/rocm/lib/libamdhip64.so") || 
                               File.Exists("/usr/lib/libamdhip64.so") ||
                               File.Exists("/usr/lib/x86_64-linux-gnu/libamdhip64.so");
@@ -57,7 +66,6 @@ public partial class LinuxAmdGpuProbe
         bool isOpenglAvailable = CheckOpenglSupport();
         bool isRayTracingAvailable = CheckRayTracingSupportVulkan(ids.Device);
 
-        // --- OBLICZENIA ---
         string pixelFill = "N/A";
         string texFill = "N/A";
         string bandwidth = "N/A";
@@ -156,8 +164,15 @@ public partial class LinuxAmdGpuProbe
         };
     }
 
+    /// <summary>
+    /// Represents raw PCI IDs for device and subsystem.
+    /// </summary>
     private record RawIds(string Vendor, string Device, string SubVendor, string SubDevice);
 
+    /// <summary>
+    /// Reads PCI IDs from sysfs files and returns a RawIds record.
+    /// </summary>
+    /// <returns>RawIds containing vendor, device, subvendor, and subdevice IDs.</returns>
     private RawIds GetRawIds()
     {
         try 
@@ -174,6 +189,10 @@ public partial class LinuxAmdGpuProbe
         }
     }
 
+    /// <summary>
+    /// Reads VRAM size from sysfs and returns it as a formatted string.
+    /// </summary>
+    /// <returns>VRAM size in MB, or "0 MB" if unavailable.</returns>
     private string GetVramSize()
     {
         try 
@@ -189,6 +208,10 @@ public partial class LinuxAmdGpuProbe
         return "0 MB";
     }
 
+    /// <summary>
+    /// Retrieves PCIe interface information including capability and current link state.
+    /// </summary>
+    /// <returns>Formatted PCIe capability and current link information.</returns>
     private string GetPcieInfo()
     {
         string maxSpeedStr = ReadFile("max_link_speed");
@@ -252,6 +275,11 @@ public partial class LinuxAmdGpuProbe
         return $"{capability} @ x{currentWidth} {currentGen}";
     }
 
+    /// <summary>
+    /// Maps PCIe GT/s speed to PCIe generation string.
+    /// </summary>
+    /// <param name="gtPerSecond">GT/s speed value.</param>
+    /// <returns>PCIe generation as string.</returns>
     private string SpeedToGen(double gtPerSecond)
     {
         if (gtPerSecond > 30.0) return "5.0";
@@ -261,16 +289,18 @@ public partial class LinuxAmdGpuProbe
         return "1.1";
     }
 
+    /// <summary>
+    /// Determines if Resizable BAR (ReBAR) is enabled using a heuristic based on BAR size and VRAM.
+    /// </summary>
+    /// <returns>"Enabled", "Disabled", "N/A", or "Unknown".</returns>
     private string CheckResizableBar()
     {
         try
         {
-            // 1. Pobieramy całkowitą ilość VRAM (w bajtach) z pliku sterownika
+            // Determine total VRAM in bytes; used to estimate whether a BAR maps most of VRAM (heuristic for ReBAR).
             long totalVram = long.Parse(ReadFile("mem_info_vram_total", "0"));
             if (totalVram == 0) return "N/A";
 
-            // 2. Czytamy plik 'resource', który definiuje fizyczne regiony pamięci PCI (BARs)
-            // Format pliku: start_address end_address flags (hex)
             string resourceContent = ReadFile("resource");
 
             if (string.IsNullOrWhiteSpace(resourceContent)) return "Unknown";
@@ -287,34 +317,26 @@ public partial class LinuxAmdGpuProbe
                 {
                     try
                     {
-                        // Konwersja z HEX na long
                         long start = Convert.ToInt64(parts[0], 16);
                         long end = Convert.ToInt64(parts[1], 16);
 
-                        // Obliczamy rozmiar regionu: (koniec - początek) + 1
                         long size = (end - start) + 1;
 
                         if (size > maxBarSize) maxBarSize = size;
                     }
                     catch
                     {
-                        // Ignorujemy błędy parsowania pojedynczych linii
+                        // Ignore parsing errors for individual resource lines.
                         continue;
                     }
                 }
             }
 
-            // 3. Logika Decyzyjna
-            // Standardowy BAR (bez ReBar) ma zazwyczaj dokładnie 256 MB (268,435,456 bajtów).
-            // Jeśli największy BAR pokrywa ponad 90% całkowitego VRAM, to ReBar jest w pełni aktywny.
-            
+            // Heuristic: if the largest BAR maps more than 90% of VRAM, consider ReBAR enabled.
             if (maxBarSize > (totalVram * 0.9))
             {
                 return "Enabled";
             }
-            
-            // Opcjonalnie: Można by tu dodać wykrywanie "częściowego" ReBar (np. 1GB na karcie 8GB),
-            // ale zazwyczaj interesuje nas Enabled vs Disabled.
             
             return "Disabled";
         }
@@ -324,6 +346,10 @@ public partial class LinuxAmdGpuProbe
         }
     }
 
+    /// <summary>
+    /// Retrieves the real driver version using vulkaninfo or kernel version as fallback.
+    /// </summary>
+    /// <returns>Driver version string.</returns>
     private string GetRealDriverVersion()
     {
         try {
@@ -344,6 +370,10 @@ public partial class LinuxAmdGpuProbe
         return "Unknown";
     }
 
+    /// <summary>
+    /// Retrieves the kernel version using uname.
+    /// </summary>
+    /// <returns>Kernel version string.</returns>
     private string GetKernelVersion()
     {
         try {
@@ -360,6 +390,10 @@ public partial class LinuxAmdGpuProbe
         return "";
     }
 
+    /// <summary>
+    /// Retrieves the Vulkan API version using vulkaninfo.
+    /// </summary>
+    /// <returns>Vulkan API version string or "N/A".</returns>
     private string GetVulkanApiVersion()
     {
         try 
@@ -374,10 +408,7 @@ public partial class LinuxAmdGpuProbe
                 string output = p.StandardOutput.ReadToEnd();
                 p.WaitForExit();
                 
-                // ZMIANA REGEXA:
-                // 1. "apiVersion\s*=\s*" -> Szukamy klucza.
-                // 2. ".*?" -> (Non-greedy) Pomiń wszystko po drodze (np. "4206816 (").
-                // 3. "(\d+\.\d+(?:\.\d+)?)" -> Złap grupę, która MUSI wyglądać jak liczba.liczba(.liczba).
+                // Use a non-greedy search to extract a semantic apiVersion string if present.
                 var match = Regex.Match(output, @"apiVersion\s*=\s*.*?(\d+\.\d+(?:\.\d+)?)");
                 
                 if (match.Success) return match.Groups[1].Value;
@@ -387,6 +418,10 @@ public partial class LinuxAmdGpuProbe
         return "N/A";
     }
 
+    /// <summary>
+    /// Retrieves the driver date from /proc/version.
+    /// </summary>
+    /// <returns>Driver date string or "N/A".</returns>
     private string GetDriverDate()
     {
         try
@@ -408,6 +443,10 @@ public partial class LinuxAmdGpuProbe
         return "N/A";
     }
 
+    /// <summary>
+    /// Retrieves the PCI bus ID from sysfs link or directory name.
+    /// </summary>
+    /// <returns>Bus ID string or "Unknown".</returns>
     private string GetBusId()
     {
         try
@@ -419,6 +458,11 @@ public partial class LinuxAmdGpuProbe
         catch { return "Unknown"; }
     }
 
+    /// <summary>
+    /// Reads the maximum clock value from a DPM file.
+    /// </summary>
+    /// <param name="fileName">DPM file name.</param>
+    /// <returns>Maximum clock value in MHz.</returns>
     private double GetMaxClockFromDpm(string fileName)
     {
         try

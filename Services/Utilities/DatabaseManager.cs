@@ -8,42 +8,59 @@ using GPU_T.Models;
 
 namespace GPU_T.Services;
 
+/// <summary>
+/// Manages the GPU database lifecycle, including initialization, loading, and hash verification.
+/// </summary>
 public static class DatabaseManager
 {
-    // Ścieżka do folderu użytkownika: ~/.local/share/GPU-T/
+    /// <summary>
+    /// Gets the path to the user data folder (~/.local/share/GPU-T/).
+    /// </summary>
     private static readonly string UserDataFolder = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
         "GPU-T");
 
+    /// <summary>
+    /// Gets the path to the database file.
+    /// </summary>
     private static readonly string DbPath = Path.Combine(UserDataFolder, "gpu_db.json");
+
+    /// <summary>
+    /// Gets the path to the database hash file.
+    /// </summary>
     private static readonly string HashPath = Path.Combine(UserDataFolder, "gpu_db.hash");
 
-    // Tutaj trzymamy załadowaną bazę
+    /// <summary>
+    /// Holds the loaded GPU database instance.
+    /// </summary>
     public static GpuDatabaseRoot Database { get; private set; } = new();
 
+    /// <summary>
+    /// Initializes the database, handling internal/external file logic and user modifications.
+    /// </summary>
     public static void Initialize()
     {
         try
         {
-            // 1. Upewnij się, że folder istnieje
+            // Ensures user data folder exists.
             if (!Directory.Exists(UserDataFolder))
                 Directory.CreateDirectory(UserDataFolder);
 
-            // 2. Pobierz treść WBUDOWANEJ bazy (jako string)
+            // Loads internal database JSON and computes its hash.
             string internalJson = ReadInternalResource("avares://GPU-T/Assets/gpu_db.json");
             string internalHash = ComputeHash(internalJson);
 
-            // 3. Sprawdź plik zewnętrzny
+            // Handles external database file scenarios.
             if (!File.Exists(DbPath))
             {
-                // Scenariusz: Pierwsze uruchomienie. Zapisz plik i hash.
+                // First launch: save internal database and hash.
                 File.WriteAllText(DbPath, internalJson);
                 File.WriteAllText(HashPath, internalHash);
                 LoadDatabase(internalJson);
             }
             else
             {
-                // Scenariusz: Plik istnieje. Sprawdzamy czy użytkownik modyfikował.
+                // Existing file: check for user modification.
                 string externalJson = File.ReadAllText(DbPath);
                 string currentExternalHash = ComputeHash(externalJson);
                 
@@ -51,41 +68,30 @@ public static class DatabaseManager
 
                 if (currentExternalHash == originalHash)
                 {
-                    // Użytkownik NIE dotykał pliku.
-                    // Sprawdzamy czy my mamy nowszą wersję w aplikacji.
-                    // (Dla uproszczenia: jeśli hash wewnętrzny jest inny niż zewnętrzny, to znaczy że zrobiliśmy update aplikacji)
+                    // User has not modified the file.
+                    // If internal hash differs, update database for app upgrade.
                     if (internalHash != currentExternalHash)
                     {
-                        // Update aplikacji! Nadpisujemy bezpiecznie.
                         File.WriteAllText(DbPath, internalJson);
                         File.WriteAllText(HashPath, internalHash);
                         LoadDatabase(internalJson);
                     }
                     else
                     {
-                        // Wersje identyczne. Ładujemy z dysku.
                         LoadDatabase(externalJson);
                     }
                 }
                 else
                 {
-                    // Użytkownik ZMODYFIKOWAŁ plik (Hashe się różnią).
-                    // Tutaj powinniśmy wyświetlić okno dialogowe.
-                    // Na potrzeby backendu zrobimy "Safe Update":
-                    // Robimy backup pliku użytkownika, a ładujemy nasz nowy (żeby nie popsuć appki).
-                    // W wersji finalnej tu dodasz logikę "Ask User".
-                    
-                    // Spróbujmy załadować plik użytkownika. Jeśli jest poprawnym JSONem, użyjmy go.
+                    // User has modified the file.
+                    // Attempts safe update and backup if user file is invalid.
                     try 
                     {
                         LoadDatabase(externalJson);
-                        // Jeśli się udało, to znaczy że user ma swoją customową bazę. Zostawiamy ją!
-                        // (Opcjonalnie: można sprawdzić wersję i zapytać o update)
                     }
                     catch
                     {
-                        // Plik użytkownika uszkodzony? Wracamy do default.
-                        File.WriteAllText(DbPath + ".bak", externalJson); // Backup
+                        File.WriteAllText(DbPath + ".bak", externalJson);
                         File.WriteAllText(DbPath, internalJson);
                         File.WriteAllText(HashPath, internalHash);
                         LoadDatabase(internalJson);
@@ -96,28 +102,39 @@ public static class DatabaseManager
         catch (Exception ex)
         {
             Console.WriteLine($"Critical Database Error: {ex.Message}");
-            // Fallback w razie totalnej katastrofy
+            // Fallback to empty database in case of unrecoverable error.
             Database = new GpuDatabaseRoot(); 
         }
     }
 
+    /// <summary>
+    /// Loads the database from a JSON string.
+    /// </summary>
+    /// <param name="json">The JSON content to deserialize.</param>
     private static void LoadDatabase(string json)
     {
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         Database = JsonSerializer.Deserialize<GpuDatabaseRoot>(json, options) ?? new GpuDatabaseRoot();
     }
 
-private static string ReadInternalResource(string uri)
+    /// <summary>
+    /// Reads an internal resource file using Avalonia AssetLoader.
+    /// </summary>
+    /// <param name="uri">The resource URI.</param>
+    /// <returns>The file content as a string.</returns>
+    private static string ReadInternalResource(string uri)
     {
-        // Nowy sposób dla Avalonia 11+
-        // Wymaga: using Avalonia.Platform;
-        
-        // AssetLoader.Open zwraca Stream, więc używamy 'using'
+        // Uses Avalonia AssetLoader to read embedded resources.
         using var stream = AssetLoader.Open(new Uri(uri));
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
     }
 
+    /// <summary>
+    /// Computes the MD5 hash of the provided content and returns it as a hexadecimal string.
+    /// </summary>
+    /// <param name="content">The content to hash.</param>
+    /// <returns>The hexadecimal hash string.</returns>
     private static string ComputeHash(string content)
     {
         using var md5 = MD5.Create();

@@ -7,14 +7,22 @@ using GPU_T.ViewModels;
 
 namespace GPU_T.Services.Advanced;
 
+/// <summary>
+/// Provides general system, driver, and firmware information for advanced GPU diagnostics.
+/// </summary>
 public class GeneralProvider : AdvancedDataProvider
 {
+    /// <summary>
+    /// Loads advanced system, driver, and firmware data into the provided collection.
+    /// </summary>
+    /// <param name="list">The collection to populate with advanced item view models.</param>
+    /// <param name="selectedGpu">The currently selected GPU item, or null if not specified.</param>
     public override void LoadData(ObservableCollection<AdvancedItemViewModel> list, GpuListItem? selectedGpu)
     {
         ResetCounter();
 
-        // 1. System
         AddRow(list, "System", "", true);
+
         string kernel = "Unknown";
         try { kernel = File.ReadAllText("/proc/sys/kernel/osrelease").Trim(); } catch {}
         AddRow(list, "Kernel Version", kernel);
@@ -25,11 +33,12 @@ public class GeneralProvider : AdvancedDataProvider
         string desktop = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP") ?? "Unknown";
         AddRow(list, "Desktop Environment", desktop);
 
-        // 2. Drivers
         AddRow(list, "Graphics Drivers", "", true);
+
         string driverModule = "Unknown";
         try 
         {
+            // Resolves the kernel driver module for the selected GPU by following the symlink in /sys/class/drm.
             var driverPath = $"/sys/class/drm/{selectedGpu?.Id ?? "card0"}/device/driver";
             var dirInfo = new DirectoryInfo(driverPath);
             if (dirInfo.Exists)
@@ -41,17 +50,17 @@ public class GeneralProvider : AdvancedDataProvider
         catch {}
         AddRow(list, "Kernel Driver", driverModule);
 
-        // OpenGL
         CheckOpengl(list);
 
-        // 3. Firmware
         AddRow(list, "Firmware", "", true);
+
         string fwDirPath = $"/sys/class/drm/{selectedGpu?.Id ?? "card0"}/device/fw_version";
         
         if (Directory.Exists(fwDirPath))
         {
             try
             {
+                // Enumerates firmware version files and adds their contents to the list.
                 var files = Directory.GetFiles(fwDirPath, "*_fw_version");
                 Array.Sort(files);
                 foreach (var filePath in files)
@@ -72,6 +81,10 @@ public class GeneralProvider : AdvancedDataProvider
         }
     }
 
+    /// <summary>
+    /// Queries OpenGL and Mesa information using glxinfo and adds relevant details to the list.
+    /// </summary>
+    /// <param name="list">The collection to populate with OpenGL-related information.</param>
     private void CheckOpengl(ObservableCollection<AdvancedItemViewModel> list)
     {
         try
@@ -109,6 +122,7 @@ public class GeneralProvider : AdvancedDataProvider
                 AddRow(list, "Mesa Version", mesaVersion);
                 AddRow(list, "Direct Rendering", directRendering);
 
+                // Detects LLVM software rendering and adds a warning if llvmpipe is present.
                 if (renderer.Contains("LLVM"))
                 {
                     var match = Regex.Match(renderer, @"LLVM\s+([\d\.]+)");

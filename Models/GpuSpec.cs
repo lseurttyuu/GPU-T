@@ -17,5 +17,5 @@ public record GpuSpec(
     string DefBoostClock,
     string DefMemClock,
     string LookupUrl,
-    bool IsExactMatch = true // <--- NOWE POLE
+    bool IsExactMatch = true
 );

@@ -9,8 +9,16 @@ using GPU_T.ViewModels;
 
 namespace GPU_T.Services.Advanced.LinuxAmd;
 
+/// <summary>
+/// Provides advanced diagnostic information about PCI-Express Resizable BAR support for AMD GPUs on Linux.
+/// </summary>
 public class LinuxAmdResizableBarProvider : AdvancedDataProvider
 {
+    /// <summary>
+    /// Loads Resizable BAR and related PCI/firmware information into the provided collection for the selected AMD GPU.
+    /// </summary>
+    /// <param name="list">The collection to populate with advanced item view models.</param>
+    /// <param name="selectedGpu">The currently selected GPU item, or null if not specified.</param>
     public override void LoadData(ObservableCollection<AdvancedItemViewModel> list, GpuListItem? selectedGpu)
     {
         ResetCounter();
@@ -67,6 +75,7 @@ public class LinuxAmdResizableBarProvider : AdvancedDataProvider
                             string sizeStr = t.Substring(sizeStart + 6, sizeEnd - sizeStart - 6); 
                             long bytes = ParseLspciSize(sizeStr);
                             
+                            // Tracks the largest BAR size and presence of 64-bit BAR for Resizable BAR eligibility.
                             if (bytes > maxBarSize) maxBarSize = bytes;
                             if (t.Contains("64-bit")) has64BitBar = true;
 
@@ -80,6 +89,7 @@ public class LinuxAmdResizableBarProvider : AdvancedDataProvider
                 }
             }
 
+            // Determines Resizable BAR status based on maximum BAR size threshold (256MB).
             bool isReBarEnabled = maxBarSize > 268435456; 
 
             AddRow(list, "PCI-Express Resizable BAR", "", true);
@@ -114,7 +124,11 @@ public class LinuxAmdResizableBarProvider : AdvancedDataProvider
         }
     }
 
-
+    /// <summary>
+    /// Parses a size string from lspci output and returns its value in bytes.
+    /// </summary>
+    /// <param name="sizeStr">The size string to parse (e.g., "256M", "1G").</param>
+    /// <returns>The size in bytes as a long integer.</returns>
     private long ParseLspciSize(string sizeStr)
     {
         if (string.IsNullOrEmpty(sizeStr)) return 0;

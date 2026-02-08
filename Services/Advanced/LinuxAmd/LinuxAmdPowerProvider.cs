@@ -5,8 +5,16 @@ using GPU_T.ViewModels;
 
 namespace GPU_T.Services.Advanced.LinuxAmd;
 
+/// <summary>
+/// Provides advanced power, fan, and feature information for AMD GPUs on Linux.
+/// </summary>
 public class LinuxAmdPowerProvider : AdvancedDataProvider
 {
+    /// <summary>
+    /// Loads power limits, fan control, power profiles, and driver features for the selected AMD GPU.
+    /// </summary>
+    /// <param name="list">The collection to populate with advanced item view models.</param>
+    /// <param name="selectedGpu">The currently selected GPU item, or null if not specified.</param>
     public override void LoadData(ObservableCollection<AdvancedItemViewModel> list, GpuListItem? selectedGpu)
     {
         ResetCounter();
@@ -22,6 +30,7 @@ public class LinuxAmdPowerProvider : AdvancedDataProvider
                 foreach (var dir in hwmonDirs)
                 {
                     string namePath = Path.Combine(dir, "name");
+                    // Select the hwmon directory associated with the AMDGPU driver.
                     if (File.Exists(namePath) && File.ReadAllText(namePath).Trim() == "amdgpu")
                     {
                         hwmonPath = dir;
@@ -39,6 +48,7 @@ public class LinuxAmdPowerProvider : AdvancedDataProvider
             string powerCapMin = ReadSysFs(Path.Combine(hwmonPath, "power1_cap_min"));
             string powerCapMax = ReadSysFs(Path.Combine(hwmonPath, "power1_cap_max"));
 
+            // Convert power values from microWatts to Watts for display.
             if (double.TryParse(powerCap, out double pCap)) AddRow(list, "Current Limit (TDP)", $"{pCap / 1000000.0:0.0} W");
             if (double.TryParse(powerCapDefault, out double pDef)) AddRow(list, "Default Limit", $"{pDef / 1000000.0:0.0} W");
             if (double.TryParse(powerCapMin, out double pMin) && double.TryParse(powerCapMax, out double pMax)) AddRow(list, "Allowed Range", $"{pMin / 1000000.0:0.0} W - {pMax / 1000000.0:0.0} W");
@@ -51,6 +61,7 @@ public class LinuxAmdPowerProvider : AdvancedDataProvider
             string pwmMax = ReadSysFs(Path.Combine(hwmonPath, "pwm1_max"));
             if (double.TryParse(pwm, out double pwmVal) && double.TryParse(pwmMax, out double pwmMaxVal))
             {
+                // Calculate PWM percentage for fan signal representation.
                 double percent = (pwmVal / pwmMaxVal) * 100.0;
                 AddRow(list, "Current Signal (PWM)", $"{percent:0}% ({pwmVal}/{pwmMaxVal})");
             }
@@ -67,6 +78,7 @@ public class LinuxAmdPowerProvider : AdvancedDataProvider
                     var lines = File.ReadAllLines(profilePath);
                     foreach (var line in lines)
                     {
+                        // Identifies the currently active power profile by searching for the '*' marker.
                         if (line.Contains("*"))
                         {
                             var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -82,6 +94,7 @@ public class LinuxAmdPowerProvider : AdvancedDataProvider
             if (File.Exists(odPath))
             {
                 AddRow(list, "Overdrive Limits", "", true);
+                // Displays all available overdrive information lines.
                 try { var odLines = File.ReadAllLines(odPath); foreach (var l in odLines) AddRow(list, "OD Info", l); } catch {}
             }
 
@@ -95,6 +108,7 @@ public class LinuxAmdPowerProvider : AdvancedDataProvider
                      foreach (var line in lines)
                      {
                          string l = line.Trim();
+                         // Filter out header and empty lines from feature parsing.
                          if (string.IsNullOrWhiteSpace(l) || l.StartsWith("features high") || l.StartsWith("No. Feature")) continue;
                          var parts = l.Split(':');
                          if (parts.Length == 2)
@@ -103,6 +117,7 @@ public class LinuxAmdPowerProvider : AdvancedDataProvider
                              string leftSide = parts[0];
                              int dotIndex = leftSide.IndexOf('.');
                              int parenIndex = leftSide.IndexOf('(');
+                             // Extract feature name between '.' and '(' for display when present.
                              if (dotIndex != -1 && parenIndex > dotIndex) AddRow(list, leftSide.Substring(dotIndex + 1, parenIndex - dotIndex - 1).Trim(), state);
                              else AddRow(list, leftSide.Trim(), state);
                          }

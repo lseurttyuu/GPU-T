@@ -3,52 +3,61 @@ using GPU_T.Models;
 
 namespace GPU_T.Services;
 
+/// <summary>
+/// Provides lookup and matching utilities for PCI device and vendor IDs against the GPU database.
+/// </summary>
 public static class PciIdLookup
 {
-    // ZMIANA: Metoda przyjmuje teraz revisionId
+    /// <summary>
+    /// Retrieves GPU specification for the given device and revision ID, with fallback logic for variant matching.
+    /// </summary>
+    /// <param name="deviceId">The PCI device ID.</param>
+    /// <param name="revisionId">The revision ID to match.</param>
+    /// <returns>A <see cref="GpuSpec"/> instance if found; otherwise, null.</returns>
     public static GpuSpec? GetSpecs(string deviceId, string revisionId)
     {
-        // Sprawdzamy, czy mamy wpisy dla tego DeviceID
         if (DatabaseManager.Database.Gpus.TryGetValue(deviceId, out var variantsList))
         {
             if (variantsList == null || variantsList.Count == 0) return null;
 
-            // 1. Próba znalezienia dokładnego dopasowania po rewizji
-            // Szukamy wariantu, którego lista 'Revisions' zawiera nasz 'revisionId'
             var exactMatch = variantsList.FirstOrDefault(v => v.Revisions != null && v.Revisions.Contains(revisionId));
 
             if (exactMatch != null)
             {
-                // MAMY TO! Zwracamy dokładne dane
                 return exactMatch.ToGpuSpec(isExactMatch: true);
             }
 
-            // 2. FALLBACK: Nie znaleziono rewizji.
-            // Bierzemy dane techniczne z pierwszego elementu (zakładamy, że architektura jest ta sama)
             var baseVariant = variantsList[0];
 
-            // Łączymy nazwy wszystkich wariantów: "RX 7900 XTX / RX 7900 GRE"
-            // Używamy Distinct(), żeby nie powielać nazw, jeśli występują wielokrotnie
+            // Fallback: present a combined name of all known variants to indicate a best-effort match.
             var combinedName = string.Join(" / ", variantsList.Select(v => v.Name).Distinct());
 
-            // Zwracamy obiekt z flagą IsExactMatch = false
             return baseVariant.ToGpuSpec(isExactMatch: false, overrideName: combinedName);
         }
 
         return null;
     }
 
-    // Ta metoda służy tylko do prostego wyciągnięcia nazwy (np. do listy wyboru),
-    // tutaj możemy zwrócić pierwszą nazwę lub ogólną, jeśli nie znamy rewizji.
+    /// <summary>
+    /// Retrieves the representative device name for the given PCI device ID.
+    /// </summary>
+    /// <param name="deviceId">The PCI device ID.</param>
+    /// <returns>The device name string, or "Unknown AMD GPU" if not found.</returns>
     public static string LookupDeviceName(string deviceId)
     {
         if (DatabaseManager.Database.Gpus.TryGetValue(deviceId, out var list) && list.Count > 0)
         {
-            return list[0].Name; // Zwracamy pierwszą nazwę jako reprezentanta
+            // Returns the first variant name as a representative label.
+            return list[0].Name;
         }
         return "Unknown AMD GPU";
     }
 
+    /// <summary>
+    /// Retrieves the vendor name for the given vendor ID.
+    /// </summary>
+    /// <param name="vendorId">The vendor ID string.</param>
+    /// <returns>The vendor name, or "Unknown (vendorId)" if not found.</returns>
     public static string LookupVendorName(string vendorId)
     {
         if (DatabaseManager.Database.Vendors.TryGetValue(vendorId, out var name))

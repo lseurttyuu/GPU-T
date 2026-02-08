@@ -13,7 +13,7 @@ namespace GPU_T.ViewModels;
 
 public class GpuListItem
 {
-    public string Id { get; set; }          // Np. "card0"
-    public string DisplayName { get; set; } // Np. "AMD Radeon RX 7900 XTX (card0)"
+    public string Id { get; set; }
+    public string DisplayName { get; set; }
     public override string ToString() => DisplayName; 
 }

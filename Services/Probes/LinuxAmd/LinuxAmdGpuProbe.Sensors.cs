@@ -6,8 +6,18 @@ using GPU_T.Models;
 
 namespace GPU_T.Services.Probes.LinuxAmd;
 
+/// <summary>
+/// Provides sensor polling and availability detection for AMD GPUs on Linux.
+/// Contains logic to read sysfs and hwmon sensor values.
+/// </summary>
 public partial class LinuxAmdGpuProbe
 {
+    /// <summary>
+    /// Determines sensor availability for the current AMD GPU.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="SensorAvailability"/> instance indicating which sensors are present.
+    /// </returns>
     public SensorAvailability GetSensorAvailability()
     {
         var avail = new SensorAvailability();
@@ -38,6 +48,12 @@ public partial class LinuxAmdGpuProbe
         return avail;
     }
 
+    /// <summary>
+    /// Loads current sensor values for the AMD GPU and system.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="GpuSensorData"/> instance populated with live sensor readings.
+    /// </returns>
     public GpuSensorData LoadSensorData()
     {
         double coreClk = ReadFreq("freq1", "sclk"); 
@@ -87,6 +103,11 @@ public partial class LinuxAmdGpuProbe
         double cpuTemp = GetCpuTemperature();
         double sysRam = GetSystemRamUsage();
 
+        // Sensor label parsing and assignment logic ensures correct mapping for edge, hotspot, and memory temperatures.
+        // Fan percentage is calculated from PWM values if available.
+        // Power and voltage readings are normalized to standard units.
+        // Memory usage and load values are parsed from sysfs and converted to MB.
+        // CPU and system RAM readings are included for cross-device monitoring.
         return new GpuSensorData
         {
             GpuClock = coreClk,
@@ -107,6 +128,10 @@ public partial class LinuxAmdGpuProbe
         };
     }
 
+    /// <summary>
+    /// Reads the CPU temperature from hwmon directories.
+    /// </summary>
+    /// <returns>CPU temperature in Celsius, or 0 if unavailable.</returns>
     private double GetCpuTemperature()
     {
         try
@@ -137,6 +162,10 @@ public partial class LinuxAmdGpuProbe
         return 0;
     }
 
+    /// <summary>
+    /// Reads system RAM usage from /proc/meminfo.
+    /// </summary>
+    /// <returns>Used RAM in MB, or 0 if unavailable.</returns>
     private double GetSystemRamUsage()
     {
         try
@@ -160,6 +189,11 @@ public partial class LinuxAmdGpuProbe
         return 0;
     }
 
+    /// <summary>
+    /// Extracts a numeric value in kilobytes from a meminfo line.
+    /// </summary>
+    /// <param name="line">A line from /proc/meminfo.</param>
+    /// <returns>Value in kilobytes, or 0 if parsing fails.</returns>
     private double ExtractKb(string line)
     {
         var match = Regex.Match(line, @"(\d+)");
@@ -167,6 +201,12 @@ public partial class LinuxAmdGpuProbe
         return 0;
     }
 
+    /// <summary>
+    /// Reads a frequency value from hwmon, matching the expected label content.
+    /// </summary>
+    /// <param name="prefix">Prefix for hwmon file names.</param>
+    /// <param name="expectedLabelContent">Expected label content to match.</param>
+    /// <returns>Frequency in MHz, or 0 if not matched.</returns>
     private double ReadFreq(string prefix, string expectedLabelContent)
     {
         string label = ReadFileFromHwmon($"{prefix}_label", "").ToLower();
@@ -177,6 +217,12 @@ public partial class LinuxAmdGpuProbe
         return 0;
     }
 
+    /// <summary>
+    /// Reads a file from hwmon and returns its contents, or a fallback value.
+    /// </summary>
+    /// <param name="filename">File name in hwmon directory.</param>
+    /// <param name="fallback">Fallback value if file is missing or unreadable.</param>
+    /// <returns>File contents or fallback value.</returns>
     private string ReadFileFromHwmon(string filename, string fallback)
     {
         if (string.IsNullOrEmpty(_hwmonPath)) return fallback;
@@ -186,6 +232,11 @@ public partial class LinuxAmdGpuProbe
         } catch { return fallback; }
     }
 
+    /// <summary>
+    /// Reads a double value from a hwmon file.
+    /// </summary>
+    /// <param name="filename">File name in hwmon directory.</param>
+    /// <returns>Parsed double value, or 0 if unavailable.</returns>
     private double ReadHwmonDouble(string filename)
     {
         if (string.IsNullOrEmpty(_hwmonPath)) return 0;
@@ -203,6 +254,11 @@ public partial class LinuxAmdGpuProbe
         return 0;
     }
 
+    /// <summary>
+    /// Reads the current clock value from a DPM file.
+    /// </summary>
+    /// <param name="fileName">DPM file name.</param>
+    /// <returns>Current clock as formatted string.</returns>
     private string GetCurrentClock(string fileName)
     {
         try

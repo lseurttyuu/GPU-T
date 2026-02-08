@@ -8,6 +8,9 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace GPU_T.ViewModels;
 
+/// <summary>
+/// Represents a single sensor item including history, statistics and lightweight sparkline generation for the UI.
+/// </summary>
 public enum SensorMode
 {
     Current,
@@ -16,50 +19,76 @@ public enum SensorMode
     Avg
 }
 
+/// <summary>
+/// ViewModel for an individual sensor exposed to the UI. Maintains history, statistics and provides formatted display values.
+/// </summary>
 public partial class SensorItemViewModel : ViewModelBase
 {
     #region PRIVATE FIELDS
 
-    // Konfiguracja
     private readonly bool _isFixedRange;
     private const int GraphWidth = 131; 
     private const double GraphHeight = 18.0; 
 
-    // Dane Wykresu
     private readonly List<double> _graphHistory = new();
     
-    // Dane Statystyczne
     private double _globalMin = double.MaxValue;
     private double _globalMax = double.MinValue;
     private double _globalSum = 0;
     private long _globalCount = 0;
     
-    // Skalowanie Wykresu
     private double _scaleMin = double.MaxValue;
     private double _scaleMax = double.MinValue;
     private bool _hasInitializedScale = false;
 
-    // Stan UI
     private bool _isHovering = false;
 
     #endregion
 
     #region OBSERVABLE PROPERTIES
 
+    /// <summary>
+    /// Sensor display name (generated public property: Name).
+    /// </summary>
     [ObservableProperty] private string _name;
+    /// <summary>
+    /// Sensor unit label (generated public property: Unit).
+    /// </summary>
     [ObservableProperty] private string _unit;
+    /// <summary>
+    /// Formatted display string for the current sensor value (generated public property: DisplayValue).
+    /// </summary>
     [ObservableProperty] private string _displayValue = "---";
+    /// <summary>
+    /// Label representing the current mode (MIN/MAX/AVG) (generated public property: ModeLabel).
+    /// </summary>
     [ObservableProperty] private string _modeLabel = ""; 
+    /// <summary>
+    /// Currently selected display mode (generated public property: CurrentMode).
+    /// </summary>
     [ObservableProperty] private SensorMode _currentMode = SensorMode.Current;
+    /// <summary>
+    /// Points used to render the sparkline polygon (generated public property: GraphPoints).
+    /// </summary>
     [ObservableProperty] private List<Point> _graphPoints;
 
-    // Publiczny dostęp do aktualnej wartości (dla logera)
+    /// <summary>
+    /// Public access to the current raw numeric value (used by loggers and other services).
+    /// </summary>
     public double CurrentValue { get; private set; }
 
     #endregion
 
     #region CONSTRUCTOR
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="SensorItemViewModel"/>.
+    /// </summary>
+    /// <param name="name">Sensor name.</param>
+    /// <param name="unit">Sensor unit string.</param>
+    /// <param name="minLimit">Optional initial minimum scale.</param>
+    /// <param name="maxLimit">Optional initial maximum scale.</param>
+    /// <param name="isFixed">Specifies whether the scale is fixed.</param>
     public SensorItemViewModel(string name, string unit, double? minLimit = null, double? maxLimit = null, bool isFixed = false)
     {
         _name = name;
@@ -67,7 +96,6 @@ public partial class SensorItemViewModel : ViewModelBase
         _graphPoints = new List<Point>();
         _isFixedRange = isFixed;
 
-        // Inicjalizacja limitów startowych
         if (minLimit.HasValue) _scaleMin = minLimit.Value;
         if (maxLimit.HasValue) _scaleMax = maxLimit.Value;
         
@@ -78,21 +106,22 @@ public partial class SensorItemViewModel : ViewModelBase
 
     #region PUBLIC METHODS
 
+    /// <summary>
+    /// Updates the sensor with a new raw value: appends history, updates statistics and regenerates UI data.
+    /// </summary>
+    /// <param name="rawValue">The latest sensor reading.</param>
     public void UpdateValue(double rawValue)
     {
         CurrentValue = rawValue;
 
-        // 1. Historia
         _graphHistory.Add(rawValue);
         if (_graphHistory.Count > GraphWidth) _graphHistory.RemoveAt(0);
 
-        // 2. Statystyki
         _globalCount++;
         _globalSum += rawValue;
         if (rawValue < _globalMin) _globalMin = rawValue;
         if (rawValue > _globalMax) _globalMax = rawValue;
 
-        // 3. Skalowanie Wykresu
         if (!_isFixedRange)
         {
             if (!_hasInitializedScale)
@@ -108,11 +137,13 @@ public partial class SensorItemViewModel : ViewModelBase
             }
         }
 
-        // 4. Update UI
         UpdateDisplayString(rawValue);
         GeneratePolygon();
     }
 
+    /// <summary>
+    /// Resets history and statistics while preserving scale extents derived from history.
+    /// </summary>
     public void Reset()
     {
         _graphHistory.Clear();
@@ -126,11 +157,13 @@ public partial class SensorItemViewModel : ViewModelBase
         
         DisplayValue = "---";
         ModeLabel = "";
-        
-        // Nie resetujemy _scaleMin/_scaleMax (zostają "rozciągnięte" z historii)
     }
 
-    // Interakcja myszą (Hover)
+    /// <summary>
+    /// When hovering over the sparkline, shows the historical value corresponding to the provided x position.
+    /// </summary>
+    /// <param name="xPosition">X coordinate of the cursor relative to the control.</param>
+    /// <param name="actualWidth">Rendered width of the sparkline control.</param>
     public void ShowHistoryAt(double xPosition, double actualWidth)
     {
         if (_graphHistory.Count == 0) return;
@@ -138,7 +171,7 @@ public partial class SensorItemViewModel : ViewModelBase
         _isHovering = true;
         ModeLabel = ""; 
 
-        // Obliczanie indeksu pod kursorem (wykres rysowany od prawej)
+        // Map cursor X to history index. The sparkline is rendered from right-to-left in history buffer.
         double offsetFromRight = actualWidth - xPosition;
         int indexFromEnd = (int)Math.Round(offsetFromRight);
         int index = _graphHistory.Count - 1 - indexFromEnd;
@@ -154,6 +187,9 @@ public partial class SensorItemViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Stops hover mode and restores the standard display string for the current value.
+    /// </summary>
     public void StopHovering()
     {
         _isHovering = false;
@@ -228,7 +264,7 @@ public partial class SensorItemViewModel : ViewModelBase
         double min = _scaleMin;
         double max = _scaleMax;
 
-        // Zapobieganie dzieleniu przez zero
+        // Prevent division by zero when all history values are equal.
         if (Math.Abs(max - min) < 0.001)
         {
             max += 1;
@@ -238,14 +274,14 @@ public partial class SensorItemViewModel : ViewModelBase
         double range = max - min;
         var points = new List<Point>();
 
-        // Punkty zamykające poligon (dół-prawa, dół-lewa)
+        // Closing polygon points at bottom-right and bottom-left.
         points.Add(new Point(width, height)); 
         
         double startX = width - (_graphHistory.Count - 1);
         if (startX < 0) startX = 0;
         points.Add(new Point(startX, height));
 
-        // Punkty wykresu (od lewej do prawej)
+        // Generate graph points left-to-right based on history buffer.
         for (int i = 0; i < _graphHistory.Count; i++)
         {
             double val = _graphHistory[i];
@@ -253,7 +289,7 @@ public partial class SensorItemViewModel : ViewModelBase
             double x = width - (_graphHistory.Count - 1 - i);
             double y = height - ((val - min) / range * height);
             
-            // Clampowanie Y (dla FixedRange)
+            // Clamp Y to the chart boundaries to avoid rendering artifacts.
             if (y < 0) y = 0;
             if (y > height) y = height;
 

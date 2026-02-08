@@ -9,18 +9,31 @@ using GPU_T.Services;
 
 namespace GPU_T.ViewModels;
 
-// ==========================================================
-// CZĘŚĆ 2 - SENSORY I LOGOWANIE
-// ==========================================================
 
+/// <summary>
+/// Partial view model responsible for GPU/CPU sensor management and logging orchestration.
+/// </summary>
 public partial class MainWindowViewModel
 {
     private DispatcherTimer _sensorTimer;
     private string _logFilePath = "";
 
+    /// <summary>
+    /// Backing field for the generated Sensors property.
+    /// Contains the collection of sensor view models displayed in the UI.
+    /// </summary>
     [ObservableProperty] private ObservableCollection<SensorItemViewModel> _sensors;
+
+    /// <summary>
+    /// Backing field for the generated IsLogEnabled property.
+    /// Indicates whether periodic sensor data logging is active.
+    /// </summary>
     [ObservableProperty] private bool _isLogEnabled;
     
+    /// <summary>
+    /// Backing field for the generated RefreshRates property.
+    /// Provides selectable refresh intervals for sensor polling.
+    /// </summary>
     [ObservableProperty] private ObservableCollection<RefreshRateItem> _refreshRates = new()
     {
         new RefreshRateItem { Label = "0.1 s", Seconds = 0.1 },
@@ -32,8 +45,17 @@ public partial class MainWindowViewModel
         new RefreshRateItem { Label = "10.0 s", Seconds = 10.0 },
     };
     
+    /// <summary>
+    /// Backing field for the generated SelectedRefreshRate property.
+    /// When changed, updates the internal polling timer interval.
+    /// </summary>
     [ObservableProperty] private RefreshRateItem _selectedRefreshRate;
 
+    /// <summary>
+    /// Called by the source generator when SelectedRefreshRate changes.
+    /// Updates the dispatcher's timer interval to reflect the selected rate.
+    /// </summary>
+    /// <param name="value">The newly selected refresh rate item.</param>
     partial void OnSelectedRefreshRateChanged(RefreshRateItem value)
     {
         if (_sensorTimer != null && value != null)
@@ -42,6 +64,10 @@ public partial class MainWindowViewModel
         }
     }
 
+    /// <summary>
+    /// Resets all sensor items to their initial state.
+    /// Intended to be invoked from the UI command infrastructure.
+    /// </summary>
     [RelayCommand]
     private void ResetSensors()
     {
@@ -54,6 +80,10 @@ public partial class MainWindowViewModel
         }
     }
 
+    /// <summary>
+    /// Starts CSV logging to the specified file path and writes the CSV header.
+    /// </summary>
+    /// <param name="filePath">Filesystem path to append log rows.</param>
     public void StartLogging(string filePath)
     {
         _logFilePath = filePath;
@@ -61,6 +91,9 @@ public partial class MainWindowViewModel
         WriteLogHeader();
     }
 
+    /// <summary>
+    /// Stops logging and clears the internal log file path.
+    /// </summary>
     public void StopLogging()
     {
         IsLogEnabled = false;
@@ -69,6 +102,7 @@ public partial class MainWindowViewModel
 
     private void InitSensors()
     {
+        // Select the GPU probe ID; if none selected use a sensible default ("card0").
         string gpuId = _selectedGpu?.Id ?? "card0";
         var probe = GpuProbeFactory.Create(gpuId);
         var support = probe.GetSensorAvailability();
@@ -126,6 +160,7 @@ public partial class MainWindowViewModel
     {
         if (_selectedGpu == null) return;
         
+        // Create a probe for the currently selected GPU and memory read type.
         var probe = GpuProbeFactory.Create(_selectedGpu.Id, MemoryType);
         var data = probe.LoadSensorData();
 
@@ -157,7 +192,10 @@ public partial class MainWindowViewModel
                 string row = SensorLogService.BuildDataRow(Sensors);
                 File.AppendAllText(_logFilePath, row + Environment.NewLine);
             }
-            catch { /* Ignore lock errors */ }
+            catch
+            {
+                // Ignore IO locking scenarios during append; logging should not disrupt runtime sensor updates.
+            }
         }
     }
 
@@ -177,6 +215,7 @@ public partial class MainWindowViewModel
         }
         catch (Exception ex)
         {
+            // Log file write failures disable logging to avoid repeated errors; surface the error to the console for diagnostics.
             Console.WriteLine($"Log write error: {ex.Message}");
             StopLogging();
         }
