@@ -17,13 +17,7 @@
 GPU-T is a modern desktop utility built with **.NET** and **Avalonia UI** designed to provide detailed information about your video card and GPU. It reads directly from the Linux kernel (`sysfs`), graphics APIs and the custom hardware database to display low-level hardware specifications, real-time sensors, and advanced feature support.
 
 <p align="center">
-  <img src="docs/readme/gpu_t_main_screenshot.png" alt="Screenshot of GPU-T application (main screen)" width="387">
-</p>
-
-<p float="left">
-  <img src="docs/readme/gpu_t_main_screenshot.png" alt="Screenshot of GPU-T application (main screen)" width="387" />
-  <img src="docs/readme/gpu_t_sensors_screenshot.png" alt="Screenshot of GPU-T application (sensors screen)" width="387" />
-  <img src="docs/readme/gpu_t_advanced_screenshot.png" alt="Screenshot of GPU-T application (advanced tab)" width="387" />
+  <img src="docs/readme/gpu_t_main_screenshot.png" alt="Screenshots of GPU-T application">
 </p>
 
 ## Why create this?
