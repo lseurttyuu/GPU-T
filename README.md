@@ -41,9 +41,9 @@ GPU-T is designed to be a "Single Source of Truth" for your GPU on Linux:
     * **BIOS** and Driver version readout.
     * **Memory** type, vendor, and bus width verification.
     * **Vulkan** version, extensions, and features lookup.
-    * **OpenCL** version, vendor, and other capabilities.
-    * **VA-API** status, including encode & decode capabilities.
-* **Vendor-Agnostic Architecture:** Built with a modular architecture. Currently supports **AMD Radeon** GPUs (using `amdgpu` driver), but is designed to support NVIDIA and Intel ARC in the future.
+    * **OpenCL** version, vendor, and other capabilities lookup.
+    * **VA-API** status, including encode & decode capabilities lookup.
+* **Vendor-Agnostic Architecture:** Built with a modular architecture. Currently supports **AMD Radeon** GPUs (using `amdgpu` driver), but is designed to support NVIDIA and Intel in the future.
 * **TechPowerUp Lookup:** Directly open the TechPowerUp website to verify data about your specific GPU model.
 
 ## Supported Hardware
@@ -66,11 +66,13 @@ GPU-T relies on standard Linux utilities to fetch API-specific information. Ensu
 * `lspci` (for ReBAR detection)
 
 ### Installation
-1.  Download the latest release (or AppImage) from the **Releases** tab.
-2.  Mark the file as executable: `chmod +x GPU-T`.
+1.  Download the latest AppImage from the **Releases** tab.
+2.  Mark the file as executable: `chmod +x GPU-T.AppImage`.
 3.  Run the application.
 
 *Note: No root privileges are required, as the app reads user-accessible paths in `/sys/class/drm`.*
+
+*Note 2: The application has been verified on Debian 13 and Ubuntu 22.04. It is expected to work on most modern Linux distributions.*
 
 ## Building from Source
 
@@ -78,7 +80,7 @@ Requirements: **.NET SDK 9.0 or newer**.
 
 1.  Clone the repository:
     ```bash
-    git clone [https://github.com/lseurttyuu/GPU-T](https://github.com/lseurttyuu/GPU-T)
+    git clone https://github.com/lseurttyuu/GPU-T
     cd GPU-T
     ```
 2.  Restore dependencies and build:
@@ -87,7 +89,7 @@ Requirements: **.NET SDK 9.0 or newer**.
     ```
 3.  Run the application:
     ```bash
-    dotnet run --project GPU-T
+    dotnet run
     ```
 
 ## Architecture
@@ -95,8 +97,8 @@ Requirements: **.NET SDK 9.0 or newer**.
 For developers interested in the code, GPU-T uses a clean **MVVM** architecture with a focus on modularity:
 
 * **Services Layer:** Separated into `Probes` (hardware polling), `Advanced` (API providers), and `Utilities`.
-* **Factory Pattern:** A `GpuProbeFactory` determines the GPU vendor at runtime and injects the correct logic (e.g., `LinuxAmdGpuProbe`), making it easy to add Nvidia/Intel support in the future without touching the UI code.
-* **Database:** A local JSON database handles static specs, supporting user overrides and automatic updates for new hardware definitions. Want to modify the database that your GPU-T uses? Just head over to `~/.local/share/GPU-T/` and modify the JSON file.
+* **Factory Pattern:** A `GpuProbeFactory` determines the GPU vendor at runtime and injects the correct logic (e.g., `LinuxAmdGpuProbe`), making it easy to add Nvidia/Intel support in the future practically without touching the UI code.
+* **Database:** A local JSON database handles static specs, supporting user overrides and updates (when provided) for new hardware definitions. Want to modify the database that your GPU-T uses? Just head over to `~/.local/share/GPU-T/` and modify the JSON file.
 
 ## Built With
 

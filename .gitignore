@@ -1,6 +1,9 @@
 bin/
+AppImageBuild/
 obj/
+Releases/
 .vscode/
 *.user
 .DS_Store
 Thumbs.db
+appimagetool-x86_64.AppImage
