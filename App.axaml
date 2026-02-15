@@ -39,19 +39,16 @@
             <Setter Property="CornerRadius" Value="0"/>
             <Setter Property="Margin" Value="0,1"/>
             <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Background" Value="#f1f1f1"/>
             <Setter Property="BorderBrush" Value="#a2a2a2"/>
             <Setter Property="BorderThickness" Value="1,1,0,0"/>
         </Style>
 
         <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
-            <Setter Property="Background" Value="#f1f1f1"/>
             <Setter Property="BorderBrush" Value="#a2a2a2"/>
             <Setter Property="BorderThickness" Value="1,1,0,0"/>
         </Style>
 
         <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
-            <Setter Property="Background" Value="#f1f1f1"/>
             <Setter Property="BorderBrush" Value="#a2a2a2"/>
             <Setter Property="BorderThickness" Value="1,1,0,0"/>
         </Style>
@@ -65,7 +62,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Template">
                 <ControlTemplate>
-                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                    <StackPanel Orientation="Horizontal">
                         <Border Name="PART_Border"
                                 Width="13" Height="13"
                                 Background="#FFFFFF"
@@ -85,8 +82,7 @@
                         <ContentPresenter Content="{TemplateBinding Content}"
                                           Margin="5,0,0,0"
                                           VerticalAlignment="Center"
-                                          FontSize="11"
-                                          Foreground="Black"/>
+                                          FontSize="11"/>
                     </StackPanel>
                 </ControlTemplate>
             </Setter>
@@ -139,14 +135,12 @@
         <Style Selector="TextBlock.SensorName">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="4,0,0,0"/> <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Foreground" Value="Black"/>
         </Style>
 
         <Style Selector="TextBlock.SensorValue">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
             <Setter Property="Margin" Value="0,0,4,0"/> <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Foreground" Value="Black"/>
         </Style>
 
         <Style Selector="TextBlock.ModeLabel">

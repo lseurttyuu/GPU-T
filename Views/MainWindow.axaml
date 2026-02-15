@@ -15,7 +15,8 @@
         x:Name="MainWnd"
         Icon="/Assets/app_icon.png"
         Title="GPU-T"
-        Background="#f1f1f1">
+        Background="{DynamicResource ApplicationPageBackgroundThemeBrush}"
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}">
 
     <!-- Design-time DataContext to enable designer previews for the MainWindowViewModel. -->
     <Design.DataContext>
