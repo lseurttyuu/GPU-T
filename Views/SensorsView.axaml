@@ -60,7 +60,7 @@
                                   PointerExited="Graph_PointerExited">
                                 
                                 <!-- Clipped drawing surface bound to GraphPoints; the polygon is a low-cost visual representation of recent history. -->
-                                <Border Background="#f1f1f1" ClipToBounds="True" Margin="1">
+                                <Border Background="{DynamicResource ApplicationPageBackgroundThemeBrush}" ClipToBounds="True" Margin="1">
                                     <Polygon Points="{Binding GraphPoints}"
                                              Fill="#FF0000"
                                              Stroke="#FF0000"
