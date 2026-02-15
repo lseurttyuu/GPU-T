@@ -54,18 +54,30 @@ Currently, the application is fully implemented for **AMD Radeon** GPUs on Linux
 - [ ] **NVIDIA GeForce** (Architecture ready, implementation planned)
 - [ ] **Intel Arc** (Architecture ready, implementation planned)
 
-## Quick Start
+## Roadmap
 
-### Prerequisites
-GPU-T relies on standard Linux utilities to fetch API-specific information. Ensure the following are installed on your system (the app works without these, but will show more info / more accurate info with these):
+Based on community feedback, here is the current priority list:
 
-* `vulkan-tools` (provides `vulkaninfo`)
-* `clinfo` (for OpenCL detection)
-* `mesa-utils` (provides `glxinfo` for OpenGL)
-* `vainfo` (for Multimedia capabilities readout)
-* `lspci` (for ReBAR detection)
+- [ ] **Critical Bug Fixes:** Resolving UI issues, specifically the "white-on-white" text visibility in certain Desktop Environments (Dark Themes).
+- [ ] **NVIDIA & Intel Support:** High priority. Work will begin on the backend architecture once the AMD implementation is more stable.
+- [ ] **Flatpak Support:** Planned for easier installation on Steam Deck (SteamOS) and immutable distros once the app reaches a more mature state.
 
-### Installation
+## Installation
+
+### 1. Arch Linux (AUR)
+Thanks to community maintainers, Arch users can install via the AUR:
+```bash
+yay -S gpu-t-git
+```
+
+### 2. AppMan (AM)
+You can install via the `am` package manager:
+```bash
+am -i gpu-t
+```
+
+### 3. Universal AppImage
+
 1.  Download the latest AppImage from the **Releases** tab.
 2.  Mark the file as executable: `chmod +x GPU-T.AppImage`.
 3.  Run the application.
@@ -73,6 +85,16 @@ GPU-T relies on standard Linux utilities to fetch API-specific information. Ensu
 *Note: No root privileges are required, as the app reads user-accessible paths in `/sys/class/drm`.*
 
 *Note 2: The application has been verified on Debian 13 and Ubuntu 22.04. It is expected to work on most modern Linux distributions.*
+
+## Prerequisites
+GPU-T relies on standard Linux utilities to fetch API-specific information. Ensure the following are installed on your system (the app works without these, but will show more info / more accurate info with these):
+
+* `vulkan-tools` (provides `vulkaninfo`)
+* `clinfo` (for OpenCL detection)
+* `mesa-utils` (provides `glxinfo` for OpenGL)
+* `vainfo` (for Multimedia capabilities readout)
+* `pciutils` (provides `lspci` for ReBAR detection)
+
 
 ## Building from Source
 
@@ -108,13 +130,18 @@ For developers interested in the code, GPU-T uses a clean **MVVM** architecture 
 
 ## Contributing
 
-Contributions are welcome! If you have an NVIDIA or Intel GPU and want to help implement the NVIDIA/Intel GPUs support, feel free to open a Pull Request. As I do not currently own NVIDIA or Intel hardware, implementing support for these platforms is out of my scope.
+Contributions are welcome! If you have an NVIDIA or Intel GPU and want to help implement the NVIDIA/Intel GPUs support, feel free to open a Pull Request.
 
-## Acknowledgements & Disclaimer
+## Acknowledgements, Credits & Disclaimer
 
 This project is heavily inspired by **GPU-Z** by **TechPowerUp**. It is not an official port, nor is it affiliated with TechPowerUp in any way. GPU-T is a tool designed for Linux users who miss the clarity and utility of the original Windows tool.
 
 Special thanks to the TechPowerUp team for setting the standard in GPU diagnostics and maintaining the extensive [GPU Database](https://www.techpowerup.com/gpu-specs/), which this application links to via the "Lookup" button.
+
+### Community Credits:
+* **yobson** - for submitting and maintaining the AUR package.
+* **dCo3lh0** - for adding GPU-T to the AppMan (AM) database.
+* The **r/linux_gaming** community for the incredible feedback and support!
 
 ---
 <p align="center">
