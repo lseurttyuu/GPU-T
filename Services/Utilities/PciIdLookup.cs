@@ -50,7 +50,7 @@ public static class PciIdLookup
             // Returns the first variant name as a representative label.
             return list[0].Name;
         }
-        return "Unknown AMD GPU";
+        return "Unknown GPU";
     }
 
     /// <summary>

@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using GPU_T.Services.Probes.LinuxAmd;
+using GPU_T.Services.Probes.LinuxNvidia;
 
 namespace GPU_T.Services;
 
@@ -10,26 +12,31 @@ namespace GPU_T.Services;
 public static class GpuProbeFactory
 {
     /// <summary>
-    /// Retrieves a combined list of available GPU cards from all known providers.
+    /// Retrieves a combined list of available GPU cards by scanning /sys/class/drm.
     /// </summary>
     /// <returns>A sorted list of GPU card identifiers.</returns>
     public static List<string> GetAvailableCards()
     {
-        var allCards = new List<string>();
-
-        // Adds AMD cards to the list; future providers will be appended here.
-        allCards.AddRange(LinuxAmdGpuProbe.GetAvailableCards());
-
-        // 2. Future impl: NVIDIA
-        // allCards.AddRange(LinuxNvidiaGpuProbe.GetAvailableCards());
-
-        // 3. Future impl: INTEL
-        // allCards.AddRange(LinuxIntelGpuProbe.GetAvailableCards());
-
-        // Sorting ensures card0 precedes card1 for UI consistency.
-        allCards.Sort();
-        
-        return allCards;
+        var cards = new List<string>();
+        try
+        {
+            var drmDir = "/sys/class/drm/";
+            if (Directory.Exists(drmDir))
+            {
+                var dirs = Directory.GetDirectories(drmDir, "card*");
+                foreach (var dir in dirs)
+                {
+                    var name = Path.GetFileName(dir);
+                    if (Regex.IsMatch(name, @"^card\d+$"))
+                    {
+                        cards.Add(name);
+                    }
+                }
+            }
+        }
+        catch { }
+        cards.Sort();
+        return cards;
     }
 
     /// <summary>
@@ -40,19 +47,18 @@ public static class GpuProbeFactory
     /// <returns>An <see cref="IGpuProbe"/> instance for the detected vendor.</returns>
     public static IGpuProbe Create(string gpuId, string memoryType = "")
     {
-        // Vendor detection logic is prepared for future expansion.
         string vendorId = GetVendorId(gpuId);
 
-        /*
-        if (vendorId == "0x10DE") // NVIDIA
+        if (vendorId == "0X10DE") // NVIDIA
         {
-             return new LinuxNvidiaGpuProbe(gpuId); 
+            return new LinuxNvidiaGpuProbe(gpuId);
         }
-        else if (vendorId == "0x8086") // INTEL
-        {
-             return new LinuxIntelGpuProbe(gpuId);
-        }
-        */
+
+        // Future: Intel (0x8086)
+        // if (vendorId == "0X8086")
+        // {
+        //     return new LinuxIntelGpuProbe(gpuId);
+        // }
 
         // Default to AMD provider; memoryType is passed for clock multiplier logic.
         return new LinuxAmdGpuProbe(gpuId, memoryType);

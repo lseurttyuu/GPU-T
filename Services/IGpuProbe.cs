@@ -129,4 +129,9 @@ public interface IGpuProbe
     /// <param name="category">The advanced category name.</param>
     /// <returns>An <see cref="AdvancedDataProvider"/> instance or null.</returns>
     AdvancedDataProvider? GetAdvancedDataProvider(string category);
+
+    /// <summary>
+    /// Returns the list of advanced categories supported by this probe.
+    /// </summary>
+    string[] GetAdvancedCategories();
 }
