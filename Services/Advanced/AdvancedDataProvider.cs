@@ -31,8 +31,12 @@ public abstract class AdvancedDataProvider
     protected void AddRow(ObservableCollection<AdvancedItemViewModel> list, string name, string value = "", bool isHeader = false)
     {
         // Alternates row color for UI clarity.
-        string color = (_rowCounter % 2 == 0) ? "#FFFFFF" : "#F4F4F4";
-        list.Add(new AdvancedItemViewModel(name, value, isHeader, color));
+        if(isHeader)
+            ResetCounter();
+
+        bool isAlternate = (_rowCounter % 2 != 0);
+        list.Add(new AdvancedItemViewModel(name, value, isHeader, isAlternate));
+        
         _rowCounter++;
     }
 

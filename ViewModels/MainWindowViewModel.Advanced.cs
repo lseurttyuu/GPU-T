@@ -70,8 +70,8 @@ public partial class MainWindowViewModel
             }
             else
             {
-                list.Add(new AdvancedItemViewModel("Info", "", true, "#FFFFFF"));
-                list.Add(new AdvancedItemViewModel("Status", "Not implemented", false, "#F4F4F4"));
+                list.Add(new AdvancedItemViewModel("Info", "", true, false));
+                list.Add(new AdvancedItemViewModel("Status", "Not implemented", false, true));
             }
         }
 
