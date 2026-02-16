@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "vendors": {
     "1002": "AMD",
     "10DE": "NVIDIA",
@@ -1041,6 +1041,27 @@
       }
     ],
     "687F": [
+      {
+        "name": "AMD Radeon RX Vega 56",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Vega 10",
+        "technology": "14 nm",
+        "dieSize": "495 mm\u00B2",
+        "releaseDate": "Aug 14th, 2017",
+        "transistors": "12500M",
+        "rops": "64",
+        "tmus": "224",
+        "shaders": "3584 Unified",
+        "computeUnits": "56 CU",
+        "memoryType": "HBM2",
+        "busWidth": "2048 bit",
+        "defGpuClock": "1156 MHz",
+        "defBoostClock": "1471 MHz",
+        "defMemClock": "800 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-vega-56.c2993"
+      },
       {
         "name": "AMD Radeon RX Vega 64",
         "revisions": [
@@ -3329,10 +3350,30 @@
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-9070-gre.c4291"
       },
       {
+        "name": "AMD Radeon RX 9070",
+        "revisions": [
+          "C3"
+        ],
+        "codeName": "Navi 48",
+        "technology": "4 nm",
+        "dieSize": "357 mm\u00B2",
+        "releaseDate": "Mar 6th, 2025",
+        "transistors": "53900M",
+        "rops": "128",
+        "tmus": "224",
+        "shaders": "3584 Unified",
+        "computeUnits": "56 CU",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1330 MHz",
+        "defBoostClock": "2520 MHz",
+        "defMemClock": "2518 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-9070.c4250"
+      },
+      {
         "name": "AMD Radeon RX 9070 XT",
         "revisions": [
-          "C0",
-          "C3"
+          "C0"
         ],
         "codeName": "Navi 48",
         "technology": "4 nm",
