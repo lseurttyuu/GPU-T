@@ -1,5 +1,6 @@
 bin/
 AppImageBuild/
+Assets_NotIncluded/
 obj/
 Releases/
 .vscode/
