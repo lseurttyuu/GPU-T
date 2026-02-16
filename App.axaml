@@ -128,7 +128,7 @@
         </Style>
 
         <Style Selector="Border.SensorFrameInner">
-            <Setter Property="BorderBrush" Value="#ffffff"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ApplicationPageBackgroundThemeBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
         </Style>
 

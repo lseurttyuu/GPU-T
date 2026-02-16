@@ -1,4 +1,3 @@
-<!-- filepath: /home/mike/Dokumenty/Visual Studio Code/Projekty/GPU-T/Views/AdvancedView.axaml -->
 <!-- UserControl bound to MainWindowViewModel; provides categorized advanced properties with a selectable category filter. -->
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -18,7 +17,7 @@
 
         <!-- Container providing a framed scrolling region for advanced items; interior content is driven by AdvancedItems. -->
         <Border Grid.Row="1" 
-                BorderBrush="#A0A0A0" 
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
                 BorderThickness="1" 
                 Margin="6,0,6,10">
             
@@ -28,17 +27,25 @@
                 <ItemsControl ItemsSource="{Binding AdvancedItems}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <!-- Per-item container: Background is bound to the item to allow alternating or grouped visuals. -->
-                            <Grid Background="{Binding Background}">
+                            <!-- Per-item container: alternating / grouped visuals. -->
+                            <Grid>
                                 
+                                <Border Grid.ColumnSpan="2"
+                                        Background="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                                        Opacity="0.045"
+                                        IsHitTestVisible="False"
+                                        IsVisible="{Binding IsAlternate}"/>
+                            
                                 <!-- Header row: visible when IsHeader is true; displays the section title. -->
-                                <Border IsVisible="{Binding IsHeader}"
+                                <Border Grid.ColumnSpan="2"
                                         Height="28"
-                                        BorderBrush="#A0A0A0"
-                                        BorderThickness="0,0,0,1">
-                                    <TextBlock Text="{Binding Name}" 
-                                               FontWeight="Bold" 
-                                               Foreground="#000000"
+                                        Background="{DynamicResource ApplicationPageBackgroundThemeBrush}"
+                                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                                        BorderThickness="0,0,0,1"
+                                        IsVisible="{Binding IsHeader}">
+                                     <TextBlock Text="{Binding Name}" 
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
                                                VerticalAlignment="Bottom"
                                                Margin="4,0,0,3"/> 
                                 </Border>
@@ -48,18 +55,21 @@
                                       IsVisible="{Binding !IsHeader}"
                                       Height="18">
                                     
-                                    <Border BorderBrush="#E0E0E0" BorderThickness="0,0,1,1">
+                                    <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                                            BorderThickness="0,0,1,1">
                                         <TextBlock Text="{Binding Name}" 
-                                                   Foreground="Black"
+                                                   Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="4,0,0,0"
                                                    FontSize="11"
                                                    TextTrimming="CharacterEllipsis"/>
                                     </Border>
                                     
-                                    <Border Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                                    <Border Grid.Column="1" 
+                                            BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                                            BorderThickness="0,0,0,1">
                                         <TextBlock Text="{Binding Value}" 
-                                                   Foreground="Black"
+                                                   Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="4,0,0,0"
                                                    FontSize="11"
