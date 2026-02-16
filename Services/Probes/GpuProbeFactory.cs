@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using GPU_T.Services.Probes.LinuxAmd;
+using GPU_T.Services.Probes.LinuxIntel;
 using GPU_T.Services.Probes.LinuxNvidia;
 
 namespace GPU_T.Services;
@@ -54,11 +55,10 @@ public static class GpuProbeFactory
             return new LinuxNvidiaGpuProbe(gpuId);
         }
 
-        // Future: Intel (0x8086)
-        // if (vendorId == "0X8086")
-        // {
-        //     return new LinuxIntelGpuProbe(gpuId);
-        // }
+        if (vendorId == "0X8086") // Intel
+        {
+            return new LinuxIntelGpuProbe(gpuId);
+        }
 
         // Default to AMD provider; memoryType is passed for clock multiplier logic.
         return new LinuxAmdGpuProbe(gpuId, memoryType);

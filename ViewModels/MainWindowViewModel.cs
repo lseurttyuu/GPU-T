@@ -502,7 +502,11 @@ public partial class MainWindowViewModel : ViewModelBase
             return isDark ? "/Assets/nvidia_logo_dark.png" : "/Assets/nvidia_logo.png";
         }
 
-        // AMD and Intel (placeholder) use the same logo with no dark variant
+        if (_currentVendorName == "Intel")
+        {
+            return "/Assets/intel_logo.png";
+        }
+
         return "/Assets/amd_logo.png";
     }
 
