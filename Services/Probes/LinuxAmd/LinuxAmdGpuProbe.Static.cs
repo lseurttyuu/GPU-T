@@ -429,13 +429,34 @@ public partial class LinuxAmdGpuProbe
             if (File.Exists("/proc/version"))
             {
                 string content = File.ReadAllText("/proc/version").Trim();
-                var parts = content.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length > 6)
+
+                int hashIndex = content.LastIndexOf('#');
+                if (hashIndex != -1)
                 {
-                    string day = parts[^4];
-                    string month = parts[^5];
-                    string year = parts[^1];
-                    return $"{day} {month} {year}";
+                    string segment = content.Substring(hashIndex);
+
+                    var dateMatch = Regex.Match(segment, 
+                        @"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun).+", 
+                        RegexOptions.IgnoreCase);
+
+                    if (dateMatch.Success)
+                    {
+                        string datePart = dateMatch.Value;
+
+                        var matchRFC = Regex.Match(datePart, @"(\d{1,2})\s+([a-zA-Z]{3})\s+(\d{4})");
+                        if (matchRFC.Success)
+                        {
+                            return $"{matchRFC.Groups[1].Value} {matchRFC.Groups[2].Value} {matchRFC.Groups[3].Value}";
+                        }
+
+                        var matchStd = Regex.Match(datePart, @"\w{3}\s+([a-zA-Z]{3})\s+(\d{1,2}).+\s(\d{4})");
+                        if (matchStd.Success)
+                        {
+                            return $"{matchStd.Groups[2].Value} {matchStd.Groups[1].Value} {matchStd.Groups[3].Value}";
+                        }
+
+                        return datePart.Replace(",","");
+                    }
                 }
             }
         }
