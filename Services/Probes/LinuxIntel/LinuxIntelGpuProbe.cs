@@ -118,8 +118,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
         bool isRayTracingAvailable = GpuFeatureDetection.CheckRayTracingSupportVulkan(ids.Device);
 
         // OpenCL: check for Intel ICD
-        bool isOpenClAvailable = File.Exists("/etc/OpenCL/vendors/intel.icd") ||
-                                 File.Exists("/etc/OpenCL/vendors/intel_icd.x86_64.icd");
+        bool isOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("intel.icd", "intel_icd.x86_64.icd");
 
         return new GpuStaticData
         {
@@ -162,7 +161,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
             CurrentMemClock = "N/A",
 
             IsOpenClAvailable = isOpenClAvailable,
-            IsVulkanAvailable = vulkanApi != "N/A",
+            IsVulkanAvailable = vulkanApi != "N/A" || GpuFeatureDetection.CheckVulkanIcdInstalled("intel_icd.x86_64.json", "intel_icd.i686.json", "intel_hasvk.json"),
             IsOpenglAvailable = isOpenglAvailable,
             IsRayTracingAvailable = isRayTracingAvailable,
             IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),

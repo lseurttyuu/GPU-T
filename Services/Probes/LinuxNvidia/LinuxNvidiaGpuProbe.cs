@@ -114,14 +114,10 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         bool isRayTracingAvailable = GpuFeatureDetection.CheckRayTracingSupportVulkan(ids.Device);
 
         bool isCudaAvailable = IsNvidiaSmiAvailable() ||
-                               File.Exists("/usr/lib/libcuda.so") ||
-                               File.Exists("/usr/lib/libcuda.so.1") ||
-                               File.Exists("/usr/lib/x86_64-linux-gnu/libcuda.so") ||
-                               File.Exists("/usr/lib/x86_64-linux-gnu/libcuda.so.1");
+                               GpuFeatureDetection.IsNativeLibraryAvailable("libcuda.so.1") ||
+                               GpuFeatureDetection.CheckEglVendorInstalled("10_nvidia.json");
 
-        bool isPhysXEnabled = File.Exists("/usr/lib/libPhysXCommon.so") ||
-                              File.Exists("/usr/lib/x86_64-linux-gnu/libPhysXCommon.so") ||
-                              File.Exists("/usr/lib/libPhysX_static.a");
+        bool isPhysXEnabled = GpuFeatureDetection.IsNativeLibraryAvailable("libPhysXCommon.so");
 
         // Resizable BAR: nvidia-smi doesn't expose this directly, use PCI resource heuristic
         long totalVramBytes = 0;
@@ -133,7 +129,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         }
         string reBarState = GpuFeatureDetection.CheckResizableBar(_basePath, totalVramBytes);
 
-        bool isOpenClAvailable = File.Exists("/etc/OpenCL/vendors/nvidia.icd");
+        bool isOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("nvidia.icd");
 
         return new GpuStaticData
         {
@@ -162,7 +158,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
             IsCudaAvailable = isCudaAvailable,
             IsPhysXEnabled = isPhysXEnabled,
-            IsVulkanAvailable = vulkanApi != "N/A",
+            IsVulkanAvailable = vulkanApi != "N/A" || GpuFeatureDetection.CheckVulkanIcdInstalled("nvidia_icd.json", "nvidia_icd.x86_64.json"),
             IsOpenClAvailable = isOpenClAvailable,
             IsOpenglAvailable = isOpenglAvailable,
             IsRayTracingAvailable = isRayTracingAvailable,

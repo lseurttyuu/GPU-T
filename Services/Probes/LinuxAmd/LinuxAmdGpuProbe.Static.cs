@@ -56,9 +56,7 @@ public partial class LinuxAmdGpuProbe
         double maxMemDpm = GetMaxClockFromDpm("pp_dpm_mclk") * dpmMemMultiplier;
 
         // Detect presence of optional runtime libraries or capabilities; these checks reflect user-facing feature toggles.
-        bool isHipAvailable = File.Exists("/opt/rocm/lib/libamdhip64.so") ||
-                              File.Exists("/usr/lib/libamdhip64.so") ||
-                              File.Exists("/usr/lib/x86_64-linux-gnu/libamdhip64.so");
+        bool isHipAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libamdhip64.so");
 
         bool isOpenglAvailable = CheckOpenglSupport();
         bool isRayTracingAvailable = CheckRayTracingSupportVulkan(ids.Device);
@@ -150,8 +148,8 @@ public partial class LinuxAmdGpuProbe
 
             IsHsaAvailable = isHipAvailable,
             IsRocmAvailable = Directory.Exists("/opt/rocm") || Directory.Exists("/usr/lib/x86_64-linux-gnu/rocm"),
-            IsVulkanAvailable = vulkanApi != "N/A",
-            IsOpenClAvailable = File.Exists("/etc/OpenCL/vendors/amdocl64.icd") || File.Exists("/etc/OpenCL/vendors/mesa.icd"),
+            IsVulkanAvailable = vulkanApi != "N/A" || GpuFeatureDetection.CheckVulkanIcdInstalled("radeon_icd.x86_64.json", "radeon_icd.i686.json"),
+            IsOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("amdocl64.icd", "mesa.icd"),
             IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),
 
             IsCudaAvailable = false,

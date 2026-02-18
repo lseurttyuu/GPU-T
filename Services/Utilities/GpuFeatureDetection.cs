@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace GPU_T.Services.Utilities;
@@ -399,5 +400,86 @@ public static class GpuFeatureDetection
         {
             return ("0000", "0000", "0000", "0000");
         }
+    }
+
+    /// <summary>
+    /// Checks whether a native shared library is loadable via the dynamic linker.
+    /// This is distro-agnostic — it delegates to dlopen, which respects ld.so.conf and LD_LIBRARY_PATH.
+    /// </summary>
+    public static bool IsNativeLibraryAvailable(string libraryName)
+    {
+        try
+        {
+            if (NativeLibrary.TryLoad(libraryName, out IntPtr handle))
+            {
+                NativeLibrary.Free(handle);
+                return true;
+            }
+        }
+        catch { }
+        return false;
+    }
+
+    /// <summary>
+    /// Searches XDG_DATA_DIRS paths for a file matching any of the candidate filenames
+    /// inside the given subdirectory. Falls back to /usr/local/share:/usr/share per XDG spec.
+    /// </summary>
+    private static bool FindInXdgDataDirs(string subdirectory, params string[] candidateFilenames)
+    {
+        string dataDirs = Environment.GetEnvironmentVariable("XDG_DATA_DIRS")
+                          ?? "/usr/local/share:/usr/share";
+
+        foreach (string dir in dataDirs.Split(':'))
+        {
+            if (string.IsNullOrWhiteSpace(dir)) continue;
+            foreach (string filename in candidateFilenames)
+            {
+                if (File.Exists(Path.Combine(dir, subdirectory, filename)))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Checks whether an OpenCL ICD file is installed, searching /etc/OpenCL/vendors/
+    /// and then XDG_DATA_DIRS/OpenCL/vendors/.
+    /// </summary>
+    public static bool CheckOpenClIcdInstalled(params string[] candidateFilenames)
+    {
+        foreach (string filename in candidateFilenames)
+        {
+            if (File.Exists(Path.Combine("/etc/OpenCL/vendors", filename)))
+                return true;
+        }
+        return FindInXdgDataDirs("OpenCL/vendors", candidateFilenames);
+    }
+
+    /// <summary>
+    /// Checks whether a Vulkan ICD JSON is installed, searching /etc/vulkan/icd.d/
+    /// and then XDG_DATA_DIRS/vulkan/icd.d/.
+    /// </summary>
+    public static bool CheckVulkanIcdInstalled(params string[] candidateFilenames)
+    {
+        foreach (string filename in candidateFilenames)
+        {
+            if (File.Exists(Path.Combine("/etc/vulkan/icd.d", filename)))
+                return true;
+        }
+        return FindInXdgDataDirs("vulkan/icd.d", candidateFilenames);
+    }
+
+    /// <summary>
+    /// Checks whether a GLVND EGL vendor JSON is installed, searching /etc/glvnd/egl_vendor.d/
+    /// and then XDG_DATA_DIRS/glvnd/egl_vendor.d/.
+    /// </summary>
+    public static bool CheckEglVendorInstalled(params string[] candidateFilenames)
+    {
+        foreach (string filename in candidateFilenames)
+        {
+            if (File.Exists(Path.Combine("/etc/glvnd/egl_vendor.d", filename)))
+                return true;
+        }
+        return FindInXdgDataDirs("glvnd/egl_vendor.d", candidateFilenames);
     }
 }
