@@ -56,16 +56,16 @@ Currently, the application is fully implemented for **AMD Radeon** GPUs on Linux
 
 ## Roadmap
 
-Based on community feedback, here is the current priority list:
-
-- [ ] **Critical Bug Fixes:** Resolving UI issues, specifically the "white-on-white" text visibility in certain Desktop Environments (Dark Themes).
-- [ ] **NVIDIA & Intel Support:** High priority. Work will begin on the backend architecture once the AMD implementation is more stable.
-- [ ] **Flatpak Support:** Planned for easier installation on Steam Deck (SteamOS) and immutable distros once the app reaches a more mature state.
+Please check out the Discussions tab.
 
 ## Installation
 
 ### 1. Arch Linux (AUR)
 Thanks to community maintainers, Arch users can install via the AUR:
+```bash
+yay -S gpu-t
+```
+Alternatively, for the unstable development version, use:
 ```bash
 yay -S gpu-t-git
 ```
@@ -130,7 +130,7 @@ For developers interested in the code, GPU-T uses a clean **MVVM** architecture 
 
 ## Contributing
 
-Contributions are welcome! If you have an NVIDIA or Intel GPU and want to help implement the NVIDIA/Intel GPUs support, feel free to open a Pull Request.
+Contributions are welcome! If you have an NVIDIA or Intel GPU and want to help implement the NVIDIA/Intel GPUs support, feel free to open a Pull Request. Want to discuss new features? Head over to the Discussions tab.
 
 ## Acknowledgements, Credits & Disclaimer
 
@@ -140,6 +140,7 @@ Special thanks to the TechPowerUp team for setting the standard in GPU diagnosti
 
 ### Community Credits:
 * **yobson** - for submitting and maintaining the AUR package.
+* **yochananmarqos** - for submitting and maintaining the AUR package (stable).
 * **dCo3lh0** - for adding GPU-T to the AppMan (AM) database.
 * The **r/linux_gaming** community for the incredible feedback and support!
 

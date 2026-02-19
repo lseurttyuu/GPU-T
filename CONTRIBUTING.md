@@ -11,8 +11,10 @@ I am a solo maintainer and currently plan to dedicate approximately **1 hour per
 
 ### 🛠️ How to Contribute
 1. **Open an Issue First:** For anything beyond a simple bug fix, please open an issue to discuss the change before writing code.
-2. **Quality over Quantity:** I prefer small, focused Pull Requests that address a single issue. 
-3. **Architecture:** Please follow the existing patterns (e.g., using the `GpuProbeFactory` and staying within the Avalonia/C# ecosystem).
+2. **GPU listed as "Unknown"?** Open an issue and provide the full GPU name/variant along with a GPU-T screenshot. I will update the database as soon as possible.
+3. **Discussion & Roadmap:** Want to discuss new features, the project roadmap, or need help? Head over to the Discussions tab to start a new thread or join an existing one.
+4. **Quality over Quantity:** I prefer small, focused Pull Requests that address a single issue. 
+5. **Architecture:** Please follow the existing patterns (e.g., using the `GpuProbeFactory` and staying within the Avalonia/C# ecosystem).
 
 ### 🚀 Pull Request Requirements
 * **Branching:** Always branch off the latest `main`.
