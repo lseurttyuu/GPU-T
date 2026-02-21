@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "vendors": {
     "1002": "AMD",
     "10DE": "NVIDIA",
@@ -4778,6 +4778,52 @@
         "defBoostClock": "1243 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-wx-7100.c2872"
+      }
+    ],
+    "1638": [
+      {
+        "name": "AMD Radeon Graphics 512SP",
+        "revisions": [
+          "C8"          
+        ],
+        "codeName": "Cezanne",
+        "technology": "7 nm",
+        "dieSize": "180 mm\u00B2",
+        "releaseDate": "Jan 12th, 2021",
+        "transistors": "9800M",
+        "rops": "8",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "2000 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-graphics-512sp.c3768"
+      }
+    ],
+    "164C": [
+      {
+        "name": "AMD Radeon Graphics 512SP Mobile",
+        "revisions": [
+          "C1"          
+        ],
+        "codeName": "Lucienne",
+        "technology": "7 nm",
+        "dieSize": "156 mm\u00B2",
+        "releaseDate": "Jan 12th, 2021",
+        "transistors": "9800M",
+        "rops": "8",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-graphics-512sp-mobile.c4065"
       }
     ],
     "164E": [
