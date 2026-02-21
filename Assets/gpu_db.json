@@ -5405,8 +5405,8 @@
         "dieSize": "N/A",
         "releaseDate": "Aug 28th, 2018",
         "transistors": "N/A",
-        "rops": "N/A",
-        "tmus": "N/A",
+        "rops": "3",
+        "tmus": "24",
         "shaders": "24 EU",
         "computeUnits": "24 EU",
         "memoryType": "DDR4 / LPDDR3",
@@ -5414,7 +5414,7 @@
         "defGpuClock": "300 MHz",
         "defBoostClock": "1150 MHz",
         "defMemClock": "N/A",
-        "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-620.c3206"
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-620-mobile.c2909"
       }
     ]
   }

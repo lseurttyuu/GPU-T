@@ -18,6 +18,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
     private readonly string _basePath;
     private readonly string _hwmonPath;
     private readonly string _gpuId;
+    private readonly string _busId;
 
     /// <summary>
     /// Cached result of nvidia-smi availability check. Null means unchecked.
@@ -34,6 +35,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             var dirs = Directory.GetDirectories($"{_basePath}/hwmon");
             if (dirs.Length > 0) _hwmonPath = dirs[0];
         }
+
+        _busId = GpuFeatureDetection.GetBusId(_basePath);
     }
 
     #region Static Data
@@ -42,6 +45,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
     {
         var ids = GpuFeatureDetection.GetRawPciIds(_basePath);
         string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "").ToUpper();
+
+        var spec = PciIdLookup.GetSpecs(ids.Device, revId);
 
         // Try nvidia-smi first for rich data, fall back to sysfs
         var smiData = QueryNvidiaSmi(
@@ -52,7 +57,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         string deviceName = "Unknown NVIDIA GPU";
         string driverVersion = "Unknown";
         string biosVersion = "Unknown";
-        string busId = GpuFeatureDetection.GetBusId(_basePath);
+        string busId = _busId;
         string memorySize = "N/A";
         string currentGpuClock = "---";
         string currentMemClock = "---";
@@ -99,16 +104,20 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         else
         {
             // Fallback: try to identify from lspci
-            deviceName = GetDeviceNameFromLspci(busId);
+            deviceName = CommonGpuHelpers.GetDeviceNameFromLspci(busId);
             if (string.IsNullOrEmpty(deviceName) || deviceName == "Unknown")
                 deviceName = "Unknown NVIDIA GPU";
 
-            driverVersion = GpuFeatureDetection.GetRealDriverVersion();
+            driverVersion = GpuFeatureDetection.GetNvidiaDriverVersion();
         }
+
+        // Prefer DB name when we have an exact revision match
+        if (spec != null && spec.IsExactMatch)
+            deviceName = spec.Name;
 
         string busInterface = GpuFeatureDetection.GetPcieInfo(_basePath);
         string vulkanApi = GpuFeatureDetection.GetVulkanApiVersion();
-        string driverDate = GpuFeatureDetection.GetDriverDate();
+        string driverDate = GpuFeatureDetection.GetNvidiaDriverDate();
 
         bool isOpenglAvailable = GpuFeatureDetection.CheckOpenglSupport();
         bool isRayTracingAvailable = GpuFeatureDetection.CheckRayTracingSupportVulkan(ids.Device);
@@ -131,10 +140,40 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
         bool isOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("nvidia.icd");
 
+        string pixelFill = "N/A";
+        string texFill = "N/A";
+        string bandwidth = "N/A";
+        string ropsTmus = "N/A";
+        string lookupUrl = "";
+
+        if (spec != null)
+        {
+            lookupUrl = spec.LookupUrl;
+            ropsTmus = $"{spec.Rops} / {spec.Tmus}";
+            double boostClock = CommonGpuHelpers.ExtractNumber(spec.DefBoostClock);
+            double memClock = CommonGpuHelpers.ExtractNumber(spec.DefMemClock);
+            double busWidth = CommonGpuHelpers.ExtractNumber(spec.BusWidth);
+            double rops = CommonGpuHelpers.ExtractNumber(spec.Rops);
+            double tmus = CommonGpuHelpers.ExtractNumber(spec.Tmus);
+
+            if (boostClock > 0 && rops > 0 && tmus > 0)
+            {
+                pixelFill = $"{(boostClock * rops / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GPixel/s";
+                texFill = $"{(boostClock * tmus / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GTexel/s";
+            }
+
+            if (memClock > 0 && busWidth > 0)
+            {
+                double multiplier = CommonGpuHelpers.GetMemoryMultiplier(spec.MemoryType);
+                double bandwidthValue = (memClock * multiplier * busWidth) / 8000.0;
+                bandwidth = $"{bandwidthValue.ToString("0.0", CultureInfo.InvariantCulture)} GB/s";
+            }
+        }
+
         return new GpuStaticData
         {
             DeviceName = deviceName,
-            IsExactMatch = true,
+            IsExactMatch = spec?.IsExactMatch ?? true,
             DeviceId = $"{ids.Vendor} {ids.Device} - {ids.SubVendor} {ids.SubDevice}",
             Subvendor = PciIdLookup.LookupVendorName(ids.SubVendor),
             BusId = busId,
@@ -144,12 +183,26 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             VulkanApi = vulkanApi,
             BusInterface = busInterface,
             ResizableBarState = reBarState,
+            LookupUrl = lookupUrl,
 
+            GpuCodeName = spec?.CodeName ?? "N/A",
             Revision = revId,
+            Technology = spec?.Technology ?? "N/A",
+            DieSize = spec?.DieSize ?? "N/A",
+            ReleaseDate = spec?.ReleaseDate ?? "N/A",
+            Transistors = spec?.Transistors ?? "N/A",
+            RopsTmus = ropsTmus,
+            Shaders = spec?.Shaders ?? "N/A",
+            ComputeUnits = spec?.ComputeUnits ?? "N/A",
+            PixelFillrate = pixelFill,
+            TextureFillrate = texFill,
+            MemoryType = spec?.MemoryType ?? "N/A",
+            BusWidth = spec?.BusWidth ?? "N/A",
+            Bandwidth = bandwidth,
 
-            DefaultGpuClock = maxGpuClock,
-            DefaultBoostClock = maxGpuClock,
-            DefaultMemoryClock = maxMemClock,
+            DefaultGpuClock = spec?.DefGpuClock ?? maxGpuClock,
+            DefaultBoostClock = spec?.DefBoostClock ?? maxGpuClock,
+            DefaultMemoryClock = spec?.DefMemClock ?? maxMemClock,
             CurrentGpuClock = currentGpuClock,
             BoostClock = currentGpuClock,
             CurrentMemClock = currentMemClock,
@@ -205,8 +258,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             gpuClock = ReadHwmonDouble("freq1_input") / 1000000.0;
         }
 
-        double cpuTemp = GetCpuTemperature();
-        double sysRam = GetSystemRamUsage();
+        double cpuTemp = CommonGpuHelpers.GetCpuTemperature();
+        double sysRam = CommonGpuHelpers.GetSystemRamUsage();
 
         return new GpuSensorData
         {
@@ -317,18 +370,19 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
     /// Queries nvidia-smi for the specified fields and returns parsed CSV values.
     /// Returns null if nvidia-smi is unavailable or the query fails.
     /// </summary>
-    private static List<string>? QueryNvidiaSmi(string queryFields)
+    private List<string>? QueryNvidiaSmi(string queryFields)
     {
         if (!IsNvidiaSmiAvailable()) return null;
 
         try
         {
+            string idArg = !string.IsNullOrEmpty(_busId) && _busId != "Unknown"
+                ? $"-i {_busId} " : "";
             string output = ShellHelper.RunCommand("nvidia-smi",
-                $"--query-gpu={queryFields} --format=csv,noheader,nounits");
+                $"{idArg}--query-gpu={queryFields} --format=csv,noheader,nounits");
 
             if (string.IsNullOrEmpty(output)) return null;
 
-            // Take only the first line (first GPU) in case of multi-GPU
             string firstLine = output.Split('\n')[0];
             var values = new List<string>();
             foreach (var val in firstLine.Split(','))
@@ -363,33 +417,6 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
     #region Fallback Helpers
 
-    /// <summary>
-    /// Tries to get the device name from lspci output.
-    /// </summary>
-    private static string GetDeviceNameFromLspci(string busId)
-    {
-        try
-        {
-            string output = ShellHelper.RunCommand("lspci", $"-s {busId}");
-            if (!string.IsNullOrEmpty(output))
-            {
-                // Format: "01:00.0 VGA compatible controller: NVIDIA Corporation GeForce RTX 3080 (rev a1)"
-                int colonIdx = output.IndexOf(": ", StringComparison.Ordinal);
-                if (colonIdx > 0)
-                {
-                    string name = output.Substring(colonIdx + 2).Trim();
-                    // Remove "(rev xx)" suffix
-                    var revMatch = Regex.Match(name, @"\s*\(rev\s+\w+\)\s*$");
-                    if (revMatch.Success)
-                        name = name.Substring(0, revMatch.Index).Trim();
-                    return name;
-                }
-            }
-        }
-        catch { }
-        return "Unknown";
-    }
-
     private double ReadHwmonDouble(string filename)
     {
         if (string.IsNullOrEmpty(_hwmonPath)) return 0;
@@ -404,64 +431,6 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             }
         }
         catch { }
-        return 0;
-    }
-
-    private double GetCpuTemperature()
-    {
-        try
-        {
-            var baseDir = "/sys/class/hwmon/";
-            if (Directory.Exists(baseDir))
-            {
-                foreach (var dir in Directory.GetDirectories(baseDir))
-                {
-                    string namePath = Path.Combine(dir, "name");
-                    if (File.Exists(namePath))
-                    {
-                        string name = File.ReadAllText(namePath).Trim();
-                        if (name == "k10temp" || name == "coretemp")
-                        {
-                            string tempPath = Path.Combine(dir, "temp1_input");
-                            if (File.Exists(tempPath))
-                            {
-                                if (double.TryParse(File.ReadAllText(tempPath), out double val))
-                                    return val / 1000.0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch { }
-        return 0;
-    }
-
-    private double GetSystemRamUsage()
-    {
-        try
-        {
-            if (File.Exists("/proc/meminfo"))
-            {
-                string[] lines = File.ReadAllLines("/proc/meminfo");
-                double total = 0, avail = 0;
-                foreach (var line in lines)
-                {
-                    if (line.StartsWith("MemTotal:")) total = ExtractKb(line);
-                    else if (line.StartsWith("MemAvailable:")) avail = ExtractKb(line);
-                    if (total > 0 && avail > 0) break;
-                }
-                return (total - avail) / 1024.0;
-            }
-        }
-        catch { }
-        return 0;
-    }
-
-    private static double ExtractKb(string line)
-    {
-        var match = Regex.Match(line, @"(\d+)");
-        if (match.Success && double.TryParse(match.Value, out double val)) return val;
         return 0;
     }
 

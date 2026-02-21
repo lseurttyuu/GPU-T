@@ -204,27 +204,87 @@ public static class GpuFeatureDetection
     }
 
     /// <summary>
-    /// Retrieves the driver date from /proc/version.
+    /// Retrieves the kernel driver date from /proc/version using robust regex parsing.
+    /// Suitable for AMD (amdgpu) and Intel (i915/xe) in-tree kernel drivers.
     /// </summary>
-    public static string GetDriverDate()
+    public static string GetKernelDriverDate()
     {
         try
         {
             if (File.Exists("/proc/version"))
             {
                 string content = File.ReadAllText("/proc/version").Trim();
-                var parts = content.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length > 6)
+
+                // The date is in the segment after the last '#' in /proc/version
+                int hashIndex = content.LastIndexOf('#');
+                if (hashIndex >= 0 && hashIndex < content.Length - 1)
                 {
-                    string day = parts[^4];
-                    string month = parts[^5];
-                    string year = parts[^1];
-                    return $"{day} {month} {year}";
+                    string segment = content[(hashIndex + 1)..].Trim();
+
+                    // RFC-style: "1 SMP PREEMPT_DYNAMIC 21 Feb 2026"
+                    var rfcMatch = Regex.Match(segment, @"(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})\s*$");
+                    if (rfcMatch.Success)
+                        return $"{rfcMatch.Groups[1].Value} {rfcMatch.Groups[2].Value} {rfcMatch.Groups[3].Value}";
+
+                    // Standard-style: "1 SMP PREEMPT_DYNAMIC Fri Feb 21 12:34:56 UTC 2026"
+                    var stdMatch = Regex.Match(segment,
+                        @"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Za-z]{3})\s+(\d{1,2})\s+[\d:]+\s+\w+\s+(\d{4})");
+                    if (stdMatch.Success)
+                        return $"{stdMatch.Groups[2].Value} {stdMatch.Groups[1].Value} {stdMatch.Groups[3].Value}";
                 }
             }
         }
         catch { }
         return "N/A";
+    }
+
+    /// <summary>
+    /// Retrieves the NVIDIA proprietary driver version from /proc/driver/nvidia/version.
+    /// Falls back to <see cref="GetRealDriverVersion"/> for nouveau users.
+    /// </summary>
+    public static string GetNvidiaDriverVersion()
+    {
+        try
+        {
+            const string nvidiaVersionPath = "/proc/driver/nvidia/version";
+            if (File.Exists(nvidiaVersionPath))
+            {
+                string content = File.ReadAllText(nvidiaVersionPath);
+                // NVRM line: "NVRM version: NVIDIA UNIX x86_64 Kernel Module  560.35.03  Thu Aug 22 ..."
+                var match = Regex.Match(content, @"NVRM version:.*?\s(\d+\.\d+(?:\.\d+)?)\s");
+                if (match.Success)
+                    return match.Groups[1].Value;
+            }
+        }
+        catch { }
+
+        // Nouveau driver — fall back to generic detection
+        return GetRealDriverVersion();
+    }
+
+    /// <summary>
+    /// Retrieves the NVIDIA proprietary driver date from /proc/driver/nvidia/version.
+    /// Falls back to <see cref="GetKernelDriverDate"/> for nouveau users.
+    /// </summary>
+    public static string GetNvidiaDriverDate()
+    {
+        try
+        {
+            const string nvidiaVersionPath = "/proc/driver/nvidia/version";
+            if (File.Exists(nvidiaVersionPath))
+            {
+                string content = File.ReadAllText(nvidiaVersionPath);
+                // NVRM line: "NVRM version: ... 560.35.03  Thu Aug 22 01:25:42 UTC 2024"
+                var match = Regex.Match(content,
+                    @"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Za-z]{3})\s+(\d{1,2})\s+[\d:]+\s+\w+\s+(\d{4})");
+                if (match.Success)
+                    return $"{match.Groups[2].Value} {match.Groups[1].Value} {match.Groups[3].Value}";
+            }
+        }
+        catch { }
+
+        // Nouveau driver — fall back to kernel date
+        return GetKernelDriverDate();
     }
 
     /// <summary>

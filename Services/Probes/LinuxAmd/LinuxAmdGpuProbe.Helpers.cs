@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -24,36 +23,6 @@ public partial class LinuxAmdGpuProbe
         }
         catch { }
         return fallback;
-    }
-
-    /// <summary>
-    /// Extracts the first numeric value from the input string.
-    /// </summary>
-    /// <param name="input">The input string to parse.</param>
-    /// <returns>The extracted number as a double, or 0 if not found.</returns>
-    private double ExtractNumber(string input)
-    {
-        if (string.IsNullOrEmpty(input)) return 0;
-        var match = Regex.Match(input, @"[\d]+(\.[\d]+)?");
-        if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
-            return result;
-        return 0;
-    }
-
-    /// <summary>
-    /// Determines the memory clock multiplier based on the memory type string.
-    /// </summary>
-    /// <param name="memoryType">The memory type descriptor.</param>
-    /// <returns>The multiplier as a double.</returns>
-    private double GetMemoryMultiplier(string memoryType)
-    {
-        if (string.IsNullOrEmpty(memoryType)) return 1;
-        string type = memoryType.ToUpperInvariant();
-        if (type.Contains("GDDR6") || type.Contains("GDDR6X")) return 8.0; 
-        if (type.Contains("GDDR5") || type.Contains("GDDR5X")) return 4.0; 
-        if (type.Contains("HBM") || type.Contains("HBM2")) return 2.0;     
-        if (type.Contains("DDR")) return 2.0;                              
-        return 1.0; 
     }
 
     /// <summary>

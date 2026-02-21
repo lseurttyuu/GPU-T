@@ -49,7 +49,7 @@ public partial class LinuxAmdGpuProbe
         string reBarState = CheckResizableBar();
 
         string driverVer = GpuFeatureDetection.GetRealDriverVersion();
-        string driverDate = GpuFeatureDetection.GetDriverDate();
+        string driverDate = GpuFeatureDetection.GetKernelDriverDate();
         string vulkanApi = GpuFeatureDetection.GetVulkanApiVersion();
 
         double maxCoreDpm = GetMaxClockFromDpm("pp_dpm_sclk");
@@ -88,11 +88,11 @@ public partial class LinuxAmdGpuProbe
         {
             lookupUrl = spec.LookupUrl;
             ropsTmus = $"{spec.Rops} / {spec.Tmus}";
-            double boostClock = ExtractNumber(spec.DefBoostClock);
-            double memClock = ExtractNumber(spec.DefMemClock);
-            double busWidth = ExtractNumber(spec.BusWidth);
-            double rops = ExtractNumber(spec.Rops);
-            double tmus = ExtractNumber(spec.Tmus);
+            double boostClock = CommonGpuHelpers.ExtractNumber(spec.DefBoostClock);
+            double memClock = CommonGpuHelpers.ExtractNumber(spec.DefMemClock);
+            double busWidth = CommonGpuHelpers.ExtractNumber(spec.BusWidth);
+            double rops = CommonGpuHelpers.ExtractNumber(spec.Rops);
+            double tmus = CommonGpuHelpers.ExtractNumber(spec.Tmus);
 
             if (boostClock > 0 && rops > 0 && tmus > 0)
             {
@@ -102,7 +102,7 @@ public partial class LinuxAmdGpuProbe
 
             if (memClock > 0 && busWidth > 0)
             {
-                double multiplier = GetMemoryMultiplier(spec.MemoryType);
+                double multiplier = CommonGpuHelpers.GetMemoryMultiplier(spec.MemoryType);
                 double bandwidthValue = (memClock * multiplier * busWidth) / 8000.0;
                 bandwidth = $"{bandwidthValue.ToString("0.0", CultureInfo.InvariantCulture)} GB/s";
             }

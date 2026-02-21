@@ -84,7 +84,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
         else
         {
             // Fallback: try to identify from lspci
-            deviceName = GetDeviceNameFromLspci(busId);
+            deviceName = CommonGpuHelpers.GetDeviceNameFromLspci(busId);
             if (string.IsNullOrEmpty(deviceName) || deviceName == "Unknown")
                 deviceName = "Unknown Intel GPU";
             else if (!deviceName.StartsWith("Intel", StringComparison.OrdinalIgnoreCase))
@@ -97,20 +97,14 @@ public class LinuxIntelGpuProbe : IGpuProbe
         string boostClockStr = ReadDrmFile("gt_boost_freq_mhz");
         string curGpuClockStr = ReadDrmFile("gt_cur_freq_mhz");
 
-        // Use sysfs values if database didn't provide defaults
-        if (defaultGpuClock == "N/A" && !string.IsNullOrEmpty(maxGpuClockStr))
-            defaultGpuClock = $"{maxGpuClockStr} MHz";
-        if (defaultBoostClock == "N/A" && !string.IsNullOrEmpty(boostClockStr))
-            defaultBoostClock = $"{boostClockStr} MHz";
-
         string currentGpuClock = !string.IsNullOrEmpty(curGpuClockStr) ? $"{curGpuClockStr} MHz" : "---";
         string currentBoostClock = currentGpuClock;
 
         // Memory: integrated GPUs use shared system RAM
-        string memorySize = GetSharedMemorySize();
+        string memorySize = "System Shared";
 
         string driverVersion = GpuFeatureDetection.GetRealDriverVersion();
-        string driverDate = GpuFeatureDetection.GetDriverDate();
+        string driverDate = GpuFeatureDetection.GetKernelDriverDate();
         string busInterface = GpuFeatureDetection.GetPcieInfo(_basePath);
         string vulkanApi = GpuFeatureDetection.GetVulkanApiVersion();
 
@@ -185,8 +179,8 @@ public class LinuxIntelGpuProbe : IGpuProbe
         // GPU temperature: try i915 hwmon first, then thermal zones
         double gpuTemp = GetGpuTemperature();
 
-        double cpuTemp = GetCpuTemperature();
-        double sysRam = GetSystemRamUsage();
+        double cpuTemp = CommonGpuHelpers.GetCpuTemperature();
+        double sysRam = CommonGpuHelpers.GetSystemRamUsage();
 
         return new GpuSensorData
         {
@@ -252,33 +246,6 @@ public class LinuxIntelGpuProbe : IGpuProbe
         return "";
     }
 
-    /// <summary>
-    /// Gets total system RAM as "Shared (X MB)" for integrated GPUs.
-    /// </summary>
-    private static string GetSharedMemorySize()
-    {
-        try
-        {
-            if (File.Exists("/proc/meminfo"))
-            {
-                string[] lines = File.ReadAllLines("/proc/meminfo");
-                foreach (var line in lines)
-                {
-                    if (line.StartsWith("MemTotal:"))
-                    {
-                        double kb = ExtractKb(line);
-                        if (kb > 0)
-                        {
-                            int mb = (int)(kb / 1024.0);
-                            return $"{mb} MB (Shared)";
-                        }
-                    }
-                }
-            }
-        }
-        catch { }
-        return "N/A";
-    }
 
     /// <summary>
     /// Tries to get the GPU temperature from i915 hwmon or thermal zones.
@@ -340,89 +307,6 @@ public class LinuxIntelGpuProbe : IGpuProbe
         }
         catch { }
 
-        return 0;
-    }
-
-    /// <summary>
-    /// Tries to get the device name from lspci output.
-    /// </summary>
-    private static string GetDeviceNameFromLspci(string busId)
-    {
-        try
-        {
-            string output = ShellHelper.RunCommand("lspci", $"-s {busId}");
-            if (!string.IsNullOrEmpty(output))
-            {
-                int colonIdx = output.IndexOf(": ", StringComparison.Ordinal);
-                if (colonIdx > 0)
-                {
-                    string name = output.Substring(colonIdx + 2).Trim();
-                    var revMatch = Regex.Match(name, @"\s*\(rev\s+\w+\)\s*$");
-                    if (revMatch.Success)
-                        name = name.Substring(0, revMatch.Index).Trim();
-                    return name;
-                }
-            }
-        }
-        catch { }
-        return "Unknown";
-    }
-
-    private double GetCpuTemperature()
-    {
-        try
-        {
-            var baseDir = "/sys/class/hwmon/";
-            if (Directory.Exists(baseDir))
-            {
-                foreach (var dir in Directory.GetDirectories(baseDir))
-                {
-                    string namePath = Path.Combine(dir, "name");
-                    if (File.Exists(namePath))
-                    {
-                        string name = File.ReadAllText(namePath).Trim();
-                        if (name == "k10temp" || name == "coretemp")
-                        {
-                            string tempPath = Path.Combine(dir, "temp1_input");
-                            if (File.Exists(tempPath))
-                            {
-                                if (double.TryParse(File.ReadAllText(tempPath), out double val))
-                                    return val / 1000.0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch { }
-        return 0;
-    }
-
-    private double GetSystemRamUsage()
-    {
-        try
-        {
-            if (File.Exists("/proc/meminfo"))
-            {
-                string[] lines = File.ReadAllLines("/proc/meminfo");
-                double total = 0, avail = 0;
-                foreach (var line in lines)
-                {
-                    if (line.StartsWith("MemTotal:")) total = ExtractKb(line);
-                    else if (line.StartsWith("MemAvailable:")) avail = ExtractKb(line);
-                    if (total > 0 && avail > 0) break;
-                }
-                return (total - avail) / 1024.0;
-            }
-        }
-        catch { }
-        return 0;
-    }
-
-    private static double ExtractKb(string line)
-    {
-        var match = Regex.Match(line, @"(\d+)");
-        if (match.Success && double.TryParse(match.Value, out double val)) return val;
         return 0;
     }
 
