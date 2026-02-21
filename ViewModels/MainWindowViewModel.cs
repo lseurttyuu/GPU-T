@@ -27,6 +27,11 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _currentLookupUrl = "";
 
     /// <summary>
+    /// Tracks the current vendor name so we can refresh the logo when the OS theme changes.
+    /// </summary>
+    private string _currentVendorName = "";
+
+    /// <summary>
     /// Preserves the last user-selected window height when switching tabs that require manual sizing.
     /// </summary>
     private double _lastUserHeight = 525 - 1;
@@ -293,8 +298,6 @@ public partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     public MainWindowViewModel()
     {
-        VendorLogo = LoadBitmapFromAssets("/Assets/amd_logo.png");
-
         var cardIds = GpuProbeFactory.GetAvailableCards();
         AvailableGpus = new ObservableCollection<GpuListItem>();
 
@@ -316,6 +319,17 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         SelectedRefreshRate = RefreshRates.FirstOrDefault(x => x.Seconds == 1.0) ?? RefreshRates[3];
+
+        if (Avalonia.Application.Current is { } app)
+        {
+            app.ActualThemeVariantChanged += (_, _) =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    VendorLogo = LoadBitmapFromAssets(GetVendorLogoPath());
+                });
+            };
+        }
 
         InitSensors();
     }
@@ -461,29 +475,52 @@ public partial class MainWindowViewModel : ViewModelBase
 
 
        if (data.DeviceName.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase))
-        {
-            /* Placeholder for vendor-specific handling (e.g., logo, terminology).
-               Intentionally left for future vendor-specific implementations. */
-            //ComputeUnitsLabel = "SM Count";
-
-        }
+            _currentVendorName = "NVIDIA";
         else if (data.DeviceName.Contains("Intel", StringComparison.OrdinalIgnoreCase))
-        {
-            /* Placeholder for vendor-specific handling (e.g., logo, terminology).
-               Intentionally left for future vendor-specific implementations. */
-            //ComputeUnitsLabel = "Execution Units";
-        }
+            _currentVendorName = "Intel";
+        else if(data.DeviceName.Contains("AMD", StringComparison.OrdinalIgnoreCase) || data.DeviceName.Contains("ATI", StringComparison.OrdinalIgnoreCase))
+            _currentVendorName = "AMD";
         else
-        {
-            VendorLogo = LoadBitmapFromAssets("/Assets/amd_logo.png");
-            /* Default to AMD branding when no other vendor is detected. */
-            //ComputeUnitsLabel = "Compute Units";
-        }
+            _currentVendorName = "Unknown";
+
+        VendorLogo = LoadBitmapFromAssets(GetVendorLogoPath());
+
+        // Update advanced categories based on probe capabilities
+        var categories = probe.GetAdvancedCategories();
+        AdvancedCategories = new System.Collections.ObjectModel.ObservableCollection<string>(categories);
+        if (categories.Length > 0)
+            SelectedAdvancedCategory = categories[0];
 
 
 
     }
 
+
+    private string GetVendorLogoPath()
+    {
+        // For development/testing purposes, we can enable experimental support for Nvidia and Intel to show their logos and test theme responsiveness.
+        if (AppConfig.EnableExperimentalGpuSupport)
+        {
+            if (_currentVendorName == "NVIDIA")
+            {
+                var isDark = Avalonia.Application.Current?.ActualThemeVariant == Avalonia.Styling.ThemeVariant.Dark;
+                return isDark ? "/Assets/nvidia_logo_dark.png" : "/Assets/nvidia_logo.png";
+            }
+
+            if (_currentVendorName == "Intel")
+            {
+                return "/Assets/intel_logo.png";
+            }
+        }
+
+
+        if(_currentVendorName == "AMD")
+        {
+            return "/Assets/amd_logo.png";
+        }
+
+        return "/Assets/unknown_logo.png";
+    }
 
     private Bitmap? LoadBitmapFromAssets(string path)
     {

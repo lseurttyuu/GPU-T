@@ -100,8 +100,8 @@ public partial class LinuxAmdGpuProbe
         if (long.TryParse(ReadFile("mem_info_gtt_used", "0"), out long gttBytes))
             memGttMb = gttBytes / (1024.0 * 1024.0);
 
-        double cpuTemp = GetCpuTemperature();
-        double sysRam = GetSystemRamUsage();
+        double cpuTemp = CommonGpuHelpers.GetCpuTemperature();
+        double sysRam = CommonGpuHelpers.GetSystemRamUsage();
 
         // Sensor label parsing and assignment logic ensures correct mapping for edge, hotspot, and memory temperatures.
         // Fan percentage is calculated from PWM values if available.
@@ -126,79 +126,6 @@ public partial class LinuxAmdGpuProbe
             CpuTemperature = cpuTemp,
             SystemRamUsed = sysRam
         };
-    }
-
-    /// <summary>
-    /// Reads the CPU temperature from hwmon directories.
-    /// </summary>
-    /// <returns>CPU temperature in Celsius, or 0 if unavailable.</returns>
-    private double GetCpuTemperature()
-    {
-        try
-        {
-            var baseDir = "/sys/class/hwmon/";
-            if (Directory.Exists(baseDir))
-            {
-                foreach (var dir in Directory.GetDirectories(baseDir))
-                {
-                    string namePath = Path.Combine(dir, "name");
-                    if (File.Exists(namePath))
-                    {
-                        string name = File.ReadAllText(namePath).Trim();
-                        if (name == "k10temp" || name == "coretemp")
-                        {
-                            string tempPath = Path.Combine(dir, "temp1_input");
-                            if (File.Exists(tempPath))
-                            {
-                                if (double.TryParse(File.ReadAllText(tempPath), out double val))
-                                    return val / 1000.0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch { }
-        return 0;
-    }
-
-    /// <summary>
-    /// Reads system RAM usage from /proc/meminfo.
-    /// </summary>
-    /// <returns>Used RAM in MB, or 0 if unavailable.</returns>
-    private double GetSystemRamUsage()
-    {
-        try
-        {
-            if (File.Exists("/proc/meminfo"))
-            {
-                string[] lines = File.ReadAllLines("/proc/meminfo");
-                double total = 0;
-                double avail = 0;
-
-                foreach (var line in lines)
-                {
-                    if (line.StartsWith("MemTotal:")) total = ExtractKb(line);
-                    else if (line.StartsWith("MemAvailable:")) avail = ExtractKb(line);
-                    if (total > 0 && avail > 0) break;
-                }
-                return (total - avail) / 1024.0;
-            }
-        }
-        catch { }
-        return 0;
-    }
-
-    /// <summary>
-    /// Extracts a numeric value in kilobytes from a meminfo line.
-    /// </summary>
-    /// <param name="line">A line from /proc/meminfo.</param>
-    /// <returns>Value in kilobytes, or 0 if parsing fails.</returns>
-    private double ExtractKb(string line)
-    {
-        var match = Regex.Match(line, @"(\d+)");
-        if (match.Success && double.TryParse(match.Value, out double val)) return val;
-        return 0;
     }
 
     /// <summary>

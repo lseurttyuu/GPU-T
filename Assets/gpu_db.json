@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "vendors": {
     "1002": "AMD",
     "10DE": "NVIDIA",
@@ -5392,6 +5392,29 @@
         "defBoostClock": "2525 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w7800.c4148"
+      }
+    ],
+    "3EA0": [
+      {
+        "name": "Intel UHD Graphics 620",
+        "revisions": [
+          "02"
+        ],
+        "codeName": "Whiskey Lake GT2",
+        "technology": "14 nm",
+        "dieSize": "N/A",
+        "releaseDate": "Aug 28th, 2018",
+        "transistors": "N/A",
+        "rops": "3",
+        "tmus": "24",
+        "shaders": "24 EU",
+        "computeUnits": "24 EU",
+        "memoryType": "DDR4 / LPDDR3",
+        "busWidth": "128 bit",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1150 MHz",
+        "defMemClock": "N/A",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-620-mobile.c2909"
       }
     ]
   }
