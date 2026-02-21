@@ -19,10 +19,7 @@ public partial class MainWindowViewModel
     {
         "General",
         "Vulkan",
-        "OpenCL",
-        "Multimedia (VA-API)",
-        "Power & Limits",
-        "PCIe Resizable BAR"
+        "OpenCL"
     };
 
     /// <summary>

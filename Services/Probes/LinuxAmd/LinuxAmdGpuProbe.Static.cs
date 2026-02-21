@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Diagnostics;
+using GPU_T.Services.Utilities;
 
 namespace GPU_T.Services.Probes.LinuxAmd;
 
@@ -15,9 +15,6 @@ public partial class LinuxAmdGpuProbe
     /// <summary>
     /// Loads static data describing the GPU, driver, and capabilities.
     /// </summary>
-    /// <returns>
-    /// A <see cref="GpuStaticData"/> instance populated from sysfs, vendor databases, and utility probes.
-    /// </returns>
     public GpuStaticData LoadStaticData()
     {
         if (!Directory.Exists(_basePath))
@@ -31,37 +28,35 @@ public partial class LinuxAmdGpuProbe
         var spec = PciIdLookup.GetSpecs(ids.Device, revId);
 
         double dpmMemMultiplier = 1.0;
-        
+
         // Apply multiplier when detected memory type implies effective DPM frequency doubling (e.g., GDDR6).
-        if (spec != null && !string.IsNullOrEmpty(spec.MemoryType) && 
+        if (spec != null && !string.IsNullOrEmpty(spec.MemoryType) &&
             spec.MemoryType.Contains("GDDR6", StringComparison.OrdinalIgnoreCase))
         {
             dpmMemMultiplier = 2.0;
         }
 
-        string vramVendor = ReadFile("mem_info_vram_vendor"); 
+        string vramVendor = ReadFile("mem_info_vram_vendor");
         string memTypeDb = spec?.MemoryType ?? "Unknown";
         string finalMemType = !string.IsNullOrEmpty(vramVendor) && vramVendor != "N/A"
             ? $"{memTypeDb} ({CultureInfo.CurrentCulture.TextInfo.ToTitleCase(vramVendor)})"
             : memTypeDb;
 
-        string finalMemorySize = GetVramSize(); 
+        string finalMemorySize = GetVramSize();
         if (finalMemorySize == "0 MB") finalMemorySize = "N/A";
 
-        string busInterface = GetPcieInfo();
+        string busInterface = GpuFeatureDetection.GetPcieInfo(_basePath);
         string reBarState = CheckResizableBar();
 
-        string driverVer = GetRealDriverVersion();
-        string driverDate = GetDriverDate();
-        string vulkanApi = GetVulkanApiVersion();
+        string driverVer = GpuFeatureDetection.GetRealDriverVersion();
+        string driverDate = GpuFeatureDetection.GetKernelDriverDate();
+        string vulkanApi = GpuFeatureDetection.GetVulkanApiVersion();
 
         double maxCoreDpm = GetMaxClockFromDpm("pp_dpm_sclk");
         double maxMemDpm = GetMaxClockFromDpm("pp_dpm_mclk") * dpmMemMultiplier;
 
         // Detect presence of optional runtime libraries or capabilities; these checks reflect user-facing feature toggles.
-        bool isHipAvailable = File.Exists("/opt/rocm/lib/libamdhip64.so") || 
-                              File.Exists("/usr/lib/libamdhip64.so") ||
-                              File.Exists("/usr/lib/x86_64-linux-gnu/libamdhip64.so");
+        bool isHipAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libamdhip64.so");
 
         bool isOpenglAvailable = CheckOpenglSupport();
         bool isRayTracingAvailable = CheckRayTracingSupportVulkan(ids.Device);
@@ -93,11 +88,11 @@ public partial class LinuxAmdGpuProbe
         {
             lookupUrl = spec.LookupUrl;
             ropsTmus = $"{spec.Rops} / {spec.Tmus}";
-            double boostClock = ExtractNumber(spec.DefBoostClock);
-            double memClock = ExtractNumber(spec.DefMemClock);
-            double busWidth = ExtractNumber(spec.BusWidth);
-            double rops = ExtractNumber(spec.Rops);
-            double tmus = ExtractNumber(spec.Tmus);
+            double boostClock = CommonGpuHelpers.ExtractNumber(spec.DefBoostClock);
+            double memClock = CommonGpuHelpers.ExtractNumber(spec.DefMemClock);
+            double busWidth = CommonGpuHelpers.ExtractNumber(spec.BusWidth);
+            double rops = CommonGpuHelpers.ExtractNumber(spec.Rops);
+            double tmus = CommonGpuHelpers.ExtractNumber(spec.Tmus);
 
             if (boostClock > 0 && rops > 0 && tmus > 0)
             {
@@ -107,7 +102,7 @@ public partial class LinuxAmdGpuProbe
 
             if (memClock > 0 && busWidth > 0)
             {
-                double multiplier = GetMemoryMultiplier(spec.MemoryType);
+                double multiplier = CommonGpuHelpers.GetMemoryMultiplier(spec.MemoryType);
                 double bandwidthValue = (memClock * multiplier * busWidth) / 8000.0;
                 bandwidth = $"{bandwidthValue.ToString("0.0", CultureInfo.InvariantCulture)} GB/s";
             }
@@ -119,12 +114,12 @@ public partial class LinuxAmdGpuProbe
             IsExactMatch = spec?.IsExactMatch ?? true,
             DeviceId = $"{ids.Vendor} {ids.Device} - {ids.SubVendor} {ids.SubDevice}",
             Subvendor = PciIdLookup.LookupVendorName(ids.SubVendor),
-            BusId = GetBusId(),
+            BusId = GpuFeatureDetection.GetBusId(_basePath),
             BiosVersion = ReadFile("vbios_version", "Unknown"),
             DriverVersion = driverVer,
             DriverDate = driverDate,
             VulkanApi = vulkanApi,
-            BusInterface = busInterface, 
+            BusInterface = busInterface,
             ResizableBarState = reBarState,
             LookupUrl = lookupUrl,
 
@@ -146,17 +141,17 @@ public partial class LinuxAmdGpuProbe
             DefaultGpuClock = spec?.DefGpuClock ?? "N/A",
             DefaultBoostClock = spec?.DefBoostClock ?? "N/A",
             DefaultMemoryClock = spec?.DefMemClock ?? "N/A",
-            
+
             CurrentGpuClock = gpuClock,
             BoostClock = boostClockDisplay,
             CurrentMemClock = memClockDisplay,
 
-            IsHsaAvailable = isHipAvailable, 
+            IsHsaAvailable = isHipAvailable,
             IsRocmAvailable = Directory.Exists("/opt/rocm") || Directory.Exists("/usr/lib/x86_64-linux-gnu/rocm"),
-            IsVulkanAvailable = vulkanApi != "N/A",
-            IsOpenClAvailable = File.Exists("/etc/OpenCL/vendors/amdocl64.icd") || File.Exists("/etc/OpenCL/vendors/mesa.icd"),
+            IsVulkanAvailable = vulkanApi != "N/A" || GpuFeatureDetection.CheckVulkanIcdInstalled("radeon_icd.x86_64.json", "radeon_icd.i686.json"),
+            IsOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("amdocl64.icd", "mesa.icd"),
             IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),
-            
+
             IsCudaAvailable = false,
             IsRayTracingAvailable = isRayTracingAvailable,
             IsPhysXEnabled = false,
@@ -172,30 +167,18 @@ public partial class LinuxAmdGpuProbe
     /// <summary>
     /// Reads PCI IDs from sysfs files and returns a RawIds record.
     /// </summary>
-    /// <returns>RawIds containing vendor, device, subvendor, and subdevice IDs.</returns>
     private RawIds GetRawIds()
     {
-        try 
-        {
-            string v = ReadFile("vendor").Replace("0x", "").ToUpper();
-            string d = ReadFile("device").Replace("0x", "").ToUpper();
-            string sv = ReadFile("subsystem_vendor").Replace("0x", "").ToUpper();
-            string sd = ReadFile("subsystem_device").Replace("0x", "").ToUpper();
-            return new RawIds(v, d, sv, sd);
-        }
-        catch
-        {
-            return new RawIds("0000", "0000", "0000", "0000");
-        }
+        var ids = GpuFeatureDetection.GetRawPciIds(_basePath);
+        return new RawIds(ids.Vendor, ids.Device, ids.SubVendor, ids.SubDevice);
     }
 
     /// <summary>
     /// Reads VRAM size from sysfs and returns it as a formatted string.
     /// </summary>
-    /// <returns>VRAM size in MB, or "0 MB" if unavailable.</returns>
     private string GetVramSize()
     {
-        try 
+        try
         {
             string content = ReadFile("mem_info_vram_total");
             if (long.TryParse(content, out long bytes))
@@ -209,281 +192,24 @@ public partial class LinuxAmdGpuProbe
     }
 
     /// <summary>
-    /// Retrieves PCIe interface information including capability and current link state.
-    /// </summary>
-    /// <returns>Formatted PCIe capability and current link information.</returns>
-    private string GetPcieInfo()
-    {
-        string maxSpeedStr = ReadFile("max_link_speed");
-        string maxWidthStr = ReadFile("max_link_width");
-        string maxGen = "Unknown";
-        if (double.TryParse(Regex.Match(maxSpeedStr, @"(\d+\.?\d*)").Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double maxSpeedVal))
-        {
-            maxGen = SpeedToGen(maxSpeedVal);
-        }
-        string capability = $"PCIe x{maxWidthStr} {maxGen}";
-
-        string currentGen = "?";
-        string currentWidth = "?";
-        bool foundInDpm = false;
-
-        try
-        {
-            string dpmPath = Path.Combine(_basePath, "pp_dpm_pcie");
-            if (File.Exists(dpmPath))
-            {
-                string[] lines = File.ReadAllLines(dpmPath);
-                foreach (var line in lines)
-                {
-                    if (line.Contains("*"))
-                    {
-                        var match = Regex.Match(line, @"(\d+\.?\d*)GT/s,\s*x(\d+)");
-                        if (match.Success)
-                        {
-                            double speedGt = double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
-                            currentWidth = match.Groups[2].Value;
-                            currentGen = SpeedToGen(speedGt);
-                            foundInDpm = true;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        catch { }
-
-        if (!foundInDpm)
-        {
-            try
-            {
-                string speedStr = ReadFile("current_link_speed");
-                string widthStr = ReadFile("current_link_width");
-                currentWidth = widthStr;
-                var match = Regex.Match(speedStr, @"(\d+\.?\d*)");
-                if (match.Success)
-                {
-                    double speedGt = double.Parse(match.Value, CultureInfo.InvariantCulture);
-                    currentGen = SpeedToGen(speedGt);
-                }
-            }
-            catch 
-            {
-                currentWidth = "x16";
-                currentGen = "Unknown";
-            }
-        }
-        return $"{capability} @ x{currentWidth} {currentGen}";
-    }
-
-    /// <summary>
-    /// Maps PCIe GT/s speed to PCIe generation string.
-    /// </summary>
-    /// <param name="gtPerSecond">GT/s speed value.</param>
-    /// <returns>PCIe generation as string.</returns>
-    private string SpeedToGen(double gtPerSecond)
-    {
-        if (gtPerSecond > 30.0) return "5.0";
-        if (gtPerSecond > 15.0) return "4.0";
-        if (gtPerSecond > 7.0)  return "3.0";
-        if (gtPerSecond > 4.0)  return "2.0";
-        return "1.1";
-    }
-
-    /// <summary>
     /// Determines if Resizable BAR (ReBAR) is enabled using a heuristic based on BAR size and VRAM.
     /// </summary>
-    /// <returns>"Enabled", "Disabled", "N/A", or "Unknown".</returns>
     private string CheckResizableBar()
     {
         try
         {
-            // Determine total VRAM in bytes; used to estimate whether a BAR maps most of VRAM (heuristic for ReBAR).
             long totalVram = long.Parse(ReadFile("mem_info_vram_total", "0"));
-            if (totalVram == 0) return "N/A";
-
-            string resourceContent = ReadFile("resource");
-
-            if (string.IsNullOrWhiteSpace(resourceContent)) return "Unknown";
-
-            long maxBarSize = 0;
-            var lines = resourceContent.Split('\n');
-
-            foreach (var line in lines)
-            {
-                if (string.IsNullOrWhiteSpace(line)) continue;
-
-                var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length >= 2)
-                {
-                    try
-                    {
-                        long start = Convert.ToInt64(parts[0], 16);
-                        long end = Convert.ToInt64(parts[1], 16);
-
-                        long size = (end - start) + 1;
-
-                        if (size > maxBarSize) maxBarSize = size;
-                    }
-                    catch
-                    {
-                        // Ignore parsing errors for individual resource lines.
-                        continue;
-                    }
-                }
-            }
-
-            // Heuristic: if the largest BAR maps more than 90% of VRAM, consider ReBAR enabled.
-            if (maxBarSize > (totalVram * 0.9))
-            {
-                return "Enabled";
-            }
-            
-            return "Disabled";
+            return GpuFeatureDetection.CheckResizableBar(_basePath, totalVram);
         }
-        catch 
-        { 
-            return "Unknown"; 
-        }
-    }
-
-    /// <summary>
-    /// Retrieves the real driver version using vulkaninfo or kernel version as fallback.
-    /// </summary>
-    /// <returns>Driver version string.</returns>
-    private string GetRealDriverVersion()
-    {
-        try {
-            var psi = new ProcessStartInfo("vulkaninfo", "--summary") {
-                RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true
-            };
-            using var p = Process.Start(psi);
-            if (p != null) {
-                string vInfo = p.StandardOutput.ReadToEnd();
-                p.WaitForExit();
-                var match = Regex.Match(vInfo, @"driverInfo\s*=\s*(.*)");
-                if (match.Success) return match.Groups[1].Value.Trim();
-            }
-        } catch {}
-
-        string kernel = GetKernelVersion();
-        if (!string.IsNullOrEmpty(kernel)) return $"{kernel} (Kernel)";
-        return "Unknown";
-    }
-
-    /// <summary>
-    /// Retrieves the kernel version using uname.
-    /// </summary>
-    /// <returns>Kernel version string.</returns>
-    private string GetKernelVersion()
-    {
-        try {
-            var psi = new ProcessStartInfo("uname", "-r") {
-                RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true
-            };
-            using var p = Process.Start(psi);
-            if (p != null) {
-                string output = p.StandardOutput.ReadToEnd().Trim();
-                p.WaitForExit();
-                return output;
-            }
-        } catch {}
-        return "";
-    }
-
-    /// <summary>
-    /// Retrieves the Vulkan API version using vulkaninfo.
-    /// </summary>
-    /// <returns>Vulkan API version string or "N/A".</returns>
-    private string GetVulkanApiVersion()
-    {
-        try 
+        catch
         {
-            var psi = new ProcessStartInfo("vulkaninfo", "--summary") {
-                RedirectStandardOutput = true, 
-                UseShellExecute = false, 
-                CreateNoWindow = true
-            };
-            using var p = Process.Start(psi);
-            if (p != null) {
-                string output = p.StandardOutput.ReadToEnd();
-                p.WaitForExit();
-                
-                // Use a non-greedy search to extract a semantic apiVersion string if present.
-                var match = Regex.Match(output, @"apiVersion\s*=\s*.*?(\d+\.\d+(?:\.\d+)?)");
-                
-                if (match.Success) return match.Groups[1].Value;
-            }
-        } 
-        catch {}
-        return "N/A";
-    }
-
-    /// <summary>
-    /// Retrieves the driver date from /proc/version.
-    /// </summary>
-    /// <returns>Driver date string or "N/A".</returns>
-    private string GetDriverDate()
-    {
-        try
-        {
-            if (File.Exists("/proc/version"))
-            {
-                string content = File.ReadAllText("/proc/version").Trim();
-
-                int hashIndex = content.LastIndexOf('#');
-                if (hashIndex != -1)
-                {
-                    string segment = content.Substring(hashIndex);
-
-                    var dateMatch = Regex.Match(segment, 
-                        @"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun).+", 
-                        RegexOptions.IgnoreCase);
-
-                    if (dateMatch.Success)
-                    {
-                        string datePart = dateMatch.Value;
-
-                        var matchRFC = Regex.Match(datePart, @"(\d{1,2})\s+([a-zA-Z]{3})\s+(\d{4})");
-                        if (matchRFC.Success)
-                        {
-                            return $"{matchRFC.Groups[1].Value} {matchRFC.Groups[2].Value} {matchRFC.Groups[3].Value}";
-                        }
-
-                        var matchStd = Regex.Match(datePart, @"\w{3}\s+([a-zA-Z]{3})\s+(\d{1,2}).+\s(\d{4})");
-                        if (matchStd.Success)
-                        {
-                            return $"{matchStd.Groups[2].Value} {matchStd.Groups[1].Value} {matchStd.Groups[3].Value}";
-                        }
-
-                        return datePart.Replace(",","");
-                    }
-                }
-            }
+            return "Unknown";
         }
-        catch {}
-        return "N/A";
-    }
-
-    /// <summary>
-    /// Retrieves the PCI bus ID from sysfs link or directory name.
-    /// </summary>
-    /// <returns>Bus ID string or "Unknown".</returns>
-    private string GetBusId()
-    {
-        try
-        {
-            var targetInfo = File.ResolveLinkTarget(_basePath, true);
-            if (targetInfo != null) return targetInfo.Name;
-            return new DirectoryInfo(_basePath).Name; 
-        }
-        catch { return "Unknown"; }
     }
 
     /// <summary>
     /// Reads the maximum clock value from a DPM file.
     /// </summary>
-    /// <param name="fileName">DPM file name.</param>
-    /// <returns>Maximum clock value in MHz.</returns>
     private double GetMaxClockFromDpm(string fileName)
     {
         try

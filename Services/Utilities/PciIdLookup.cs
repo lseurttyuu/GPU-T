@@ -39,21 +39,6 @@ public static class PciIdLookup
     }
 
     /// <summary>
-    /// Retrieves the representative device name for the given PCI device ID.
-    /// </summary>
-    /// <param name="deviceId">The PCI device ID.</param>
-    /// <returns>The device name string, or "Unknown AMD GPU" if not found.</returns>
-    public static string LookupDeviceName(string deviceId)
-    {
-        if (DatabaseManager.Database.Gpus.TryGetValue(deviceId, out var list) && list.Count > 0)
-        {
-            // Returns the first variant name as a representative label.
-            return list[0].Name;
-        }
-        return "Unknown AMD GPU";
-    }
-
-    /// <summary>
     /// Retrieves the vendor name for the given vendor ID.
     /// </summary>
     /// <param name="vendorId">The vendor ID string.</param>

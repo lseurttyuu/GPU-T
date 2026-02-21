@@ -16,11 +16,6 @@ public partial class LinuxAmdGpuProbe : IGpuProbe
     private readonly double _memClockMultiplier = 1.0;
 
     /// <summary>
-    /// Static cache for Ray Tracing support per DeviceID.
-    /// </summary>
-    private static Dictionary<string, bool>? _rtSupportCache;
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="LinuxAmdGpuProbe"/> class for the specified GPU.
     /// </summary>
     /// <param name="gpuId">The GPU identifier (e.g., "card0").</param>
@@ -61,6 +56,22 @@ public partial class LinuxAmdGpuProbe : IGpuProbe
             "Power & Limits" => new LinuxAmdPowerProvider(),
             "PCIe Resizable BAR" => new LinuxAmdResizableBarProvider(),
             _ => null
+        };
+    }
+
+    /// <summary>
+    /// Returns the list of advanced categories supported by AMD GPUs.
+    /// </summary>
+    public string[] GetAdvancedCategories()
+    {
+        return new[]
+        {
+            "General",
+            "Vulkan",
+            "OpenCL",
+            "Multimedia (VA-API)",
+            "Power & Limits",
+            "PCIe Resizable BAR"
         };
     }
 
