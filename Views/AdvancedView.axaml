@@ -69,6 +69,7 @@
                                             BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
                                             BorderThickness="0,0,0,1">
                                         <TextBlock Text="{Binding Value}" 
+                                                   ToolTip.Tip="{Binding Value}"           
                                                    Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
                                                    VerticalAlignment="Center"
                                                    Margin="4,0,0,0"
