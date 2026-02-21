@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using GPU_T.Services.Probes.LinuxAmd;
 using GPU_T.Services.Probes.LinuxIntel;
 using GPU_T.Services.Probes.LinuxNvidia;
+using GPU_T.Services.Probes.LinuxGeneric;
 
 namespace GPU_T.Services;
 
@@ -48,20 +49,31 @@ public static class GpuProbeFactory
     /// <returns>An <see cref="IGpuProbe"/> instance for the detected vendor.</returns>
     public static IGpuProbe Create(string gpuId, string memoryType = "")
     {
+
         string vendorId = GetVendorId(gpuId);
 
-        if (vendorId == "0X10DE") // NVIDIA
+        // For development and testing purposes, we can enable experimental support for Nvidia and Intel.
+        if(AppConfig.EnableExperimentalGpuSupport)
         {
-            return new LinuxNvidiaGpuProbe(gpuId);
+            if (vendorId == "0X10DE") // NVIDIA
+            {
+                return new LinuxNvidiaGpuProbe(gpuId);
+            }
+
+            if (vendorId == "0X8086") // Intel
+            {
+                return new LinuxIntelGpuProbe(gpuId);
+            }
         }
 
-        if (vendorId == "0X8086") // Intel
+
+        if(vendorId == "0X1002" || vendorId == "0X1022") // AMD
         {
-            return new LinuxIntelGpuProbe(gpuId);
+            return new LinuxAmdGpuProbe(gpuId, memoryType);
         }
 
-        // Default to AMD provider; memoryType is passed for clock multiplier logic.
-        return new LinuxAmdGpuProbe(gpuId, memoryType);
+        // Default to a Generic/unknown provider;
+        return new LinuxGenericGpuProbe(gpuId);
     }
 
     /// <summary>

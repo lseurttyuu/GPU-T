@@ -478,8 +478,10 @@ public partial class MainWindowViewModel : ViewModelBase
             _currentVendorName = "NVIDIA";
         else if (data.DeviceName.Contains("Intel", StringComparison.OrdinalIgnoreCase))
             _currentVendorName = "Intel";
-        else
+        else if(data.DeviceName.Contains("AMD", StringComparison.OrdinalIgnoreCase) || data.DeviceName.Contains("ATI", StringComparison.OrdinalIgnoreCase))
             _currentVendorName = "AMD";
+        else
+            _currentVendorName = "Unknown";
 
         VendorLogo = LoadBitmapFromAssets(GetVendorLogoPath());
 
@@ -496,18 +498,28 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private string GetVendorLogoPath()
     {
-        if (_currentVendorName == "NVIDIA")
+        // For development/testing purposes, we can enable experimental support for Nvidia and Intel to show their logos and test theme responsiveness.
+        if (AppConfig.EnableExperimentalGpuSupport)
         {
-            var isDark = Avalonia.Application.Current?.ActualThemeVariant == Avalonia.Styling.ThemeVariant.Dark;
-            return isDark ? "/Assets/nvidia_logo_dark.png" : "/Assets/nvidia_logo.png";
+            if (_currentVendorName == "NVIDIA")
+            {
+                var isDark = Avalonia.Application.Current?.ActualThemeVariant == Avalonia.Styling.ThemeVariant.Dark;
+                return isDark ? "/Assets/nvidia_logo_dark.png" : "/Assets/nvidia_logo.png";
+            }
+
+            if (_currentVendorName == "Intel")
+            {
+                return "/Assets/intel_logo.png";
+            }
         }
 
-        if (_currentVendorName == "Intel")
+
+        if(_currentVendorName == "AMD")
         {
-            return "/Assets/intel_logo.png";
+            return "/Assets/amd_logo.png";
         }
 
-        return "/Assets/amd_logo.png";
+        return "/Assets/unknown_logo.png";
     }
 
     private Bitmap? LoadBitmapFromAssets(string path)
