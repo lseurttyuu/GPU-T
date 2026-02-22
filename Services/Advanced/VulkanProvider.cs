@@ -87,21 +87,26 @@ public class VulkanProvider : AdvancedDataProvider
                 string trimmed = line.Trim();
                 if (string.IsNullOrWhiteSpace(trimmed)) continue;
 
-                // Detekcja zmiany GPU
+                // GPU change detection
                 if (trimmed.StartsWith("GPU id :") || (trimmed.StartsWith("GPU") && trimmed.EndsWith(":") && !trimmed.Contains("=")))
                 {
-                    if (isTargetGpu) break; 
+                    if (isTargetGpu) 
+                    {
+                        // Kill vulkaninfo - we already got the data we wanted
+                        try { process.Kill(); } catch {} 
+                        break; 
+                    }
                     isTargetGpu = false;
                     propsBuffer.Clear();
                     _currentSection = "";
                     continue;
                 }
 
-                // Detekcja sekcji
+                // Section change detection
                 bool sectionChanged = CheckSectionChange(trimmed, list, isTargetGpu);
                 if (sectionChanged) continue;
 
-                // Parsowanie Properties
+                // Properties parsing (only if we're in the target GPU block or buffering for potential match)
                 if (_currentSection == "PROPERTIES")
                 {
                     if (trimmed.StartsWith("deviceID"))
@@ -132,7 +137,7 @@ public class VulkanProvider : AdvancedDataProvider
 
                 if (!isTargetGpu) continue; 
 
-                // Parsowanie Memory, Extensions, Features
+                // Parsing memory, extensions, and features only if we're in the target GPU block
                 if (_currentSection == "MEMORY") ParseMemory(trimmed, line, list);
                 else if (_currentSection == "EXTENSIONS") ParseExtensions(trimmed, list);
                 else if (_currentSection == "FEATURES") ParseFeatures(trimmed, list);
