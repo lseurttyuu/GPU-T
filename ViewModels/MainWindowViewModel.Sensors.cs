@@ -156,6 +156,25 @@ public partial class MainWindowViewModel
         _sensorTimer.Start();
     }
 
+    private void ChangeGpuReinitSensors()
+    {
+        if (_sensorTimer != null)
+        {
+            _sensorTimer.Stop();
+            _sensorTimer.Tick -= SensorTimer_Tick;
+            _sensorTimer = null;
+        }
+        Sensors = null;
+
+        InitSensors();
+
+        if (IsLogEnabled)
+        {
+            WriteLogHeader();
+        }
+
+    }
+
     private void SensorTimer_Tick(object? sender, EventArgs e)
     {
         if (_selectedGpu == null) return;

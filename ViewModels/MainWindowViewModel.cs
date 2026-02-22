@@ -331,7 +331,6 @@ public partial class MainWindowViewModel : ViewModelBase
             };
         }
 
-        InitSensors();
     }
 
     #endregion
@@ -378,8 +377,8 @@ public partial class MainWindowViewModel : ViewModelBase
         if (value != null)
         {
             LoadGpuData(value.Id);
-            if (IsLogEnabled) WriteLogHeader();
-        }
+            ChangeGpuReinitSensors();
+        }        
     }
 
     partial void OnSelectedTabIndexChanged(int value)
