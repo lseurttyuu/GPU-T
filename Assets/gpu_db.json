@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "vendors": {
     "1002": "AMD",
     "10DE": "NVIDIA",
@@ -4780,6 +4780,29 @@
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-wx-7100.c2872"
       }
     ],
+    "1636": [
+      {
+        "name": "AMD Radeon Graphics 448SP Mobile",
+        "revisions": [
+          "C6"          
+        ],
+        "codeName": "Renoir-M",
+        "technology": "7 nm",
+        "dieSize": "180 mm\u00B2",
+        "releaseDate": "Jan 6th, 2020",
+        "transistors": "9800M",
+        "rops": "8",
+        "tmus": "28",
+        "shaders": "448 Unified",
+        "computeUnits": "7 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "400 MHz",
+        "defBoostClock": "1600 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-graphics-448sp-mobile.c3510"
+      }
+    ],
     "1638": [
       {
         "name": "AMD Radeon Graphics 512SP",
@@ -5442,7 +5465,7 @@
     ],
     "3EA0": [
       {
-        "name": "Intel UHD Graphics 620",
+        "name": "Intel UHD Graphics 620 Mobile",
         "revisions": [
           "02"
         ],
@@ -5453,14 +5476,37 @@
         "transistors": "N/A",
         "rops": "3",
         "tmus": "24",
-        "shaders": "24 EU",
+        "shaders": "192 Unified",
         "computeUnits": "24 EU",
-        "memoryType": "DDR4 / LPDDR3",
-        "busWidth": "128 bit",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
         "defGpuClock": "300 MHz",
         "defBoostClock": "1150 MHz",
         "defMemClock": "N/A",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-620-mobile.c2909"
+      }
+    ],
+    "2191": [
+      {
+        "name": "NVIDIA GeForce GTX 1660 Ti Mobile",
+        "revisions": [
+          "A1"          
+        ],
+        "codeName": "TU116",
+        "technology": "12 nm",
+        "dieSize": "284 mm\u00B2",
+        "releaseDate": "Apr 23rd, 2019",
+        "transistors": "6600M",
+        "rops": "48",
+        "tmus": "96",
+        "shaders": "1536 Unified",
+        "computeUnits": "24 SM",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "1455 MHz",
+        "defBoostClock": "1590 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-gtx-1660-ti-mobile.c3369"
       }
     ]
   }
