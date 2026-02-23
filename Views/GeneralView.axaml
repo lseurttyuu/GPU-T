@@ -281,7 +281,7 @@
                      <TextBlock Text="PhysX" Classes="CheckText" Opacity="0.5"/>
                      
                      <CheckBox IsChecked="{Binding IsOpenglEnabled}" Classes="GpuZ"/>
-                     <TextBlock Text="OpenGL 4.6" Classes="CheckText"/>
+                     <TextBlock Text="OpenGL" Classes="CheckText"/>
                  </StackPanel>
             </StackPanel>
         </Grid>
