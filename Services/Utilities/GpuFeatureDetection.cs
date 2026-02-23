@@ -222,13 +222,13 @@ public static class GpuFeatureDetection
                     string segment = content[(hashIndex + 1)..].Trim();
 
                     // RFC-style: "1 SMP PREEMPT_DYNAMIC 21 Feb 2026"
-                    var rfcMatch = Regex.Match(segment, @"(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})\s*$");
+                    var rfcMatch = Regex.Match(segment, @"(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s+)?(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})");
                     if (rfcMatch.Success)
                         return $"{rfcMatch.Groups[1].Value} {rfcMatch.Groups[2].Value} {rfcMatch.Groups[3].Value}";
 
                     // Standard-style: "1 SMP PREEMPT_DYNAMIC Fri Feb 21 12:34:56 UTC 2026"
                     var stdMatch = Regex.Match(segment,
-                        @"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Za-z]{3})\s+(\d{1,2})\s+[\d:]+\s+\w+\s+(\d{4})");
+                        @"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Za-z]{3})\s+(\d{1,2})\s+[\d:]+\s+\S+\s+(\d{4})");
                     if (stdMatch.Success)
                         return $"{stdMatch.Groups[2].Value} {stdMatch.Groups[1].Value} {stdMatch.Groups[3].Value}";
                 }
