@@ -24,13 +24,33 @@ public class OpenClProvider : AdvancedDataProvider
         ResetCounter();
         try
         {
+
+            string[] potentialClinfoPaths = {
+                "/usr/bin/clinfo",
+                "/bin/clinfo",
+                "/usr/local/bin/clinfo"
+            };
+
+            string clinfoExecutable = "clinfo";
+
+            foreach (var path in potentialClinfoPaths)
+            {
+                if (System.IO.File.Exists(path))
+                {
+                    clinfoExecutable = path;
+                    break;
+                }
+            }
+
             var startInfo = new ProcessStartInfo
             {
-                FileName = "clinfo", Arguments = "--json",
+                FileName = clinfoExecutable, Arguments = "--json",
                 RedirectStandardOutput = true, RedirectStandardError = true,
                 UseShellExecute = false, CreateNoWindow = true,
                 StandardOutputEncoding = System.Text.Encoding.UTF8
             };
+
+            startInfo.Environment["RUSTICL_ENABLE"] = "radeonsi";
 
             using var process = Process.Start(startInfo);
             if (process == null) { AddRow(list, "Error", "Could not start clinfo"); return; }
