@@ -207,13 +207,13 @@ public static class GpuFeatureDetection
     /// Retrieves the kernel driver date from /proc/version using robust regex parsing.
     /// Suitable for AMD (amdgpu) and Intel (i915/xe) in-tree kernel drivers.
     /// </summary>
-    public static string GetKernelDriverDate()
+    public static string GetKernelDriverDate(string versionPath = "/proc/version")
     {
         try
         {
-            if (File.Exists("/proc/version"))
+            if (File.Exists(versionPath))
             {
-                string content = File.ReadAllText("/proc/version").Trim();
+                string content = File.ReadAllText(versionPath).Trim();
 
                 // The date is in the segment after the last '#' in /proc/version
                 int hashIndex = content.LastIndexOf('#');
