@@ -207,35 +207,103 @@ public static class GpuFeatureDetection
     /// Retrieves the kernel driver date from /proc/version using robust regex parsing.
     /// Suitable for AMD (amdgpu) and Intel (i915/xe) in-tree kernel drivers.
     /// </summary>
-    public static string GetKernelDriverDate(string versionPath = "/proc/version")
+    public static string GetKernelDriverDate(string versionPath = "/proc/version", Func<string>? fallbackYearProvider = null)
     {
         try
         {
             if (File.Exists(versionPath))
             {
                 string content = File.ReadAllText(versionPath).Trim();
-
-                // The date is in the segment after the last '#' in /proc/version
-                int hashIndex = content.LastIndexOf('#');
-                if (hashIndex >= 0 && hashIndex < content.Length - 1)
-                {
-                    string segment = content[(hashIndex + 1)..].Trim();
-
-                    // RFC-style: "1 SMP PREEMPT_DYNAMIC 21 Feb 2026"
-                    var rfcMatch = Regex.Match(segment, @"(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s+)?(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})");
-                    if (rfcMatch.Success)
-                        return $"{rfcMatch.Groups[1].Value} {rfcMatch.Groups[2].Value} {rfcMatch.Groups[3].Value}";
-
-                    // Standard-style: "1 SMP PREEMPT_DYNAMIC Fri Feb 21 12:34:56 UTC 2026"
-                    var stdMatch = Regex.Match(segment,
-                        @"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Za-z]{3})\s+(\d{1,2})\s+[\d:]+\s+\S+\s+(\d{4})");
-                    if (stdMatch.Success)
-                        return $"{stdMatch.Groups[2].Value} {stdMatch.Groups[1].Value} {stdMatch.Groups[3].Value}";
-                }
+                
+                return ParseKernelDate(content, fallbackYearProvider ?? GetFallbackKernelYear);
             }
         }
         catch { }
         return "N/A";
+    }
+
+    /// <summary>
+    /// Parses the kernel date from raw text.
+    /// </summary>
+    internal static string ParseKernelDate(string content, Func<string> getFallbackYear)
+    {
+        int hashIndex = content.LastIndexOf('#');
+        if (hashIndex >= 0 && hashIndex < content.Length - 1)
+        {
+            string segment = content[(hashIndex + 1)..].Trim();
+
+            // Numeric format: "2026-02-17", "17/02/2026", "2026-2-17"
+            var numericMatch = Regex.Match(segment, @"\b(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}[-/]\d{4})\b");
+            
+            if (numericMatch.Success)
+            {
+                return numericMatch.Groups[1].Value;
+            }
+
+            // -------- Further logic for text formats --------
+            string day = "", month = "", year = "";
+
+            const string months = "(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)";
+
+            // Format 1 (RFC / CachyOS): "Fri, 20 Feb 2026"
+            var rfcMatch = Regex.Match(segment, $@"(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s+)?(\d{{1,2}})\s+{months}\s+(\d{{1,4}})");
+            
+            // Format 2 (Standard / Ubuntu): "Thu Jan 15 15:52:10 UTC 2026" or "... UTC 2"
+            var stdMatch = Regex.Match(segment, $@"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+{months}\s+(\d{{1,2}})\s+[\d:]+\s+\S+(?:\s+(\d{{1,4}}))?");
+
+            if (stdMatch.Success)
+            {
+                month = stdMatch.Groups[1].Value;
+                day = stdMatch.Groups[2].Value;
+                year = stdMatch.Groups[3].Value;
+            }
+            else if (rfcMatch.Success)
+            {
+                day = rfcMatch.Groups[1].Value;
+                month = rfcMatch.Groups[2].Value;
+                year = rfcMatch.Groups[3].Value;
+            }
+
+            if (!string.IsNullOrEmpty(day) && !string.IsNullOrEmpty(month))
+            {
+                // If the year is truncated (e.g., "2") or empty.
+                if (string.IsNullOrEmpty(year) || year.Length < 4)
+                {
+                    year = getFallbackYear();
+                }
+
+                return $"{day} {month} {year}";
+            }
+        }
+        
+        return "N/A";
+    }
+
+    /// <summary>
+    /// Helper method to read the file system for a fallback kernel year
+    /// </summary>
+    private static string GetFallbackKernelYear()
+    {
+        try
+        {
+            if (File.Exists("/proc/sys/kernel/osrelease"))
+            {
+                string osRelease = File.ReadAllText("/proc/sys/kernel/osrelease").Trim();
+                string[] paths = {
+                    $"/lib/modules/{osRelease}/modules.builtin",
+                    $"/boot/vmlinuz-{osRelease}",
+                    $"/lib/modules/{osRelease}/modules.order"
+                };
+
+                foreach (var path in paths)
+                {
+                    if (File.Exists(path))
+                        return File.GetLastWriteTime(path).Year.ToString();
+                }
+            }
+        }
+        catch { }
+        return DateTime.Now.Year.ToString();
     }
 
     /// <summary>
