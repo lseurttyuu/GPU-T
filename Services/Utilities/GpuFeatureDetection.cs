@@ -538,13 +538,28 @@ public static class GpuFeatureDetection
     {
         try
         {
-            if (NativeLibrary.TryLoad(libraryName, out IntPtr handle))
+
+            // Spawn the disposable clone to avoid LLVM bombs
+            var currentExe = Environment.ProcessPath;
+            if (string.IsNullOrEmpty(currentExe)) return false;
+
+            var psi = new ProcessStartInfo
             {
-                NativeLibrary.Free(handle);
-                return true;
+                FileName = currentExe,
+                Arguments = $"--check-lib {libraryName}",
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(psi);
+            if (process != null)
+            {
+                process.WaitForExit();
+                return process.ExitCode == 0; // 0 means the clone successfully loaded it!
             }
         }
         catch { }
+
         return false;
     }
 
