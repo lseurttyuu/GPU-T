@@ -4,6 +4,10 @@ Assets_NotIncluded/
 obj/
 Releases/
 .vscode/
+AppDir/
+Releases_sharun/
+quick-sharun
+qckshrn.sh
 *.user
 .DS_Store
 Thumbs.db
