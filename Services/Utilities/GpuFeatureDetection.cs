@@ -538,20 +538,40 @@ public static class GpuFeatureDetection
     {
         try
         {
+            
+            string processPath = Environment.ProcessPath;
+            string arguments = $"--check-lib {libraryName}";
 
-            // Spawn the disposable clone to avoid LLVM bombs
-            var currentExe = Environment.ProcessPath;
-            if (string.IsNullOrEmpty(currentExe)) return false;
-
-            var psi = new ProcessStartInfo
+            // 1. AppImage Check: Are we running inside an AppImage?
+            string appImagePath = Environment.GetEnvironmentVariable("APPIMAGE");
+            if (!string.IsNullOrEmpty(appImagePath))
             {
-                FileName = currentExe,
-                Arguments = $"--check-lib {libraryName}",
+                // If yes, self-invoke the AppImage directly!
+                processPath = appImagePath;
+            }
+            else if (!string.IsNullOrEmpty(processPath))
+            {
+                // 2. Local Debugging Check: Are we running via the 'dotnet' host directly?
+                var processName = System.IO.Path.GetFileNameWithoutExtension(processPath);
+                if (processName.Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Inject the DLL path before the argument
+                    var assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    arguments = $"\"{assemblyPath}\" {arguments}";
+                }
+            }
+            
+            if (string.IsNullOrEmpty(processPath)) return false;
+
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = processPath,
+                Arguments = arguments,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
 
-            using var process = Process.Start(psi);
+            using var process = System.Diagnostics.Process.Start(psi);
             if (process != null)
             {
                 process.WaitForExit();
@@ -560,7 +580,7 @@ public static class GpuFeatureDetection
         }
         catch { }
 
-        return false;
+    return false;
     }
 
     /// <summary>
