@@ -538,13 +538,38 @@ public static class GpuFeatureDetection
     {
         try
         {
-            if (NativeLibrary.TryLoad(libraryName, out IntPtr handle))
+            // Spawn the disposable clone to avoid LLVM bombs
+            string processPath = Environment.ProcessPath;
+            string arguments = $"--check-lib {libraryName}";
+
+            if (string.IsNullOrEmpty(processPath)) return false;
+
+            // Local IDE/Debugging Check: Are we running via the 'dotnet' host directly?
+            var processName = System.IO.Path.GetFileNameWithoutExtension(processPath);
+            if (processName.Equals("dotnet", StringComparison.OrdinalIgnoreCase))
             {
-                NativeLibrary.Free(handle);
-                return true;
+                // Inject the DLL path before the argument so local debugging doesn't crash
+                var assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                arguments = $"\"{assemblyPath}\" {arguments}";
+            }
+
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = processPath,
+                Arguments = arguments,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = System.Diagnostics.Process.Start(psi);
+            if (process != null)
+            {
+                process.WaitForExit();
+                return process.ExitCode == 0; // 0 means the clone successfully loaded it!
             }
         }
         catch { }
+
         return false;
     }
 
