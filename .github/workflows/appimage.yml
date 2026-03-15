@@ -1,0 +1,42 @@
+name: Build AppImage (Artifact Only)
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: {} 
+
+jobs:
+  build:
+    name: "Build AppImage (${{ matrix.arch }})"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+    container: ghcr.io/pkgforge-dev/archlinux:latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+        
+      - name: Preparing Arch Container
+        uses: pkgforge-dev/anylinux-setup-action@v1
+        
+      - name: Install Dependencies & Debloat
+        run: /bin/sh ./SharunAppImage/get-dependencies.sh
+        
+      - name: Make AppImage
+        run: /bin/sh ./SharunAppImage/make-appimage.sh
+        
+      - name: Upload Artifact (Private)
+        uses: actions/upload-artifact@v7
+        with:
+          name: GPU-T-AppImage-${{ matrix.arch }}
+          path: dist/*.AppImage*
+          retention-days: 14
