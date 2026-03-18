@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "vendors": {
     "1002": "AMD",
     "10DE": "NVIDIA",
@@ -4801,6 +4801,27 @@
         "defBoostClock": "1600 MHz",
         "defMemClock": "System Shared",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-graphics-448sp-mobile.c3510"
+      },
+      {
+        "name": "AMD Radeon Graphics 448SP",
+        "revisions": [
+          "C9"          
+        ],
+        "codeName": "Renoir",
+        "technology": "7 nm",
+        "dieSize": "156 mm\u00B2",
+        "releaseDate": "Jan 6th, 2020",
+        "transistors": "9800M",
+        "rops": "8",
+        "tmus": "28",
+        "shaders": "448 Unified",
+        "computeUnits": "7 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "400 MHz",
+        "defBoostClock": "1900 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-graphics-448sp.c4024"
       }
     ],
     "1638": [
