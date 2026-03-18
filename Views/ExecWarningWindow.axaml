@@ -1,0 +1,55 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="GPU_T.Views.ExecWarningWindow"
+        Title="Missing Recommended Tools"
+        Width="480" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+    
+    <StackPanel Margin="20">
+        
+        <TextBlock Text="GPU-T relies on external utilities to provide comprehensive and accurate information about your graphics card. The following tools were not detected on your system:"
+                   TextWrapping="Wrap" 
+                   FontSize="13"
+                   Margin="0,0,0,8"/> 
+                   
+        <ItemsControl x:Name="MissingToolsList" 
+                      Margin="15,0,0,10"> 
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" 
+                               FontFamily="Monospace" 
+                               FontSize="13"
+                               Margin="0,1,0,1"
+                               Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <TextBlock Text="Please install these packages and ensure they are available in your system's PATH for GPU-T to function optimally."
+                   TextWrapping="Wrap" 
+                   FontSize="13"
+                   Margin="0,0,0,10"/> 
+                   
+        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                BorderThickness="0,1,0,0" 
+                Margin="0,5,0,10"/>
+
+        <DockPanel LastChildFill="False">
+            <CheckBox x:Name="DoNotShowCheckBox" 
+                      Content="Do not show this warning again." 
+                      FontSize="13"
+                      VerticalAlignment="Center"
+                      DockPanel.Dock="Left"/>
+            
+            <Button Content="Got it!" 
+                    Click="OkButton_Click"
+                    IsDefault="True"
+                    Width="110" 
+                    HorizontalContentAlignment="Center"
+                    VerticalAlignment="Center"
+                    DockPanel.Dock="Right"/>
+        </DockPanel>
+    </StackPanel>
+</Window>
