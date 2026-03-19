@@ -24,7 +24,7 @@ GPU-T is a modern desktop utility built with **.NET** and **Avalonia UI** design
 
 For years, users on Windows have relied on *GPU-Z* as the gold standard for verifying graphics hardware. It is clean, precise, and tells you exactly what is under the hood.
 
-After switching to **Linux**, I couldn't find a direct alternative that offered the same specific "density" of information in a clean, native GUI. While terminal tools exist, I wanted a dedicated application that mimics the familiarity and utility of GPU-Z: a simple interface, instant hardware lookup, and real-time monitoring. 
+After switching to **Linux** in 2025, I couldn't find a direct alternative that offered the same specific "density" of information in a clean, native GUI. While other great tools exist, I wanted a dedicated application that mimics the familiarity and utility of GPU-Z: a simple interface, instant hardware lookup, and real-time monitoring. 
 
 GPU-T is my attempt (assisted by AI) to fill that void — providing a diagnostic tool for the Linux open-source ecosystem.
 
@@ -51,7 +51,7 @@ GPU-T is designed to be a "Single Source of Truth" for your GPU on Linux:
 Currently, the application is fully implemented for **AMD Radeon** GPUs on Linux.
 
 - [x] **AMD Radeon** (RDNA GPUs like RX 6000, RX 7000, Vega, Polaris, etc.)
-- [ ] **NVIDIA GeForce** (Architecture ready, implementation planned)
+- [ ] **NVIDIA GeForce** (Architecture ready, implementation planned - Target: GPU-T v0.2.0)
 - [ ] **Intel Arc** (Architecture ready, implementation planned)
 
 ## Roadmap
@@ -119,7 +119,7 @@ Requirements: **.NET SDK 9.0 or newer**.
 For developers interested in the code, GPU-T uses a clean **MVVM** architecture with a focus on modularity:
 
 * **Services Layer:** Separated into `Probes` (hardware polling), `Advanced` (API providers), and `Utilities`.
-* **Factory Pattern:** A `GpuProbeFactory` determines the GPU vendor at runtime and injects the correct logic (e.g., `LinuxAmdGpuProbe`), making it easy to add Nvidia/Intel support in the future practically without touching the UI code.
+* **Factory Pattern:** A `GpuProbeFactory` determines the GPU vendor at runtime and injects the correct logic (e.g., `LinuxAmdGpuProbe`), making it easy to add Nvidia/Intel support practically without touching the UI code.
 * **Database:** A local JSON database handles static specs, supporting user overrides and updates (when provided) for new hardware definitions. Want to modify the database that your GPU-T uses? Just head over to `~/.local/share/GPU-T/` and modify the JSON file.
 
 ## Built With
@@ -139,6 +139,8 @@ This project is heavily inspired by **GPU-Z** by **TechPowerUp**. It is not an o
 Special thanks to the TechPowerUp team for setting the standard in GPU diagnostics and maintaining the extensive [GPU Database](https://www.techpowerup.com/gpu-specs/), which this application links to via the "Lookup" button.
 
 ### Community Credits:
+* **Samueru-sama** - for helping implement the universal AppImage (sharun) packaging architecture.
+* **xndbogdan** - for creating the framework to support Nvidia and Intel graphics cards (preliminary support).
 * **yobson** - for submitting and maintaining the AUR package.
 * **yochananmarqos** - for submitting and maintaining the AUR package (stable).
 * **dCo3lh0** - for adding GPU-T to the AppMan (AM) database.
