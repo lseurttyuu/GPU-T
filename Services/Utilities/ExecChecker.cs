@@ -44,8 +44,7 @@ public static class ExecChecker
             var psi = new ProcessStartInfo
             {
                 FileName = "sh",
-                Arguments = $"-c \"command -v {command}\"",
-                RedirectStandardOutput = true,
+                Arguments = $"-c \"command -v {command} >/dev/null 2>&1\"",
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
