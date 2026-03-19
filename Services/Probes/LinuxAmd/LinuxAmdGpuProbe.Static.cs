@@ -24,6 +24,7 @@ public partial class LinuxAmdGpuProbe
 
         var ids = GetRawIds();
         string revId = ReadFile("revision").Replace("0x", "").ToUpper();
+        string uniqueId = ReadFile("unique_id", "Unknown").Trim();
 
         var spec = PciIdLookup.GetSpecs(ids.Device, revId);
 
@@ -125,6 +126,7 @@ public partial class LinuxAmdGpuProbe
 
             GpuCodeName = spec?.CodeName ?? "N/A",
             Revision = revId,
+            UniqueId = uniqueId,
             Technology = spec?.Technology ?? "N/A",
             DieSize = spec?.DieSize ?? "N/A",
             ReleaseDate = spec?.ReleaseDate ?? "N/A",

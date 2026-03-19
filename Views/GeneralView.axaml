@@ -49,7 +49,7 @@
                                FontSize="20"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Center"
-                               Margin="35,-1,0,0" 
+                               Margin="32,-1,0,0" 
                                IsVisible="{Binding ShowLookupWarning}"
                                Background="Transparent">
                         <ToolTip.Tip>
