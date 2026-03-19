@@ -15,6 +15,8 @@ public record GpuStaticData
     public bool IsExactMatch { get; init; } = true;
     /// <summary>PCI device identifier.</summary>
     public string DeviceId { get; init; } = "Unknown";
+    /// <summary>Unique device identifier.</summary>
+    public string UniqueId { get; init; } = "Unknown";
     /// <summary>Subvendor identifier.</summary>
     public string Subvendor { get; init; } = "Unknown";
     /// <summary>BIOS version string.</summary>

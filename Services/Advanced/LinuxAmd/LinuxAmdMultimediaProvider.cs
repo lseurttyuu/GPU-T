@@ -22,6 +22,8 @@ public class LinuxAmdMultimediaProvider : AdvancedDataProvider
     {
         ResetCounter();
 
+        if (selectedGpu == null) return;
+
         try
         {
             var renderNodes = Directory.GetFiles("/dev/dri", "renderD*");
@@ -31,97 +33,136 @@ public class LinuxAmdMultimediaProvider : AdvancedDataProvider
                 return;
             }
 
-            // Extracts relevant GPU name parts for device matching in VA-API output.
-            var gpuNameParts = selectedGpu?.DisplayName?
-                .Split(new[] { ' ', '(', ')' }, StringSplitOptions.RemoveEmptyEntries)
-                .Where(p => p.Length > 2 && !p.Equals("AMD", StringComparison.OrdinalIgnoreCase) && !p.Equals("Radeon", StringComparison.OrdinalIgnoreCase))
-                .ToList() ?? new List<string>();
+            // 1. Fetch the target hardware IDs from our static probe data
+            var probe = GpuProbeFactory.Create(selectedGpu.Id);
+            var staticData = probe.LoadStaticData();
             
+            // Extract the core device ID from "Vendor Device - SubVendor SubDevice"
+            var parts = staticData.DeviceId.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string targetDevice = parts.Length >= 2 ? parts[1].ToUpper() : "";
+            
+            string targetRevision = staticData.Revision.ToUpper(); 
+            string targetUniqueId = staticData.UniqueId?.Replace("0x", "").ToUpper() ?? "";
+
             bool foundDevice = false;
 
+            // 2. Iterate through DRM render nodes to find the exact hardware match
             foreach (var node in renderNodes)
             {
-                var startInfo = new ProcessStartInfo
-                {
-                    FileName = "vainfo",
-                    Arguments = $"--display drm --device {node}",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    StandardOutputEncoding = System.Text.Encoding.UTF8
-                };
+                string nodeName = Path.GetFileName(node); // e.g., "renderD128"
+                string deviceDir = $"/sys/class/drm/{nodeName}/device";
 
-                using var process = new Process { StartInfo = startInfo };
-                process.Start();
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd(); 
-                process.WaitForExit();
+                if (!Directory.Exists(deviceDir)) continue;
 
-                string fullOutput = output + "\n" + error;
-                bool isMatch = false;
-                string driverLine = "";
+                // Read sysfs values and normalize them immediately (strip "0x" and uppercase)
+                string nodeDevice = ReadSysfsValue($"{deviceDir}/device").Replace("0x", "").ToUpper();
+                string nodeRevision = ReadSysfsValue($"{deviceDir}/revision").Replace("0x", "").ToUpper();
+                string nodeUniqueId = ReadSysfsValue($"{deviceDir}/unique_id").Replace("0x", "").ToUpper();
+
+                // Check for a match
+                bool isDeviceMatch = targetDevice == nodeDevice;
+                bool isRevisionMatch = targetRevision == nodeRevision;
                 
-                using (var reader = new StringReader(fullOutput))
+                // If the target has a valid unique_id, enforce a strict match.
+                bool isUniqueIdMatch = true; 
+                if (!string.IsNullOrEmpty(targetUniqueId) && targetUniqueId != "UNKNOWN" && !string.IsNullOrEmpty(nodeUniqueId))
                 {
-                    string? line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        // Searches for the driver version line to match against GPU name parts.
-                        if (line.Contains("Driver version:")) { driverLine = line; break; }
-                    }
+                    isUniqueIdMatch = targetUniqueId == nodeUniqueId;
                 }
 
-                if (!string.IsNullOrEmpty(driverLine))
-                {
-                    foreach (var part in gpuNameParts)
-                    {
-                        if (driverLine.Contains(part, StringComparison.OrdinalIgnoreCase)) { isMatch = true; break; }
-                    }
-                }
-
-                if (isMatch)
+                // If we found our exact GPU, execute vainfo ONLY for this node
+                if (isDeviceMatch && isRevisionMatch && isUniqueIdMatch)
                 {
                     foundDevice = true;
-                    AddRow(list, "General", "", true);
-                    AddRow(list, "Device Node", node);
-                    var driverInfo = driverLine.Split(new[] { ':' }, 2).LastOrDefault()?.Trim() ?? "Unknown";
-                    AddRow(list, "Driver Info", driverInfo);
-                    AddRow(list, "Supported Codecs", "", true);
-
-                    using (var reader = new StringReader(fullOutput))
-                    {
-                        string? line;
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            line = line.Trim();
-                            // Parses VAProfile lines to extract codec and entrypoint information.
-                            if (line.StartsWith("VAProfile") && line.Contains(":"))
-                            {
-                                var parts = line.Split(':');
-                                if (parts.Length == 2)
-                                {
-                                    string profileNice = CleanVaProfile(parts[0].Trim());
-                                    string entryNice = CleanVaEntrypoint(parts[1].Trim());
-                                    if (profileNice != "None") AddRow(list, profileNice, entryNice);
-                                }
-                            }
-                        }
-                    }
-                    break;
+                    ExecuteAndParseVaInfo(list, node);
+                    break; // Stop iterating, we found and processed our target
                 }
             }
 
             if (!foundDevice)
             {
                 AddRow(list, "Info", "No matching VA-API device found.");
-                AddRow(list, "Note", "Ensure 'vainfo' is installed (package: libva-utils).");
+                AddRow(list, "Note", "Ensure 'vainfo' is installed.");
             }
         }
         catch (Exception ex)
         {
             AddRow(list, "Error", $"VA-API check failed: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Executes vainfo on the matched node and parses the codec results.
+    /// </summary>
+    private void ExecuteAndParseVaInfo(ObservableCollection<AdvancedItemViewModel> list, string node)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "vainfo",
+            Arguments = $"--display drm --device {node}",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            StandardOutputEncoding = System.Text.Encoding.UTF8
+        };
+
+        using var process = new Process { StartInfo = startInfo };
+        process.Start();
+        string output = process.StandardOutput.ReadToEnd();
+        string error = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        string fullOutput = output + "\n" + error;
+
+        // Parse the Driver Info Line
+        string driverInfo = "Unknown";
+        using (var reader = new StringReader(fullOutput))
+        {
+            string? line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                if (line.Contains("Driver version:"))
+                {
+                    driverInfo = line.Split(new[] { ':' }, 2).LastOrDefault()?.Trim() ?? "Unknown";
+                    break;
+                }
+            }
+        }
+
+        AddRow(list, "General", "", true);
+        AddRow(list, "Device Node", node);
+        AddRow(list, "Driver Info", driverInfo);
+        AddRow(list, "Supported Codecs", "", true);
+
+        // Parse Codec Profiles
+        using (var reader = new StringReader(fullOutput))
+        {
+            string? line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                line = line.Trim();
+                if (line.StartsWith("VAProfile") && line.Contains(":"))
+                {
+                    var parts = line.Split(':');
+                    if (parts.Length == 2)
+                    {
+                        string profileNice = CleanVaProfile(parts[0].Trim());
+                        string entryNice = CleanVaEntrypoint(parts[1].Trim());
+                        if (profileNice != "None") AddRow(list, profileNice, entryNice);
+                    }
+                }
+            }
+        }
+    }
+
+    private string ReadSysfsValue(string path)
+    {
+        try
+        {
+            return File.Exists(path) ? File.ReadAllText(path).Trim() : "";
+        }
+        catch { return ""; }
     }
 
     /// <summary>
