@@ -1,6 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
+using GPU_T.Services;
+using GPU_T.Models;
 using Avalonia.Input;
+using System.Collections.Generic;
 
 namespace GPU_T.Views;
 
@@ -24,7 +28,33 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
+        //check for missing tools and show warning if needed (post-init to ensure UI is ready)
+        Loaded += MainWindow_Loaded;
     }
+
+
+    private async void MainWindow_Loaded(object? sender, RoutedEventArgs e)
+    {
+        // 1. Read user settings to check if we should ignore warnings about missing tools.
+        UserSettings settings = UserSettingsManager.LoadSettings();
+
+        // 2. If user has chosen to ignore warnings, we skip the check entirely.
+        if (settings.IgnoreExecWarning)
+            return;
+
+        // 3. Check the missing tools
+        List<string> missingTools = ExecChecker.GetMissingTools();
+
+        // 4. Show the warning dialog if necessary
+        if (missingTools.Count > 0)
+        {
+            var warningDialog = new ExecWarningWindow(missingTools);
+            
+            warningDialog.Show();
+        }
+    }
+
 
     private void ResizeBar_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
