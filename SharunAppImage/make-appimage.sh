@@ -25,27 +25,22 @@ rm -f ./publish_output/*.pdb || true
 
 find ./publish_output -name "*.so" -exec strip --strip-unneeded {} + || true
 
-# 3. Setup the Desktop file 
-export DESKTOP=/usr/share/applications/gpu-t.desktop
-mkdir -p /usr/share/applications
-cp ./SharunAppImage/gpu-t.desktop $DESKTOP
-
-sed -i 's/^Exec=.*/Exec=GPU-T/' $DESKTOP
-
-# 4. Deploy app directly into AppDir/bin
+# 3. Deploy app directly into AppDir/bin
 mkdir -p ./AppDir/bin
 cp -r ./publish_output/* ./AppDir/bin/
 
-# 5. Build the heavily optimized container
+cp ./SharunAppImage/gpu-t.desktop ./AppDir/
+
+# 4. Build the heavily optimized container
 quick-sharun \
     ./AppDir/bin/* \
     /usr/lib/libSM.so*  \
     /usr/lib/libICE.so* \
     /usr/lib/libicuuc.so*
 
-# 6. Tell the native binary where the runtime is
+# 5. Tell the native binary where the runtime is
 echo 'DOTNET_ROOT=${SHARUN_DIR}/bin' >> ./AppDir/.env
 
-# 7. Turn AppDir into AppImage and Test
+# 6. Turn AppDir into AppImage and Test
 quick-sharun --make-appimage
 quick-sharun --test ./dist/*.AppImage
