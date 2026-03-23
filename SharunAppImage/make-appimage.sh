@@ -39,8 +39,9 @@ cp -r ./publish_output/* ./AppDir/bin/
 # 5. Build the heavily optimized container
 quick-sharun \
     ./AppDir/bin/* \
-    /usr/lib/libSM.so* \
-    /usr/lib/libICE.so*
+    /usr/lib/libSM.so*  \
+    /usr/lib/libICE.so* \
+    /usr/lib/libicuuc.so*
 
 # 6. Tell the native binary where the runtime is
 echo 'DOTNET_ROOT=${SHARUN_DIR}/bin' >> ./AppDir/.env
