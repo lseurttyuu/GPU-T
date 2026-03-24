@@ -44,6 +44,38 @@
             </TabItem>
         </TabControl>
 
+        <!-- Theme toggle button: positioned in the top-right corner, allows users to switch between light/dark/auto themes. -->
+        <Button Grid.Row="0"
+                x:Name="ThemeToggleButton"
+                Click="ThemeToggleButton_Click"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Width="32" Height="32"
+                Background="Transparent"
+                BorderThickness="0"
+                Margin="0,0,2,0"
+                Padding="0"
+                ZIndex="10"
+                ToolTip.Tip="Toggle GPU-T Theme (Auto/Dark/Light)">
+            <Grid Width="24" Height="24">
+                <TextBlock x:Name="ThemeIcon" 
+                           Text="🌗" 
+                           FontSize="20" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"/>
+                
+                <TextBlock x:Name="ThemeLetter" 
+                           Text="A" 
+                           FontSize="10" 
+                           FontWeight="Bold" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center" 
+                           Foreground="#b8b8b8"
+                           Margin="2,0,0,0"/> 
+            </Grid>
+        </Button>
+
+
         <!-- Bottom control bar containing GPU selector and Close button; layout uses columns for responsive alignment. -->
         <Grid Grid.Row="1" Margin="10,0,10,0"> 
             <Grid.ColumnDefinitions>
