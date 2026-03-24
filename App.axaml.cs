@@ -6,7 +6,7 @@ using System.Linq;
 using Avalonia.Markup.Xaml;
 using GPU_T.ViewModels;
 using GPU_T.Views;
-using GPU_T.Services; // <--- Dodaj
+using GPU_T.Services;
 
 namespace GPU_T;
 
@@ -21,11 +21,11 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // 1. Inicjalizacja Bazy Danych (Kopiowanie plików, ładowanie JSON)
-            DatabaseManager.Initialize(); // <--- KLUCZOWA LINIA
+            DatabaseManager.Initialize();
+
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
+
             desktop.MainWindow = new MainWindow
             {
                 DataContext = new MainWindowViewModel(),

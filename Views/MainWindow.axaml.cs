@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using GPU_T.Services;
 using GPU_T.Models;
 using Avalonia.Input;
+using Avalonia.Styling;
 using System.Collections.Generic;
 
 namespace GPU_T.Views;
@@ -21,6 +22,7 @@ public partial class MainWindow : Window
     private bool _isResizing;
     private Point _startMousePosition;
     private double _startHeight;
+    private UserSettings _currentSettings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -36,22 +38,67 @@ public partial class MainWindow : Window
 
     private async void MainWindow_Loaded(object? sender, RoutedEventArgs e)
     {
-        // 1. Read user settings to check if we should ignore warnings about missing tools.
-        UserSettings settings = UserSettingsManager.LoadSettings();
+        // Read user settings
+        _currentSettings = UserSettingsManager.LoadSettings();
 
-        // 2. If user has chosen to ignore warnings, we skip the check entirely.
-        if (settings.IgnoreExecWarning)
+        // Apply the saved theme preference on startup
+        ApplyThemeState(_currentSettings.Theme);
+
+        // If user has chosen to ignore warnings, we skip the check entirely.
+        if (_currentSettings.IgnoreExecWarning)
             return;
 
-        // 3. Check the missing tools
+        // Check the missing tools
         List<string> missingTools = ExecChecker.GetMissingTools();
 
-        // 4. Show the warning dialog if necessary
+        // Show the warning dialog if necessary
         if (missingTools.Count > 0)
         {
             var warningDialog = new ExecWarningWindow(missingTools);
             
             warningDialog.Show();
+        }
+    }
+
+
+
+    private void ThemeToggleButton_Click(object? sender, RoutedEventArgs e)
+    {
+        // Rotate the theme state: Auto(0) -> Dark(1) -> Light(2) -> Auto(0)
+        int nextThemeIndex = ((int)_currentSettings.Theme + 1) % 3;
+        _currentSettings.Theme = (AppThemeMode)nextThemeIndex;
+
+        // Apply visual changes and OS theme hook
+        ApplyThemeState(_currentSettings.Theme);
+
+        // Persist the choice to JSON
+        UserSettingsManager.SaveSettings(_currentSettings);
+    }
+
+    private void ApplyThemeState(AppThemeMode mode)
+    {
+        // Safety check to ensure Application.Current exists
+        if (Application.Current == null) return;
+
+        switch (mode)
+        {
+            case AppThemeMode.Auto:
+                Application.Current.RequestedThemeVariant = ThemeVariant.Default;
+                ThemeIcon.Text = "🌗";
+                ThemeLetter.Text = "A";
+                break;
+
+            case AppThemeMode.Dark:
+                Application.Current.RequestedThemeVariant = ThemeVariant.Dark;
+                ThemeIcon.Text = "🌕";
+                ThemeLetter.Text = "D";
+                break;
+
+            case AppThemeMode.Light:
+                Application.Current.RequestedThemeVariant = ThemeVariant.Light;
+                ThemeIcon.Text = "🌕";
+                ThemeLetter.Text = "L";
+                break;
         }
     }
 
