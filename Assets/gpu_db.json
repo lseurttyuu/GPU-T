@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "vendors": {
     "1002": "AMD",
     "10DE": "NVIDIA",
@@ -4180,6 +4180,29 @@
         "defBoostClock": "925 MHz",
         "defMemClock": "1200 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-r9-270-1024sp.c2679"
+      }
+    ],
+    "15E7": [
+      {
+        "name": "AMD Radeon Graphics 448SP Mobile",
+        "revisions": [
+          "C2"
+        ],
+        "codeName": "Barcelo",
+        "technology": "7 nm",
+        "dieSize": "180 mm\u00B2",
+        "releaseDate": "Jan 6th, 2022",
+        "transistors": "10700M",
+        "rops": "8",
+        "tmus": "28",
+        "shaders": "448 Unified",
+        "computeUnits": "7 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1800 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-graphics-448sp-mobile.c4057"
       }
     ],
     "15BF": [
