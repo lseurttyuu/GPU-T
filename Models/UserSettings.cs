@@ -15,4 +15,7 @@ public class UserSettings
 
     // Stores the user's theme preference. Defaults to Auto.
     public AppThemeMode Theme { get; set; } = AppThemeMode.Auto;
+
+    public double LastSensorWindowHeight { get; set; } = 525 - 1; // Default height for the sensor window
+
 }

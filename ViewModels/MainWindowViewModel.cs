@@ -331,6 +331,16 @@ public partial class MainWindowViewModel : ViewModelBase
             };
         }
 
+        // Read the saved Sensors window height from settings (Read Once)
+        var settings = UserSettingsManager.LoadSettings();
+        _lastUserHeight = settings.LastSensorWindowHeight;
+
+        // 2. Subscribe to the global application exit event
+        if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Exit += OnAppExit;
+        }
+
     }
 
     #endregion
@@ -534,6 +544,17 @@ public partial class MainWindowViewModel : ViewModelBase
             Console.WriteLine($"Error loading image: {ex.Message}");
             return null;
         }
+    }
+
+    private void OnAppExit(object? sender, System.EventArgs e)
+    {
+        // We load the settings again right before saving because the user might have clicked the Theme toggle during this session.
+        // If we used the settings object from the constructor, we would overwrite their new theme choice
+        var settings = UserSettingsManager.LoadSettings();
+        
+        settings.LastSensorWindowHeight = _lastUserHeight;
+        
+        UserSettingsManager.SaveSettings(settings); // Write Once
     }
 
     #endregion
