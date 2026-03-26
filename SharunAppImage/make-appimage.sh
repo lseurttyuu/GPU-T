@@ -38,9 +38,6 @@ quick-sharun \
     /usr/lib/libICE.so* \
     /usr/lib/libicuuc.so*
 
-# 5. Tell the native binary where the runtime is
-echo 'DOTNET_ROOT=${SHARUN_DIR}/bin' >> ./AppDir/.env
-
 # 6. Turn AppDir into AppImage and Test
 quick-sharun --make-appimage
 quick-sharun --test ./dist/*.AppImage
