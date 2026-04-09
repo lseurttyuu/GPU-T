@@ -1,34 +1,5 @@
 {
-  "version": 8,
-  "vendors": {
-    "1002": "AMD",
-    "10DE": "NVIDIA",
-    "8086": "Intel",
-    "1043": "ASUS",
-    "1462": "MSI",
-    "1458": "Gigabyte",
-    "1849": "ASRock",
-    "1DA2": "Sapphire",
-    "148C": "PowerColor",
-    "1682": "XFX",
-    "196D": "Club 3D",
-    "1787": "HIS",
-    "1545": "VisionTek",
-    "1D05": "Yeston",
-    "3842": "EVGA",
-    "19DA": "Zotac",
-    "174B": "PC Partner",
-    "1569": "Palit",
-    "10B0": "Gainward",
-    "1626": "Galax / KFA2",
-    "196E": "PNY",
-    "1642": "Colorful",
-    "107D": "Leadtek",
-    "1028": "Dell",
-    "103C": "HP",
-    "17AA": "Lenovo",
-    "106B": "Apple"
-  },
+  "version": 9,
   "gpus": {
     "6610": [
       {
@@ -5505,52 +5476,6 @@
         "defBoostClock": "2525 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w7800.c4148"
-      }
-    ],
-    "3EA0": [
-      {
-        "name": "Intel UHD Graphics 620 Mobile",
-        "revisions": [
-          "02"
-        ],
-        "codeName": "Whiskey Lake GT2",
-        "technology": "14 nm",
-        "dieSize": "N/A",
-        "releaseDate": "Aug 28th, 2018",
-        "transistors": "N/A",
-        "rops": "3",
-        "tmus": "24",
-        "shaders": "192 Unified",
-        "computeUnits": "24 EU",
-        "memoryType": "System Shared",
-        "busWidth": "System Shared",
-        "defGpuClock": "300 MHz",
-        "defBoostClock": "1150 MHz",
-        "defMemClock": "N/A",
-        "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-620-mobile.c2909"
-      }
-    ],
-    "2191": [
-      {
-        "name": "NVIDIA GeForce GTX 1660 Ti Mobile",
-        "revisions": [
-          "A1"          
-        ],
-        "codeName": "TU116",
-        "technology": "12 nm",
-        "dieSize": "284 mm\u00B2",
-        "releaseDate": "Apr 23rd, 2019",
-        "transistors": "6600M",
-        "rops": "48",
-        "tmus": "96",
-        "shaders": "1536 Unified",
-        "computeUnits": "24 SM",
-        "memoryType": "GDDR6",
-        "busWidth": "192 bit",
-        "defGpuClock": "1455 MHz",
-        "defBoostClock": "1590 MHz",
-        "defMemClock": "1500 MHz",
-        "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-gtx-1660-ti-mobile.c3369"
       }
     ]
   }

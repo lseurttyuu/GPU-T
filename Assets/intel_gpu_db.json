@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "gpus": {
+    "3EA0": [
+      {
+        "name": "Intel UHD Graphics 620 Mobile",
+        "revisions": [
+          "02"
+        ],
+        "codeName": "Whiskey Lake GT2",
+        "technology": "14 nm",
+        "dieSize": "N/A",
+        "releaseDate": "Aug 28th, 2018",
+        "transistors": "N/A",
+        "rops": "3",
+        "tmus": "24",
+        "shaders": "192 Unified",
+        "computeUnits": "24 EU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1150 MHz",
+        "defMemClock": "N/A",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-620-mobile.c2909"
+      }
+    ]
+  }
+}

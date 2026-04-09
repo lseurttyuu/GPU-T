@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "gpus": {
+    "2191": [
+      {
+        "name": "NVIDIA GeForce GTX 1660 Ti Mobile",
+        "revisions": [
+          "A1"          
+        ],
+        "codeName": "TU116",
+        "technology": "12 nm",
+        "dieSize": "284 mm\u00B2",
+        "releaseDate": "Apr 23rd, 2019",
+        "transistors": "6600M",
+        "rops": "48",
+        "tmus": "96",
+        "shaders": "1536 Unified",
+        "computeUnits": "24 SM",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "1455 MHz",
+        "defBoostClock": "1590 MHz",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-gtx-1660-ti-mobile.c3369"
+      }
+    ]
+  }
+}

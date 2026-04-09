@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -9,132 +10,197 @@ using GPU_T.Models;
 namespace GPU_T.Services;
 
 /// <summary>
-/// Manages the GPU database lifecycle, including initialization, loading, and hash verification.
+/// Manages the GPU database lifecycle, dynamically loading only the required vendor databases based on present hardware.
 /// </summary>
 public static class DatabaseManager
 {
-    /// <summary>
-    /// Gets the path to the user data folder (~/.local/share/GPU-T/).
-    /// </summary>
     private static readonly string UserDataFolder = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
         "GPU-T");
 
     /// <summary>
-    /// Gets the path to the database file.
+    /// Maps PCI Vendor IDs to their respective database filenames.
     /// </summary>
-    private static readonly string DbPath = Path.Combine(UserDataFolder, "gpu_db.json");
+    private static readonly Dictionary<string, string> VendorDatabaseMap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        { "0x1002", "amd_gpu_db.json" },    // AMD
+        { "0x1022", "amd_gpu_db.json" },    // AMD (Alternative)
+        { "0x10de", "nvidia_gpu_db.json" }, // NVIDIA
+        { "0x8086", "intel_gpu_db.json" }   // Intel
+    };
 
     /// <summary>
-    /// Gets the path to the database hash file.
-    /// </summary>
-    private static readonly string HashPath = Path.Combine(UserDataFolder, "gpu_db.hash");
-
-    /// <summary>
-    /// Holds the loaded GPU database instance.
+    /// Holds the unified, aggregated GPU database instance for the application to query.
     /// </summary>
     public static GpuDatabaseRoot Database { get; private set; } = new();
 
     /// <summary>
-    /// Initializes the database, handling internal/external file logic and user modifications.
+    /// Initializes the database, scans PCI bus for vendors, and loads only the necessary JSON files.
     /// </summary>
     public static void Initialize()
     {
         try
         {
-            // Ensures user data folder exists.
             if (!Directory.Exists(UserDataFolder))
                 Directory.CreateDirectory(UserDataFolder);
 
-            // Loads internal database JSON and computes its hash.
-            string internalJson = ReadInternalResource("avares://GPU-T/Assets/gpu_db.json");
+            // 1. Always load the Vendors DB (lightweight, resolves subvendors for all cards)
+            ProcessDatabaseFile("gpu_vendors_db.json", loadedDb => 
+            {
+                foreach (var kvp in loadedDb.Vendors)
+                {
+                    Database.Vendors[kvp.Key] = kvp.Value;
+                }
+            });
+
+            // 2. Fast pre-scan of the PCI bus to see which GPU vendors actually exist on this machine
+            HashSet<string> presentVendors = ScanForPresentGpuVendors();
+            
+            // 3. Determine which database files need to be loaded
+            HashSet<string> filesToLoad = new();
+            foreach (var vendor in presentVendors)
+            {
+                if (VendorDatabaseMap.TryGetValue(vendor, out string? fileName))
+                {
+                    filesToLoad.Add(fileName);
+                }
+            }
+
+            // 4. Load the required massive GPU databases
+            foreach (var fileName in filesToLoad)
+            {
+                ProcessDatabaseFile(fileName, MergeGpusIntoMaster);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Critical Database Initialization Error: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Merges the GPUs from a loaded vendor database into the master Database object.
+    /// </summary>
+    private static void MergeGpusIntoMaster(GpuDatabaseRoot vendorDb)
+    {
+        foreach (var kvp in vendorDb.Gpus)
+        {
+            Database.Gpus[kvp.Key] = kvp.Value;
+        }
+    }
+
+    /// <summary>
+    /// Abstracts the internal/external file logic, hashing, and safe-loading for any database file.
+    /// </summary>
+    private static void ProcessDatabaseFile(string fileName, Action<GpuDatabaseRoot> mergeAction)
+    {
+        string dbPath = Path.Combine(UserDataFolder, fileName);
+        string hashPath = Path.Combine(UserDataFolder, fileName.Replace(".json", ".hash"));
+
+        try
+        {
+            string internalJson = ReadInternalResource($"avares://GPU-T/Assets/{fileName}");
             string internalHash = ComputeHash(internalJson);
 
-            // Handles external database file scenarios.
-            if (!File.Exists(DbPath))
+            if (!File.Exists(dbPath))
             {
-                // First launch: save internal database and hash.
-                File.WriteAllText(DbPath, internalJson);
-                File.WriteAllText(HashPath, internalHash);
-                LoadDatabase(internalJson);
+                // First launch for this specific file
+                File.WriteAllText(dbPath, internalJson);
+                File.WriteAllText(hashPath, internalHash);
+                mergeAction(DeserializeJson(internalJson));
             }
             else
             {
-                // Existing file: check for user modification.
-                string externalJson = File.ReadAllText(DbPath);
+                // Existing file: check for user modification
+                string externalJson = File.ReadAllText(dbPath);
                 string currentExternalHash = ComputeHash(externalJson);
-                
-                string originalHash = File.Exists(HashPath) ? File.ReadAllText(HashPath) : "";
+                string originalHash = File.Exists(hashPath) ? File.ReadAllText(hashPath) : "";
 
                 if (currentExternalHash == originalHash)
                 {
-                    // User has not modified the file.
-                    // If internal hash differs, update database for app upgrade.
+                    // User has not modified the file. Check if app update brought a newer internal file.
                     if (internalHash != currentExternalHash)
                     {
-                        File.WriteAllText(DbPath, internalJson);
-                        File.WriteAllText(HashPath, internalHash);
-                        LoadDatabase(internalJson);
+                        File.WriteAllText(dbPath, internalJson);
+                        File.WriteAllText(hashPath, internalHash);
+                        mergeAction(DeserializeJson(internalJson));
                     }
                     else
                     {
-                        LoadDatabase(externalJson);
+                        mergeAction(DeserializeJson(externalJson));
                     }
                 }
                 else
                 {
-                    // User has modified the file.
-                    // Attempts safe update and backup if user file is invalid.
+                    // User has modified the file. Attempt safe load.
                     try 
                     {
-                        LoadDatabase(externalJson);
+                        mergeAction(DeserializeJson(externalJson));
                     }
                     catch
                     {
-                        File.WriteAllText(DbPath + ".bak", externalJson);
-                        File.WriteAllText(DbPath, internalJson);
-                        File.WriteAllText(HashPath, internalHash);
-                        LoadDatabase(internalJson);
+                        // Backup corrupted mod and overwrite with internal default
+                        File.WriteAllText(dbPath + ".bak", externalJson);
+                        File.WriteAllText(dbPath, internalJson);
+                        File.WriteAllText(hashPath, internalHash);
+                        mergeAction(DeserializeJson(internalJson));
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Critical Database Error: {ex.Message}");
-            // Fallback to empty database in case of unrecoverable error.
-            Database = new GpuDatabaseRoot(); 
+            Console.WriteLine($"Error processing database file '{fileName}': {ex.Message}");
         }
     }
 
     /// <summary>
-    /// Loads the database from a JSON string.
+    /// Performs a lightning-fast scan of the sysfs DRM subsystem to extract physical hardware vendor IDs.
     /// </summary>
-    /// <param name="json">The JSON content to deserialize.</param>
-    private static void LoadDatabase(string json)
+    private static HashSet<string> ScanForPresentGpuVendors()
     {
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        Database = JsonSerializer.Deserialize<GpuDatabaseRoot>(json, options) ?? new GpuDatabaseRoot();
+        var vendors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            // We look at /sys/class/drm/card* because it perfectly isolates actual graphics adapters
+            var cardDirs = Directory.GetDirectories("/sys/class/drm", "card*");
+            foreach (var dir in cardDirs)
+            {
+                // Skip display connectors (like card0-DP-1), we only want the core GPU nodes (card0, card1)
+                if (Path.GetFileName(dir).Contains("-")) continue;
+
+                string vendorPath = Path.Combine(dir, "device", "vendor");
+                if (File.Exists(vendorPath))
+                {
+                    // sysfs usually reports in lowercase like "0x1002"
+                    string vendorId = File.ReadAllText(vendorPath).Trim();
+                    vendors.Add(vendorId);
+                }
+            }
+        }
+        catch
+        {
+            // In case of restrictive permissions or weird OS configurations, fallback handled gracefully
+        }
+        return vendors;
     }
 
     /// <summary>
-    /// Reads an internal resource file using Avalonia AssetLoader.
+    /// Deserializes a JSON string into a GpuDatabaseRoot instance.
     /// </summary>
-    /// <param name="uri">The resource URI.</param>
-    /// <returns>The file content as a string.</returns>
+    private static GpuDatabaseRoot DeserializeJson(string json)
+    {
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        return JsonSerializer.Deserialize<GpuDatabaseRoot>(json, options) ?? new GpuDatabaseRoot();
+    }
+
     private static string ReadInternalResource(string uri)
     {
-        // Uses Avalonia AssetLoader to read embedded resources.
         using var stream = AssetLoader.Open(new Uri(uri));
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
     }
 
-    /// <summary>
-    /// Computes the MD5 hash of the provided content and returns it as a hexadecimal string.
-    /// </summary>
-    /// <param name="content">The content to hash.</param>
-    /// <returns>The hexadecimal hash string.</returns>
     private static string ComputeHash(string content)
     {
         using var md5 = MD5.Create();
