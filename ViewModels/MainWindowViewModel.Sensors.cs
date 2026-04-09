@@ -128,6 +128,12 @@ public partial class MainWindowViewModel
         if (support.HasGpuLoad)
             list.Add(new SensorItemViewModel("GPU Load", "%", 0, 100, true));
 
+        if(support.HasEncoderLoad)
+            list.Add(new SensorItemViewModel("Video Encoder Load", "%", 0, 100, true));
+
+        if(support.HasDecoderLoad)
+            list.Add(new SensorItemViewModel("Video Decoder Load", "%", 0, 100, true));
+
         if (support.HasMemControllerLoad)
             list.Add(new SensorItemViewModel("Memory Controller Load", "%", 0, 100, true));
 
@@ -139,6 +145,9 @@ public partial class MainWindowViewModel
 
         if (support.HasPower)
             list.Add(new SensorItemViewModel("Board Power Draw", "W", 0, 100, false));
+
+        if(support.HasPerfCapReason)
+            list.Add(new SensorItemViewModel("PerfCap Reason", "", 0, 1, true, "#00aa00"));
 
         if (support.HasVoltage)
             list.Add(new SensorItemViewModel("GPU Voltage", "V", 0, 1.0, false));
@@ -195,10 +204,19 @@ public partial class MainWindowViewModel
         UpdateSensor("GPU Load", (double)data.GpuLoad);
         UpdateSensor("Memory Controller Load", (double)data.MemControllerLoad);
         
+        UpdateSensor("Video Encoder Load", (double)data.EncoderLoad);
+        UpdateSensor("Video Decoder Load", (double)data.DecoderLoad);
+        
         UpdateSensor("Memory Used (Dedicated)", data.MemoryUsed);
         UpdateSensor("Memory Used (Dynamic)", data.MemoryUsedDynamic);
         
         UpdateSensor("Board Power Draw", data.BoardPower);
+
+        // PerfCap Reason is a decoded string value that also has an associated graph value (0.0 for None/Idle, 1.0 for any active limit); both are updated in the UI.
+        string perfCapStr = GPU_T.Services.Probes.LinuxNvidia.NvidiaPerfCapDecoder.Decode(data.PerfCapReason);
+        double perfCapVal = GPU_T.Services.Probes.LinuxNvidia.NvidiaPerfCapDecoder.GetGraphValue(perfCapStr);
+        UpdateSensor("PerfCap Reason", perfCapVal, perfCapStr);
+
         UpdateSensor("GPU Voltage", data.GpuVoltage);
         
         UpdateSensor("CPU Temperature", data.CpuTemperature);
@@ -218,10 +236,10 @@ public partial class MainWindowViewModel
         }
     }
 
-    private void UpdateSensor(string name, double value)
+    private void UpdateSensor(string name, double value, string? textValue = null)
     {
         var sensor = Sensors.FirstOrDefault(s => s.Name == name);
-        if (sensor != null) sensor.UpdateValue(value);
+        if (sensor != null) sensor.UpdateValue(value, textValue);
     }
 
     private void WriteLogHeader()

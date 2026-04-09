@@ -20,14 +20,17 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
     private readonly string _gpuId;
     private readonly string _busId;
 
+    private readonly string _memoryType;
+
     /// <summary>
     /// Cached result of nvidia-smi availability check. Null means unchecked.
     /// </summary>
     private static bool? _nvidiaSmiAvailable;
 
-    public LinuxNvidiaGpuProbe(string gpuId)
+    public LinuxNvidiaGpuProbe(string gpuId, string memoryType = "")
     {
         _gpuId = gpuId;
+        _memoryType = memoryType;
         _basePath = $"/sys/class/drm/{gpuId}/device";
 
         if (Directory.Exists($"{_basePath}/hwmon"))
@@ -47,6 +50,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "").ToUpper();
 
         var spec = PciIdLookup.GetSpecs(ids.Device, revId);
+
+        string resolvedMemType = spec?.MemoryType ?? _memoryType;
 
         // Try nvidia-smi first for rich data, fall back to sysfs
         var smiData = QueryNvidiaSmi(
@@ -91,7 +96,12 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
             string maxMemClockStr = CleanSmiValue(smiData[8]);
             if (!string.IsNullOrEmpty(maxMemClockStr))
-                maxMemClock = $"{maxMemClockStr} MHz";
+            {
+                if (double.TryParse(maxMemClockStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double rawClock))
+                {
+                    maxMemClock = $"{NormalizeMemoryClock(rawClock, resolvedMemType):0} MHz";
+                }
+            }
 
             string curGpuClockStr = CleanSmiValue(smiData[9]);
             if (!string.IsNullOrEmpty(curGpuClockStr))
@@ -99,7 +109,12 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
             string curMemClockStr = CleanSmiValue(smiData[10]);
             if (!string.IsNullOrEmpty(curMemClockStr))
-                currentMemClock = $"{curMemClockStr} MHz";
+            {
+                if (double.TryParse(curMemClockStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double rawClock))
+                {
+                    currentMemClock = $"{NormalizeMemoryClock(rawClock, resolvedMemType):0} MHz";
+                }
+            }
         }
         else
         {
@@ -205,7 +220,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             DefaultMemoryClock = spec?.DefMemClock ?? maxMemClock,
             CurrentGpuClock = currentGpuClock,
             BoostClock = currentGpuClock,
-            CurrentMemClock = currentMemClock,
+            CurrentMemClock = maxMemClock,
 
             MemorySize = memorySize,
 
@@ -228,12 +243,16 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         // Primary: nvidia-smi query
         var smiData = QueryNvidiaSmi(
             "temperature.gpu,fan.speed,power.draw,clocks.current.graphics," +
-            "clocks.current.memory,utilization.gpu,utilization.memory,memory.used");
+            "clocks.current.memory,utilization.gpu,utilization.memory,memory.used," +
+            "temperature.memory,utilization.encoder,utilization.decoder,clocks_throttle_reasons.active");
 
         double gpuTemp = 0, fanPercent = 0, powerW = 0;
         double gpuClock = 0, memClock = 0;
         int gpuLoad = 0, memLoad = 0;
         double memUsedMb = 0;
+        double memTemp = 0;
+        int encLoad = 0, decLoad = 0;
+        string perfCap = "None";
 
         if (smiData != null && smiData.Count >= 8)
         {
@@ -241,7 +260,9 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             double.TryParse(CleanSmiValue(smiData[1]), NumberStyles.Any, CultureInfo.InvariantCulture, out fanPercent);
             double.TryParse(CleanSmiValue(smiData[2]), NumberStyles.Any, CultureInfo.InvariantCulture, out powerW);
             double.TryParse(CleanSmiValue(smiData[3]), NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
+            
             double.TryParse(CleanSmiValue(smiData[4]), NumberStyles.Any, CultureInfo.InvariantCulture, out memClock);
+            memClock = NormalizeMemoryClock(memClock, _memoryType);
 
             string gpuLoadStr = CleanSmiValue(smiData[5]);
             int.TryParse(gpuLoadStr, out gpuLoad);
@@ -250,6 +271,14 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             int.TryParse(memLoadStr, out memLoad);
 
             double.TryParse(CleanSmiValue(smiData[7]), NumberStyles.Any, CultureInfo.InvariantCulture, out memUsedMb);
+
+            double.TryParse(CleanSmiValue(smiData[8]), NumberStyles.Any, CultureInfo.InvariantCulture, out memTemp);
+            int.TryParse(CleanSmiValue(smiData[9]), out encLoad);
+            int.TryParse(CleanSmiValue(smiData[10]), out decLoad);
+            
+            perfCap = CleanSmiValue(smiData[11], "None");
+            if (string.IsNullOrEmpty(perfCap)) perfCap = "None";
+            
         }
         else
         {
@@ -272,7 +301,13 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             MemControllerLoad = memLoad,
             MemoryUsed = memUsedMb,
             CpuTemperature = cpuTemp,
-            SystemRamUsed = sysRam
+            SystemRamUsed = sysRam,
+
+            // Assign new values
+            MemoryTemp = memTemp,
+            EncoderLoad = encLoad,
+            DecoderLoad = decLoad,
+            PerfCapReason = perfCap
         };
     }
 
@@ -286,27 +321,22 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
         if (IsNvidiaSmiAvailable())
         {
-            // nvidia-smi provides most sensors; check which are actually reporting
             var smiData = QueryNvidiaSmi(
-                "temperature.gpu,fan.speed,power.draw,utilization.gpu,utilization.memory,memory.used");
+                "temperature.gpu,fan.speed,power.draw,utilization.gpu,utilization.memory,memory.used," +
+                "temperature.memory,utilization.encoder,utilization.decoder,clocks_throttle_reasons.active");
 
-            if (smiData != null && smiData.Count >= 6)
+            if (smiData != null && smiData.Count >= 10)
             {
-                // Fan available if not "[Not Supported]" or "[N/A]"
-                string fanVal = CleanSmiValue(smiData[1]);
-                avail.HasFan = !string.IsNullOrEmpty(fanVal);
-
-                string powerVal = CleanSmiValue(smiData[2]);
-                avail.HasPower = !string.IsNullOrEmpty(powerVal);
-
-                string gpuLoadVal = CleanSmiValue(smiData[3]);
-                avail.HasGpuLoad = !string.IsNullOrEmpty(gpuLoadVal);
-
-                string memLoadVal = CleanSmiValue(smiData[4]);
-                avail.HasMemControllerLoad = !string.IsNullOrEmpty(memLoadVal);
-
-                string memUsedVal = CleanSmiValue(smiData[5]);
-                avail.HasMemUsed = !string.IsNullOrEmpty(memUsedVal);
+                avail.HasFan = !string.IsNullOrEmpty(CleanSmiValue(smiData[1]));
+                avail.HasPower = !string.IsNullOrEmpty(CleanSmiValue(smiData[2]));
+                avail.HasGpuLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[3]));
+                avail.HasMemControllerLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[4]));
+                avail.HasMemUsed = !string.IsNullOrEmpty(CleanSmiValue(smiData[5]));
+                
+                avail.HasMemTemp = !string.IsNullOrEmpty(CleanSmiValue(smiData[6]));
+                avail.HasEncoderLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[7]));
+                avail.HasDecoderLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[8]));
+                avail.HasPerfCapReason = !string.IsNullOrEmpty(CleanSmiValue(smiData[9]));
             }
         }
         else
@@ -408,9 +438,27 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         if (trimmed.Contains("[Not Supported]") || trimmed.Contains("[N/A]") ||
             trimmed == "N/A" || trimmed == "[Insufficient Permissions]")
             return fallback;
-        // Remove trailing unit strings that nvidia-smi sometimes includes even with nounits
-        trimmed = trimmed.Replace(" MiB", "").Replace(" MHz", "").Replace(" W", "").Replace(" %", "").Trim();
+        
+        // Added " KB/s" and " MB/s" to the replace chain
+        trimmed = trimmed.Replace(" MiB", "").Replace(" MHz", "").Replace(" W", "")
+                         .Replace(" %", "").Replace(" KB/s", "").Replace(" MB/s", "").Trim();
+
         return trimmed;
+    }
+
+    /// <summary>
+    /// Converts nvidia-smi's data-rate clock into a true GPU-Z style base clock.
+    /// </summary>
+    private double NormalizeMemoryClock(double smiClock, string memoryType)
+    {
+        if (smiClock <= 0) return 0;
+        
+        // Use the common helper to get the divisor (8 for GDDR6, 4 for GDDR5, etc.)
+        double multiplier = CommonGpuHelpers.GetMemoryMultiplier(memoryType);
+        
+        // nvidia-smi always reports (Effective / 2). 
+        // Therefore, Base = (smiClock * 2) / Multiplier.
+        return (smiClock * 2.0) / multiplier;
     }
 
     #endregion

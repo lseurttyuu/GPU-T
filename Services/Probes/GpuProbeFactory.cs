@@ -57,7 +57,7 @@ public static class GpuProbeFactory
         {
             if (vendorId == "0X10DE") // NVIDIA
             {
-                return new LinuxNvidiaGpuProbe(gpuId);
+                return new LinuxNvidiaGpuProbe(gpuId, memoryType);
             }
 
             if (vendorId == "0X8086") // Intel

@@ -14,8 +14,10 @@ public record GpuSensorData
     
     public double BoardPower { get; init; }    // Watts
     public int GpuLoad { get; init; }          // %
+    public int EncoderLoad { get; set; }
+    public int DecoderLoad { get; set; }
     public double MemoryUsed { get; init; }    // MB
-    
+    public string PerfCapReason { get; set; } = "None";
     public double GpuVoltage { get; init; }    // V
 
     public int MemControllerLoad { get; init; } // %
