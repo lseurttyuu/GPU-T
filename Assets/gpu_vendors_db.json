@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "vendors": {
+    "1002": "AMD",
+    "10DE": "NVIDIA",
+    "8086": "Intel",
+    "1043": "ASUS",
+    "1462": "MSI",
+    "1458": "Gigabyte",
+    "1849": "ASRock",
+    "1DA2": "Sapphire",
+    "148C": "PowerColor",
+    "1682": "XFX",
+    "196D": "Club 3D",
+    "1787": "HIS",
+    "1545": "VisionTek",
+    "1D05": "Yeston",
+    "3842": "EVGA",
+    "19DA": "Zotac",
+    "174B": "PC Partner",
+    "1569": "Palit",
+    "10B0": "Gainward",
+    "1626": "Galax / KFA2",
+    "196E": "PNY",
+    "1642": "Colorful",
+    "107D": "Leadtek",
+    "1028": "Dell",
+    "103C": "HP",
+    "17AA": "Lenovo",
+    "106B": "Apple"
+  }
+}
