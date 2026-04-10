@@ -15,7 +15,7 @@ mkdir -p ./AppDir/bin
 
 # 1. Compile the AOT Sidecar (This inherently runs as self-contained)
 echo "Compiling NVAPI Sidecar (AOT)..."
-dotnet publish GPU_T.Nvapi/GPU_T.Nvapi.csproj -c Release -r linux-x64 -o ./AppDir/bin \
+dotnet publish Nvapi/GPU-T.Nvapi.csproj -c Release -r linux-x64 -o ./AppDir/bin \
     -p:DebugSymbols=false \
     -p:DebugType=None
 

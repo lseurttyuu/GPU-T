@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPU-T.Tests", "Tests\GPU-T.Tests.csproj", "{C1FD00DC-8EC6-4F9F-BA9D-8550E5454606}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPU_T.Nvapi", "GPU_T.Nvapi\GPU_T.Nvapi.csproj", "{34FA510B-F0DA-4243-9E54-2314E3287474}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPU_T.Nvapi", "Nvapi\GPU-T.Nvapi.csproj", "{34FA510B-F0DA-4243-9E54-2314E3287474}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

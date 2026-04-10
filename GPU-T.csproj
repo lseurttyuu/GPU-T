@@ -13,15 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-    <ProjectReference Include="GPU_T.Nvapi\GPU_T.Nvapi.csproj">
+    <ProjectReference Include="Nvapi\GPU-T.Nvapi.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="GPU_T.Nvapi\**" />
-    <EmbeddedResource Remove="GPU_T.Nvapi\**" />
-    <None Remove="GPU_T.Nvapi\**" />
+    <Compile Remove="Nvapi\**" />
+    <EmbeddedResource Remove="Nvapi\**" />
+    <None Remove="Nvapi\**" />
   </ItemGroup>
   
   <ItemGroup>

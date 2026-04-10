@@ -569,7 +569,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             string fullArg = $"{arg}{busArg}";
 
             string appDir = AppDomain.CurrentDomain.BaseDirectory;
-            string sidecarPath = System.IO.Path.Combine(appDir, "GPU_T.Nvapi");
+            string sidecarPath = System.IO.Path.Combine(appDir, "GPU-T.Nvapi");
 
             if (!System.IO.File.Exists(sidecarPath))
                 sidecarPath += ".dll"; 
