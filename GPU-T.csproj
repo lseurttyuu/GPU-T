@@ -11,8 +11,19 @@
   <PropertyGroup>
     <DefaultItemExcludes>$(DefaultItemExcludes);Tests\**</DefaultItemExcludes>
   </PropertyGroup>
-  
 
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <ProjectReference Include="GPU_T.Nvapi\GPU_T.Nvapi.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="GPU_T.Nvapi\**" />
+    <EmbeddedResource Remove="GPU_T.Nvapi\**" />
+    <None Remove="GPU_T.Nvapi\**" />
+  </ItemGroup>
+  
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />

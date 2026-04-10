@@ -14,7 +14,9 @@ pacman -Sy --noconfirm \
     libva-utils \
     pciutils \
     desktop-file-utils \
-    hicolor-icon-theme
+    hicolor-icon-theme \
+    clang \
+    zlib
 
 echo "Installing debloated packages (Mesa without LLVM)..."
 echo "---------------------------------------------------------------"

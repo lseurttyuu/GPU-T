@@ -22,6 +22,26 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
     private readonly string _memoryType;
 
+    private class NvapiState
+    {
+        public bool? IsSupported;
+        public int HotspotTemp = 0;
+        public int VramTemp = 0;
+        public double GPUVoltage = 0.0;
+    }
+
+    private static readonly Dictionary<string, NvapiState> _stateCache = new();
+
+    private NvapiState GetState()
+    {
+        if (!_stateCache.TryGetValue(_gpuId, out var state))
+        {
+            state = new NvapiState();
+            _stateCache[_gpuId] = state;
+        }
+        return state;
+    }
+
     /// <summary>
     /// Cached result of nvidia-smi availability check. Null means unchecked.
     /// </summary>
@@ -215,11 +235,11 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             BusWidth = spec?.BusWidth ?? "N/A",
             Bandwidth = bandwidth,
 
-            DefaultGpuClock = spec?.DefGpuClock ?? maxGpuClock,
-            DefaultBoostClock = spec?.DefBoostClock ?? maxGpuClock,
-            DefaultMemoryClock = spec?.DefMemClock ?? maxMemClock,
-            CurrentGpuClock = currentGpuClock,
-            BoostClock = currentGpuClock,
+            DefaultGpuClock = spec?.DefGpuClock ?? "---",
+            DefaultBoostClock = spec?.DefBoostClock ?? "---",
+            DefaultMemoryClock = spec?.DefMemClock ?? "---",
+            CurrentGpuClock = maxGpuClock,
+            BoostClock = maxGpuClock,
             CurrentMemClock = maxMemClock,
 
             MemorySize = memorySize,
@@ -251,10 +271,41 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         int gpuLoad = 0, memLoad = 0;
         double memUsedMb = 0;
         double memTemp = 0;
+        double GpuVoltage = 0;
+        double hotSpotTemp = 0;
         int encLoad = 0, decLoad = 0;
         string perfCap = "None";
 
-        if (smiData != null && smiData.Count >= 8)
+
+        var nvapiState = GetState();
+
+        // Try NVAPI sidecar for Hotspot, VRAM temperatures and GPU Voltage
+        if (nvapiState.IsSupported == true)
+        {
+            string readData = RunNvapiSidecar("--read");
+
+            if (!string.IsNullOrEmpty(readData) && readData.Contains(','))
+            {
+                var parts = readData.Split(',');
+                if (parts.Length >= 2)
+                {
+                    if (int.TryParse(parts[0], out int hs) && hs > 0) nvapiState.HotspotTemp = hs;
+                    if (int.TryParse(parts[1], out int vr) && vr > 0) nvapiState.VramTemp = vr;
+                }
+                if (parts.Length >= 3)
+                {
+                    // Convert mV to Volts for the UI
+                    if (int.TryParse(parts[2], out int mv) && mv > 0) nvapiState.GPUVoltage = mv / 1000.0;
+                }
+            }
+
+            hotSpotTemp = nvapiState.HotspotTemp;
+            memTemp = nvapiState.VramTemp;
+            GpuVoltage = nvapiState.GPUVoltage;
+        }
+
+
+        if (smiData != null && smiData.Count >= 12)
         {
             double.TryParse(CleanSmiValue(smiData[0]), NumberStyles.Any, CultureInfo.InvariantCulture, out gpuTemp);
             double.TryParse(CleanSmiValue(smiData[1]), NumberStyles.Any, CultureInfo.InvariantCulture, out fanPercent);
@@ -272,7 +323,11 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
             double.TryParse(CleanSmiValue(smiData[7]), NumberStyles.Any, CultureInfo.InvariantCulture, out memUsedMb);
 
-            double.TryParse(CleanSmiValue(smiData[8]), NumberStyles.Any, CultureInfo.InvariantCulture, out memTemp);
+            if(memTemp == 0) // If NVAPI didn't provide a value, try nvidia-smi's memory temp
+            {
+                double.TryParse(CleanSmiValue(smiData[8]), NumberStyles.Any, CultureInfo.InvariantCulture, out memTemp);
+            }
+
             int.TryParse(CleanSmiValue(smiData[9]), out encLoad);
             int.TryParse(CleanSmiValue(smiData[10]), out decLoad);
             
@@ -295,15 +350,15 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             GpuClock = gpuClock,
             MemoryClock = memClock,
             GpuTemp = gpuTemp,
+            GpuHotSpot = hotSpotTemp,
             FanPercent = (int)fanPercent,
             BoardPower = powerW,
             GpuLoad = gpuLoad,
             MemControllerLoad = memLoad,
             MemoryUsed = memUsedMb,
+            GpuVoltage=GpuVoltage,
             CpuTemperature = cpuTemp,
             SystemRamUsed = sysRam,
-
-            // Assign new values
             MemoryTemp = memTemp,
             EncoderLoad = encLoad,
             DecoderLoad = decLoad,
@@ -347,6 +402,33 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 if (File.Exists(Path.Combine(_hwmonPath, "fan1_input"))) avail.HasFan = true;
                 if (File.Exists(Path.Combine(_hwmonPath, "power1_average")) ||
                     File.Exists(Path.Combine(_hwmonPath, "power1_input"))) avail.HasPower = true;
+            }
+        }
+
+        var nvapiState = GetState();
+
+        // NVAPI Sidecar Check
+        if (!nvapiState.IsSupported.HasValue)
+        {
+            string checkResult = RunNvapiSidecar("--check");
+            nvapiState.IsSupported = (checkResult != null); 
+        }
+
+        if (nvapiState.IsSupported == true)
+        {
+            string readData = RunNvapiSidecar("--read");
+            if (!string.IsNullOrEmpty(readData) && readData.Contains(','))
+            {
+                var parts = readData.Split(',');
+                if (parts.Length >= 2)
+                {
+                    if (int.TryParse(parts[0], out int hs) && hs > 0) avail.HasHotSpot = true;
+                    if (int.TryParse(parts[1], out int vr) && vr > 0) avail.HasMemTemp = true; 
+                }
+                if (parts.Length >= 3)
+                {
+                    if (int.TryParse(parts[2], out int mv) && mv > 0) avail.HasVoltage = true;
+                }
             }
         }
 
@@ -460,6 +542,60 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         // Therefore, Base = (smiClock * 2) / Multiplier.
         return (smiClock * 2.0) / multiplier;
     }
+
+    /// <summary>
+    /// Calls the isolated NVAPI sidecar executable. 
+    /// </summary>
+    private string RunNvapiSidecar(string arg)
+    {
+        try
+        {
+            // Extract the Hex Bus ID from Linux format (e.g. "0000:0A:00.0" -> "0A")
+            string busArg = "";
+            if (!string.IsNullOrEmpty(_busId) && _busId != "Unknown")
+            {
+                var parts = _busId.Split(':');
+                if (parts.Length >= 2)
+                {
+                    // Parse the Hex string ("0A") into an integer (10) for NVAPI
+                    if (uint.TryParse(parts[1], System.Globalization.NumberStyles.HexNumber, null, out uint busInt))
+                    {
+                        busArg = $" --bus {busInt}";
+                    }
+                }
+            }
+
+            // Append the target bus to the command (e.g. "--read --bus 1")
+            string fullArg = $"{arg}{busArg}";
+
+            string appDir = AppDomain.CurrentDomain.BaseDirectory;
+            string sidecarPath = System.IO.Path.Combine(appDir, "GPU_T.Nvapi");
+
+            if (!System.IO.File.Exists(sidecarPath))
+                sidecarPath += ".dll"; 
+
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = sidecarPath.EndsWith(".dll") ? "dotnet" : sidecarPath,
+                Arguments = sidecarPath.EndsWith(".dll") ? $"\"{sidecarPath}\" {fullArg}" : fullArg,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = System.Diagnostics.Process.Start(psi);
+            if (process != null)
+            {
+                string output = process.StandardOutput.ReadToEnd().Trim();
+                process.WaitForExit(500); 
+                if (process.ExitCode == 0) return output;
+            }
+        }
+        catch { }
+        return "";
+    }
+
+
 
     #endregion
 

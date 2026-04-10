@@ -11,8 +11,16 @@ export DEPLOY_DOTNET=1
 export DEPLOY_VULKAN=0
 export STRACE_MODE=0
 
-# 1. Compile the app with strict size-reduction flags
-echo "Compiling GPU-T..."
+mkdir -p ./AppDir/bin
+
+# 1. Compile the AOT Sidecar (This inherently runs as self-contained)
+echo "Compiling NVAPI Sidecar (AOT)..."
+dotnet publish GPU_T.Nvapi/GPU_T.Nvapi.csproj -c Release -r linux-x64 -o ./AppDir/bin \
+    -p:DebugSymbols=false \
+    -p:DebugType=None
+
+# 2. Compile the Main App with strict size-reduction flags
+echo "Compiling GPU-T Main App..."
 dotnet publish GPU-T.csproj -c Release -r linux-x64 --no-self-contained -o ./publish_output \
     -p:DebugSymbols=false \
     -p:DebugType=None \
