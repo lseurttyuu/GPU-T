@@ -83,6 +83,11 @@ public partial class SensorItemViewModel : ViewModelBase
     /// </summary>
     public double CurrentValue { get; private set; }
 
+    /// <summary>
+    /// Public access to the raw text value for string-based sensors (used by loggers).
+    /// </summary>
+    public string? CurrentTextValue { get; private set; }
+
     #endregion
 
     #region CONSTRUCTOR
@@ -124,7 +129,7 @@ public partial class SensorItemViewModel : ViewModelBase
     public void UpdateValue(double rawValue, string? textValue = null)
     {
         CurrentValue = rawValue;
-        _currentTextValue = textValue;
+        CurrentTextValue = _currentTextValue = textValue;
 
         _graphHistory.Add(rawValue);
         _textHistory.Add(textValue);
