@@ -163,9 +163,12 @@ public partial class MainWindowViewModel
 
         Sensors = list;
 
+        // Safely read the UI selection, falling back to 1.0s on initial startup
+        double intervalSeconds = SelectedRefreshRate?.Seconds ?? 1.0;
+
         _sensorTimer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(1.0)
+            Interval = TimeSpan.FromSeconds(intervalSeconds)
         };
         _sensorTimer.Tick += SensorTimer_Tick;
         _sensorTimer.Start();
