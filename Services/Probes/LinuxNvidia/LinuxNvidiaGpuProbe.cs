@@ -28,6 +28,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         public int HotspotTemp = 0;
         public int VramTemp = 0;
         public double GPUVoltage = 0.0;
+        public double PcieTxGb = 0.0; 
+        public double PcieRxGb = 0.0;
     }
 
     private static readonly Dictionary<string, NvapiState> _stateCache = new();
@@ -273,6 +275,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         double memTemp = 0;
         double GpuVoltage = 0;
         double hotSpotTemp = 0;
+        double pcieTxGb = 0, pcieRxGb = 0;
         int encLoad = 0, decLoad = 0;
         string perfCap = "None";
 
@@ -287,21 +290,32 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             if (!string.IsNullOrEmpty(readData) && readData.Contains(','))
             {
                 var parts = readData.Split(',');
-                if (parts.Length >= 2)
-                {
-                    if (int.TryParse(parts[0], out int hs) && hs > 0) nvapiState.HotspotTemp = hs;
-                    if (int.TryParse(parts[1], out int vr) && vr > 0) nvapiState.VramTemp = vr;
-                }
-                if (parts.Length >= 3)
-                {
-                    // Convert mV to Volts for the UI
-                    if (int.TryParse(parts[2], out int mv) && mv > 0) nvapiState.GPUVoltage = mv / 1000.0;
-                }
+                    if (parts.Length >= 2)
+                    {
+                        if (int.TryParse(parts[0], out int hs) && hs > 0) nvapiState.HotspotTemp = hs;
+                        if (int.TryParse(parts[1], out int vr) && vr > 0) nvapiState.VramTemp = vr;
+                    }
+                    if (parts.Length >= 3)
+                    {
+                        if (int.TryParse(parts[2], out int mv) && mv > 0) nvapiState.GPUVoltage = mv / 1000.0;
+                    }
+                    
+                    if (parts.Length >= 5)
+                    {
+                        if (int.TryParse(parts[3], out int tx) && tx >= 0) 
+                            nvapiState.PcieTxGb = tx / 1048576.0;
+                            
+                        if (int.TryParse(parts[4], out int rx) && rx >= 0) 
+                            nvapiState.PcieRxGb = rx / 1048576.0;
+                    }
             }
 
             hotSpotTemp = nvapiState.HotspotTemp;
             memTemp = nvapiState.VramTemp;
             GpuVoltage = nvapiState.GPUVoltage;
+            pcieTxGb = nvapiState.PcieTxGb;
+            pcieRxGb = nvapiState.PcieRxGb;
+
         }
 
 
@@ -362,7 +376,9 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             MemoryTemp = memTemp,
             EncoderLoad = encLoad,
             DecoderLoad = decLoad,
-            PerfCapReason = perfCap
+            PerfCapReason = perfCap,
+            PcieTx = pcieTxGb,
+            PcieRx = pcieRxGb
         };
     }
 
@@ -416,7 +432,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
         if (nvapiState.IsSupported == true)
         {
-            string readData = RunNvapiSidecar("--read");
+            string? readData = RunNvapiSidecar("--read");
             if (!string.IsNullOrEmpty(readData) && readData.Contains(','))
             {
                 var parts = readData.Split(',');
@@ -428,6 +444,12 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 if (parts.Length >= 3)
                 {
                     if (int.TryParse(parts[2], out int mv) && mv > 0) avail.HasVoltage = true;
+                }
+                // NEW: Flag PCIe throughput as available
+                if (parts.Length >= 5)
+                {
+                    if (int.TryParse(parts[3], out int tx) && tx >= 0) avail.HasPcieTx = true;
+                    if (int.TryParse(parts[4], out int rx) && rx >= 0) avail.HasPcieRx = true;
                 }
             }
         }
@@ -565,8 +587,10 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 }
             }
 
-            // Append the target bus to the command (e.g. "--read --bus 1")
-            string fullArg = $"{arg}{busArg}";
+            string pciArg = !string.IsNullOrEmpty(_busId) && _busId != "Unknown" ? $" --pci {_busId}" : "";
+
+            // Append the target bus to the command (E.g., "--read --bus 10 --pci 0000:0A:00.0")
+            string fullArg = $"{arg}{busArg}{pciArg}";
 
             string appDir = AppDomain.CurrentDomain.BaseDirectory;
             string sidecarPath = System.IO.Path.Combine(appDir, "GPU-T.Nvapi");

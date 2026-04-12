@@ -6,6 +6,7 @@ namespace GPU_T.Nvapi;
 class Program
 {
     private const string NvApiLibrary = "libnvidia-api.so.1";
+    private const string NvmlLibrary = "libnvidia-ml.so.1";
 
     private const uint QUERY_NVAPI_INITIALIZE = 0x0150e828;
     private const uint QUERY_NVAPI_ENUM_PHYSICAL_GPUS = 0xe5ac921f;
@@ -51,11 +52,23 @@ class Program
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int NvAPI_GetBusId(IntPtr handle, out uint busId);
 
+
+    [DllImport(NvmlLibrary, EntryPoint = "nvmlInit_v2")]
+    private static extern int NvmlInit();
+
+    [DllImport(NvmlLibrary, EntryPoint = "nvmlDeviceGetHandleByPciBusId_v2", CharSet = CharSet.Ansi)]
+    private static extern int NvmlDeviceGetHandleByPciBusId(string pciBusId, out IntPtr device);
+
+    [DllImport(NvmlLibrary, EntryPoint = "nvmlDeviceGetPcieThroughput")]
+    private static extern int NvmlDeviceGetPcieThroughput(IntPtr device, uint counter, out uint value);
+
     static unsafe int Main(string[] args)
     {
         if (args.Length == 0) return 1;
         bool isCheck = false, isRead = false;
         uint targetBusId = uint.MaxValue;
+
+        string targetPciString = "";
 
         // Parse arguments (e.g., "--read --bus 1")
         for (int i = 0; i < args.Length; i++)
@@ -63,9 +76,8 @@ class Program
             if (args[i] == "--check") isCheck = true;
             if (args[i] == "--read") isRead = true;
             if (args[i] == "--bus" && i + 1 < args.Length)
-            {
-                uint.TryParse(args[i + 1], out targetBusId);
-            }
+            if (args[i] == "--bus" && i + 1 < args.Length) uint.TryParse(args[i + 1], out targetBusId);
+            if (args[i] == "--pci" && i + 1 < args.Length) targetPciString = args[i + 1];
         }
 
         if (!isCheck && !isRead) return 1;
@@ -160,9 +172,26 @@ class Program
                 }
             }
 
-            // Print 3 values: Hotspot, Vram, VoltageMv
-            Console.WriteLine($"{finalHotspot},{finalVram},{finalVoltageMv}");
+            int finalTxKbps = -1;
+            int finalRxKbps = -1;
+
+            if (!string.IsNullOrEmpty(targetPciString))
+            {
+                if (NvmlInit() == 0)
+                {
+                    if (NvmlDeviceGetHandleByPciBusId(targetPciString, out IntPtr nvmlDevice) == 0)
+                    {
+                        // 0 = TX (Transmit), 1 = RX (Receive). NVML returns values in KB/s.
+                        if (NvmlDeviceGetPcieThroughput(nvmlDevice, 0, out uint tx) == 0) finalTxKbps = (int)tx;
+                        if (NvmlDeviceGetPcieThroughput(nvmlDevice, 1, out uint rx) == 0) finalRxKbps = (int)rx;
+                    }
+                }
+            }
+
+            // Output all 5 values
+            Console.WriteLine($"{finalHotspot},{finalVram},{finalVoltageMv},{finalTxKbps},{finalRxKbps}");
             return 0;
+
         }
         catch
         {

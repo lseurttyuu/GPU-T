@@ -134,6 +134,12 @@ public partial class MainWindowViewModel
         if(support.HasDecoderLoad)
             list.Add(new SensorItemViewModel("Video Decoder Load", "%", 0, 100, true));
 
+        if (support.HasPcieTx)
+            list.Add(new SensorItemViewModel("PCIe Tx Throughput", "GB/s", 0, 4, false));
+
+        if (support.HasPcieRx)
+            list.Add(new SensorItemViewModel("PCIe Rx Throughput", "GB/s", 0, 4, false));
+
         if (support.HasMemControllerLoad)
             list.Add(new SensorItemViewModel("Memory Controller Load", "%", 0, 100, true));
 
@@ -206,6 +212,9 @@ public partial class MainWindowViewModel
         
         UpdateSensor("Video Encoder Load", (double)data.EncoderLoad);
         UpdateSensor("Video Decoder Load", (double)data.DecoderLoad);
+
+        UpdateSensor("PCIe Tx Throughput", data.PcieTx);
+        UpdateSensor("PCIe Rx Throughput", data.PcieRx);
         
         UpdateSensor("Memory Used (Dedicated)", data.MemoryUsed);
         UpdateSensor("Memory Used (Dynamic)", data.MemoryUsedDynamic);

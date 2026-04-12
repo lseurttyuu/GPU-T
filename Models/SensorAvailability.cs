@@ -13,4 +13,6 @@ public class SensorAvailability
     public bool HasEncoderLoad { get; set; }
     public bool HasDecoderLoad { get; set; }
     public bool HasPerfCapReason { get; set; }
+    public bool HasPcieTx { get; set; }
+    public bool HasPcieRx { get; set; }
 }

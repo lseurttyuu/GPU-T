@@ -21,6 +21,8 @@ public record GpuSensorData
     public double GpuVoltage { get; init; }    // V
 
     public int MemControllerLoad { get; init; } // %
+    public double PcieTx { get; set; }
+    public double PcieRx { get; set; }
     public double MemoryUsedDynamic { get; init; } // MB (GTT)
     
     public double CpuTemperature { get; init; } // °C
