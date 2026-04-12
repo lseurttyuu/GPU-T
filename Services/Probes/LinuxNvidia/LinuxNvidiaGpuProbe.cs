@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using GPU_T.Models;
 using GPU_T.Services.Advanced;
 using GPU_T.Services.Utilities;
@@ -22,23 +23,27 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
     private readonly string _memoryType;
 
-    private class NvapiState
+    private class ProbeStateCache
     {
-        public bool? IsSupported;
-        public int HotspotTemp = 0;
-        public int VramTemp = 0;
-        public double GPUVoltage = 0.0;
-        public double PcieTxGb = 0.0; 
-        public double PcieRxGb = 0.0;
+        // Availability Cache
+        public bool IsAvailabilityCached = false;
+        public SensorAvailability Availability = new();
+        public bool? IsNvapiSupported;
+
+        // Smart Polling Cache
+        public bool HasInitialData = false;
+        public GpuSensorData LastData = new();
+        public bool IsUpdating = false;
+        public readonly object LockObj = new object();
     }
 
-    private static readonly Dictionary<string, NvapiState> _stateCache = new();
+    private static readonly Dictionary<string, ProbeStateCache> _stateCache = new();
 
-    private NvapiState GetState()
+    private ProbeStateCache GetState()
     {
         if (!_stateCache.TryGetValue(_gpuId, out var state))
         {
-            state = new NvapiState();
+            state = new ProbeStateCache();
             _stateCache[_gpuId] = state;
         }
         return state;
@@ -262,140 +267,166 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
     public GpuSensorData LoadSensorData()
     {
-        // Primary: nvidia-smi query
-        var smiData = QueryNvidiaSmi(
-            "temperature.gpu,fan.speed,power.draw,clocks.current.graphics," +
-            "clocks.current.memory,utilization.gpu,utilization.memory,memory.used," +
-            "temperature.memory,utilization.encoder,utilization.decoder,clocks_throttle_reasons.active");
+        var cache = GetState();
 
-        double gpuTemp = 0, fanPercent = 0, powerW = 0;
-        double gpuClock = 0, memClock = 0;
-        int gpuLoad = 0, memLoad = 0;
-        double memUsedMb = 0;
-        double memTemp = 0;
-        double GpuVoltage = 0;
-        double hotSpotTemp = 0;
-        double pcieTxGb = 0, pcieRxGb = 0;
-        int encLoad = 0, decLoad = 0;
-        string perfCap = "None";
-
-
-        var nvapiState = GetState();
-
-        // Try NVAPI sidecar for Hotspot, VRAM temperatures and GPU Voltage
-        if (nvapiState.IsSupported == true)
+        //Prevent returning 0s on the very first tick by blocking synchronously once.
+        bool needsInitialFetch = false;
+        lock (cache.LockObj)
         {
-            string readData = RunNvapiSidecar("--read");
+            if (!cache.HasInitialData)
+            {
+                needsInitialFetch = true;
+                cache.IsUpdating = true; // Lock out other threads
+            }
+        }
+
+        // Run synchronously so we have real numbers before returning to the UI
+        if (needsInitialFetch)
+        {
+            BackgroundFetchSensors(cache);
+            lock (cache.LockObj)
+            {
+                cache.HasInitialData = true;
+            }
+        }
+
+        // Standard Async Polling for all subsequent ticks
+        lock (cache.LockObj)
+        {
+            if (!cache.IsUpdating)
+            {
+                cache.IsUpdating = true;
+                var probeInstance = this; 
+                Task.Run(() => probeInstance.BackgroundFetchSensors(cache));
+            }
+
+            return cache.LastData;
+        }
+    }
+
+    /// <summary>
+    /// Executes parallel hardware queries entirely off the UI thread.
+    /// </summary>
+    private void BackgroundFetchSensors(ProbeStateCache cache)
+    {
+        try
+        {
+            // 1. Parallel Execution: Launch smi and nvapi simultaneously
+            Task<List<string>?> smiTask = Task.Run(() => QueryNvidiaSmi(
+                "temperature.gpu,fan.speed,power.draw,clocks.current.graphics," +
+                "clocks.current.memory,utilization.gpu,utilization.memory,memory.used," +
+                "temperature.memory,utilization.encoder,utilization.decoder,clocks_throttle_reasons.active"));
+
+            Task<string> nvapiTask = Task.FromResult("");
+            if (cache.IsNvapiSupported == true)
+            {
+                nvapiTask = Task.Run(() => RunNvapiSidecar("--read"));
+            }
+
+            // Wait for both to finish (takes only as long as the slowest process)
+            Task.WaitAll(smiTask, nvapiTask);
+
+            var smiData = smiTask.Result;
+            string readData = nvapiTask.Result;
+
+            // 2. Parse the Data (Exactly as before)
+            double gpuTemp = 0, fanPercent = 0, powerW = 0, gpuClock = 0, memClock = 0;
+            int gpuLoad = 0, memLoad = 0, encLoad = 0, decLoad = 0;
+            double memUsedMb = 0, memTemp = 0, GpuVoltage = 0, hotSpotTemp = 0, pcieTxGb = 0, pcieRxGb = 0;
+            string perfCap = "None";
 
             if (!string.IsNullOrEmpty(readData) && readData.Contains(','))
             {
                 var parts = readData.Split(',');
-                    if (parts.Length >= 2)
-                    {
-                        if (int.TryParse(parts[0], out int hs) && hs > 0) nvapiState.HotspotTemp = hs;
-                        if (int.TryParse(parts[1], out int vr) && vr > 0) nvapiState.VramTemp = vr;
-                    }
-                    if (parts.Length >= 3)
-                    {
-                        if (int.TryParse(parts[2], out int mv) && mv > 0) nvapiState.GPUVoltage = mv / 1000.0;
-                    }
-                    
-                    if (parts.Length >= 5)
-                    {
-                        if (int.TryParse(parts[3], out int tx) && tx >= 0) 
-                            nvapiState.PcieTxGb = tx / 1048576.0;
-                            
-                        if (int.TryParse(parts[4], out int rx) && rx >= 0) 
-                            nvapiState.PcieRxGb = rx / 1048576.0;
-                    }
+                if (parts.Length >= 2)
+                {
+                    if (int.TryParse(parts[0], out int hs) && hs > 0) hotSpotTemp = hs;
+                    if (int.TryParse(parts[1], out int vr) && vr > 0) memTemp = vr;
+                }
+                if (parts.Length >= 3)
+                {
+                    if (int.TryParse(parts[2], out int mv) && mv > 0) GpuVoltage = mv / 1000.0;
+                }
+                if (parts.Length >= 5)
+                {
+                    if (int.TryParse(parts[3], out int tx) && tx >= 0) pcieTxGb = tx / 1048576.0;
+                    if (int.TryParse(parts[4], out int rx) && rx >= 0) pcieRxGb = rx / 1048576.0;
+                }
             }
 
-            hotSpotTemp = nvapiState.HotspotTemp;
-            memTemp = nvapiState.VramTemp;
-            GpuVoltage = nvapiState.GPUVoltage;
-            pcieTxGb = nvapiState.PcieTxGb;
-            pcieRxGb = nvapiState.PcieRxGb;
-
-        }
-
-
-        if (smiData != null && smiData.Count >= 12)
-        {
-            double.TryParse(CleanSmiValue(smiData[0]), NumberStyles.Any, CultureInfo.InvariantCulture, out gpuTemp);
-            double.TryParse(CleanSmiValue(smiData[1]), NumberStyles.Any, CultureInfo.InvariantCulture, out fanPercent);
-            double.TryParse(CleanSmiValue(smiData[2]), NumberStyles.Any, CultureInfo.InvariantCulture, out powerW);
-            double.TryParse(CleanSmiValue(smiData[3]), NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
-            
-            double.TryParse(CleanSmiValue(smiData[4]), NumberStyles.Any, CultureInfo.InvariantCulture, out memClock);
-            memClock = NormalizeMemoryClock(memClock, _memoryType);
-
-            string gpuLoadStr = CleanSmiValue(smiData[5]);
-            int.TryParse(gpuLoadStr, out gpuLoad);
-
-            string memLoadStr = CleanSmiValue(smiData[6]);
-            int.TryParse(memLoadStr, out memLoad);
-
-            double.TryParse(CleanSmiValue(smiData[7]), NumberStyles.Any, CultureInfo.InvariantCulture, out memUsedMb);
-
-            if(memTemp == 0) // If NVAPI didn't provide a value, try nvidia-smi's memory temp
+            if (smiData != null && smiData.Count >= 12)
             {
-                double.TryParse(CleanSmiValue(smiData[8]), NumberStyles.Any, CultureInfo.InvariantCulture, out memTemp);
+                double.TryParse(CleanSmiValue(smiData[0]), NumberStyles.Any, CultureInfo.InvariantCulture, out gpuTemp);
+                double.TryParse(CleanSmiValue(smiData[1]), NumberStyles.Any, CultureInfo.InvariantCulture, out fanPercent);
+                double.TryParse(CleanSmiValue(smiData[2]), NumberStyles.Any, CultureInfo.InvariantCulture, out powerW);
+                double.TryParse(CleanSmiValue(smiData[3]), NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
+                double.TryParse(CleanSmiValue(smiData[4]), NumberStyles.Any, CultureInfo.InvariantCulture, out memClock);
+                memClock = NormalizeMemoryClock(memClock, _memoryType);
+
+                int.TryParse(CleanSmiValue(smiData[5]), out gpuLoad);
+                int.TryParse(CleanSmiValue(smiData[6]), out memLoad);
+                double.TryParse(CleanSmiValue(smiData[7]), NumberStyles.Any, CultureInfo.InvariantCulture, out memUsedMb);
+
+                if (memTemp == 0) double.TryParse(CleanSmiValue(smiData[8]), NumberStyles.Any, CultureInfo.InvariantCulture, out memTemp);
+
+                int.TryParse(CleanSmiValue(smiData[9]), out encLoad);
+                int.TryParse(CleanSmiValue(smiData[10]), out decLoad);
+                perfCap = CleanSmiValue(smiData[11], "None");
+                if (string.IsNullOrEmpty(perfCap)) perfCap = "None";
+            }
+            else
+            {
+                gpuTemp = ReadHwmonDouble("temp1_input") / 1000.0;
+                gpuClock = ReadHwmonDouble("freq1_input") / 1000000.0;
             }
 
-            int.TryParse(CleanSmiValue(smiData[9]), out encLoad);
-            int.TryParse(CleanSmiValue(smiData[10]), out decLoad);
-            
-            perfCap = CleanSmiValue(smiData[11], "None");
-            if (string.IsNullOrEmpty(perfCap)) perfCap = "None";
-            
-        }
-        else
-        {
-            // Fallback: read from hwmon if available
-            gpuTemp = ReadHwmonDouble("temp1_input") / 1000.0;
-            gpuClock = ReadHwmonDouble("freq1_input") / 1000000.0;
-        }
+            var newData = new GpuSensorData
+            {
+                GpuClock = gpuClock, MemoryClock = memClock, GpuTemp = gpuTemp, GpuHotSpot = hotSpotTemp,
+                FanPercent = (int)fanPercent, BoardPower = powerW, GpuLoad = gpuLoad, MemControllerLoad = memLoad,
+                MemoryUsed = memUsedMb, GpuVoltage = GpuVoltage, MemoryTemp = memTemp, EncoderLoad = encLoad,
+                DecoderLoad = decLoad, PerfCapReason = perfCap, PcieTx = pcieTxGb, PcieRx = pcieRxGb,
+                // These read fast local files, so we keep them in the background thread too!
+                CpuTemperature = CommonGpuHelpers.GetCpuTemperature(),
+                SystemRamUsed = CommonGpuHelpers.GetSystemRamUsage()
+            };
 
-        double cpuTemp = CommonGpuHelpers.GetCpuTemperature();
-        double sysRam = CommonGpuHelpers.GetSystemRamUsage();
-
-        return new GpuSensorData
+            // 3. Thread-safe push back to the cache
+            lock (cache.LockObj)
+            {
+                cache.LastData = newData;
+            }
+        }
+        catch { }
+        finally
         {
-            GpuClock = gpuClock,
-            MemoryClock = memClock,
-            GpuTemp = gpuTemp,
-            GpuHotSpot = hotSpotTemp,
-            FanPercent = (int)fanPercent,
-            BoardPower = powerW,
-            GpuLoad = gpuLoad,
-            MemControllerLoad = memLoad,
-            MemoryUsed = memUsedMb,
-            GpuVoltage=GpuVoltage,
-            CpuTemperature = cpuTemp,
-            SystemRamUsed = sysRam,
-            MemoryTemp = memTemp,
-            EncoderLoad = encLoad,
-            DecoderLoad = decLoad,
-            PerfCapReason = perfCap,
-            PcieTx = pcieTxGb,
-            PcieRx = pcieRxGb
-        };
+            // Always unlock the state so the next UI tick can trigger a new poll
+            lock (cache.LockObj)
+            {
+                cache.IsUpdating = false;
+            }
+        }
     }
 
     #endregion
 
     #region Sensor Availability
 
-    public SensorAvailability GetSensorAvailability()
+public SensorAvailability GetSensorAvailability()
     {
+        var cache = GetState();
+        
+        // Fast-path: If we already discovered the sensors, return instantly to avoid stutter
+        lock (cache.LockObj)
+        {
+            if (cache.IsAvailabilityCached) return cache.Availability;
+        }
+
         var avail = new SensorAvailability();
 
         if (IsNvidiaSmiAvailable())
         {
-            var smiData = QueryNvidiaSmi(
-                "temperature.gpu,fan.speed,power.draw,utilization.gpu,utilization.memory,memory.used," +
-                "temperature.memory,utilization.encoder,utilization.decoder,clocks_throttle_reasons.active");
-
+            var smiData = QueryNvidiaSmi("temperature.gpu,fan.speed,power.draw,utilization.gpu,utilization.memory,memory.used,temperature.memory,utilization.encoder,utilization.decoder,clocks_throttle_reasons.active");
             if (smiData != null && smiData.Count >= 10)
             {
                 avail.HasFan = !string.IsNullOrEmpty(CleanSmiValue(smiData[1]));
@@ -403,36 +434,27 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 avail.HasGpuLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[3]));
                 avail.HasMemControllerLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[4]));
                 avail.HasMemUsed = !string.IsNullOrEmpty(CleanSmiValue(smiData[5]));
-                
                 avail.HasMemTemp = !string.IsNullOrEmpty(CleanSmiValue(smiData[6]));
                 avail.HasEncoderLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[7]));
                 avail.HasDecoderLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[8]));
                 avail.HasPerfCapReason = !string.IsNullOrEmpty(CleanSmiValue(smiData[9]));
             }
         }
-        else
+        else if (!string.IsNullOrEmpty(_hwmonPath))
         {
-            // Fallback: check hwmon files
-            if (!string.IsNullOrEmpty(_hwmonPath))
-            {
-                if (File.Exists(Path.Combine(_hwmonPath, "fan1_input"))) avail.HasFan = true;
-                if (File.Exists(Path.Combine(_hwmonPath, "power1_average")) ||
-                    File.Exists(Path.Combine(_hwmonPath, "power1_input"))) avail.HasPower = true;
-            }
+            if (File.Exists(Path.Combine(_hwmonPath, "fan1_input"))) avail.HasFan = true;
+            if (File.Exists(Path.Combine(_hwmonPath, "power1_average")) || File.Exists(Path.Combine(_hwmonPath, "power1_input"))) avail.HasPower = true;
         }
 
-        var nvapiState = GetState();
-
-        // NVAPI Sidecar Check
-        if (!nvapiState.IsSupported.HasValue)
+        if (!cache.IsNvapiSupported.HasValue)
         {
             string checkResult = RunNvapiSidecar("--check");
-            nvapiState.IsSupported = (checkResult != null); 
+            cache.IsNvapiSupported = (checkResult != null);
         }
 
-        if (nvapiState.IsSupported == true)
+        if (cache.IsNvapiSupported == true)
         {
-            string? readData = RunNvapiSidecar("--read");
+            string readData = RunNvapiSidecar("--read");
             if (!string.IsNullOrEmpty(readData) && readData.Contains(','))
             {
                 var parts = readData.Split(',');
@@ -441,17 +463,20 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                     if (int.TryParse(parts[0], out int hs) && hs > 0) avail.HasHotSpot = true;
                     if (int.TryParse(parts[1], out int vr) && vr > 0) avail.HasMemTemp = true; 
                 }
-                if (parts.Length >= 3)
-                {
-                    if (int.TryParse(parts[2], out int mv) && mv > 0) avail.HasVoltage = true;
-                }
-                // NEW: Flag PCIe throughput as available
+                if (parts.Length >= 3 && int.TryParse(parts[2], out int mv) && mv > 0) avail.HasVoltage = true;
                 if (parts.Length >= 5)
                 {
                     if (int.TryParse(parts[3], out int tx) && tx >= 0) avail.HasPcieTx = true;
                     if (int.TryParse(parts[4], out int rx) && rx >= 0) avail.HasPcieRx = true;
                 }
             }
+        }
+
+        // Lock and cache the result permanently
+        lock (cache.LockObj)
+        {
+            cache.Availability = avail;
+            cache.IsAvailabilityCached = true;
         }
 
         return avail;
