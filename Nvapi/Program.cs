@@ -3,18 +3,25 @@ using System.Runtime.InteropServices;
 
 namespace GPU_T.Nvapi;
 
+/// <summary>
+/// NVIDIA GPU telemetry reader using NVAPI and NVML libraries.
+/// Retrieves thermal data, voltage, and PCIe throughput metrics from NVIDIA GPUs.
+/// </summary>
 class Program
 {
     private const string NvApiLibrary = "libnvidia-api.so.1";
     private const string NvmlLibrary = "libnvidia-ml.so.1";
 
+    // NVAPI query interface IDs for function resolution
     private const uint QUERY_NVAPI_INITIALIZE = 0x0150e828;
     private const uint QUERY_NVAPI_ENUM_PHYSICAL_GPUS = 0xe5ac921f;
     private const uint QUERY_NVAPI_THERMALS = 0x65fe3aad;
     private const uint QUERY_NVAPI_VOLTAGE = 0x465f9bcf;
-
     private const uint QUERY_NVAPI_GET_BUS_ID = 0x1be0b8e5;
 
+    /// <summary>
+    /// Structure for NVAPI thermal sensor data. Values are encoded as fixed-point integers.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct NvApiThermals
     {
@@ -23,14 +30,16 @@ class Program
         public fixed int values[40];
     }
 
-    // NEW: Voltage Struct
+    /// <summary>
+    /// Structure for NVAPI voltage readout. Voltage is expressed in microvolts (uV).
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct NvApiVoltage
     {
         public uint version;
         public uint flags;
         public fixed uint padding_1[8];
-        public uint value_uv; // Microvolts
+        public uint value_uv; // uV
         public fixed uint padding_2[8];
     }
 
@@ -52,7 +61,6 @@ class Program
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int NvAPI_GetBusId(IntPtr handle, out uint busId);
 
-
     [DllImport(NvmlLibrary, EntryPoint = "nvmlInit_v2")]
     private static extern int NvmlInit();
 
@@ -62,15 +70,19 @@ class Program
     [DllImport(NvmlLibrary, EntryPoint = "nvmlDeviceGetPcieThroughput")]
     private static extern int NvmlDeviceGetPcieThroughput(IntPtr device, uint counter, out uint value);
 
+    /// <summary>
+    /// Entry point. Provides GPU metrics in CSV format.
+    /// Arguments: --check (validation), --read (full telemetry), --bus [id], --pci [string]
+    /// Returns: 0 on success, 1 on failure.
+    /// </summary>
     static unsafe int Main(string[] args)
     {
         if (args.Length == 0) return 1;
         bool isCheck = false, isRead = false;
         uint targetBusId = uint.MaxValue;
-
         string targetPciString = "";
 
-        // Parse arguments (e.g., "--read --bus 1")
+        // Parse command-line arguments for operation mode and GPU selection
         for (int i = 0; i < args.Length; i++)
         {
             if (args[i] == "--check") isCheck = true;
@@ -84,19 +96,21 @@ class Program
 
         try
         {
+            // Initialize NVAPI
             IntPtr initPtr = NvAPI_QueryInterface(QUERY_NVAPI_INITIALIZE);
             if (initPtr == IntPtr.Zero) return 1;
             var initialize = Marshal.GetDelegateForFunctionPointer<NvAPI_Initialize>(initPtr);
             if (initialize() != 0) return 1;
 
+            // Enumerate all physical GPUs
             IntPtr enumPtr = NvAPI_QueryInterface(QUERY_NVAPI_ENUM_PHYSICAL_GPUS);
             var enumGpus = Marshal.GetDelegateForFunctionPointer<NvAPI_EnumPhysicalGPUs>(enumPtr);
             
             IntPtr[] gpuHandles = new IntPtr[64];
             if (enumGpus(gpuHandles, out uint gpuCount) != 0 || gpuCount == 0) return 1;
             
-            // MULTI-GPU LOGIC: Find the exact GPU handle by Bus ID
-            IntPtr myGpu = gpuHandles[0]; // Fallback to first GPU
+            /// Select target GPU by bus ID if specified, otherwise use first GPU
+            IntPtr myGpu = gpuHandles[0];
             
             if (targetBusId != uint.MaxValue)
             {
@@ -115,6 +129,7 @@ class Program
                 }
             }
 
+            // Retrieve and validate thermal sensor capabilities
             IntPtr thermalsPtr = NvAPI_QueryInterface(QUERY_NVAPI_THERMALS);
             if (thermalsPtr == IntPtr.Zero) return 1;
             
@@ -124,6 +139,7 @@ class Program
             int validMask = 1;
             NvApiThermals maskTest = new NvApiThermals { version = structVersion, mask = 1 };
             
+            // Determine which thermal sensors are available by testing each bit
             for (int bit = 0; bit < 32; bit++)
             {
                 maskTest.mask = 1 << bit;
@@ -136,13 +152,13 @@ class Program
 
             if (isCheck) return 0;
 
+            // Initialize output values
             NvApiThermals sensors = new NvApiThermals { version = structVersion, mask = validMask };
-            
             int finalHotspot = -1;
             int finalVram = -1;
             int finalVoltageMv = -1;
 
-            // 1. Read Thermals
+            // Read thermal sensor data (indices 9 and 15 contain hotspot and VRAM temps)
             if (getThermals(myGpu, ref sensors) == 0)
             {
                 int hotspot = sensors.values[9] / 256;
@@ -152,7 +168,7 @@ class Program
                 finalVram = (vram > 0 && vram < 255) ? vram : -1;
             }
 
-            // 2. Read Voltage (NEW)
+            // Read GPU core voltage
             IntPtr voltagePtr = NvAPI_QueryInterface(QUERY_NVAPI_VOLTAGE);
             if (voltagePtr != IntPtr.Zero)
             {
@@ -172,6 +188,7 @@ class Program
                 }
             }
 
+            // Read PCIe throughput metrics via NVML
             int finalTxKbps = -1;
             int finalRxKbps = -1;
 
@@ -188,7 +205,7 @@ class Program
                 }
             }
 
-            // Output all 5 values
+            // Output 5 values: hotspot(degC), vram(degC), voltage(mV), tx(KB/s), rx(KB/s)
             Console.WriteLine($"{finalHotspot},{finalVram},{finalVoltageMv},{finalTxKbps},{finalRxKbps}");
             return 0;
 

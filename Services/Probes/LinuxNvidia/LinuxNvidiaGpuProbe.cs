@@ -265,11 +265,15 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
     #region Sensor Data
 
+    /// <summary>
+    /// Loads the latest GPU sensor data, ensuring the first call is synchronous to avoid returning zeroed values,
+    /// and subsequent calls are handled asynchronously to keep UI responsive.
+    /// </summary>
     public GpuSensorData LoadSensorData()
     {
         var cache = GetState();
 
-        //Prevent returning 0s on the very first tick by blocking synchronously once.
+        // Prevent returning 0s on the very first tick by blocking synchronously once.
         bool needsInitialFetch = false;
         lock (cache.LockObj)
         {
@@ -297,6 +301,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             {
                 cache.IsUpdating = true;
                 var probeInstance = this; 
+                // Launch background sensor update to avoid blocking UI thread
                 Task.Run(() => probeInstance.BackgroundFetchSensors(cache));
             }
 
@@ -305,7 +310,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
     }
 
     /// <summary>
-    /// Executes parallel hardware queries entirely off the UI thread.
+    /// Executes parallel hardware queries for sensor data off the UI thread,
+    /// parses the results, and updates the cache in a thread-safe manner.
     /// </summary>
     private void BackgroundFetchSensors(ProbeStateCache cache)
     {
@@ -335,6 +341,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             double memUsedMb = 0, memTemp = 0, GpuVoltage = 0, hotSpotTemp = 0, pcieTxGb = 0, pcieRxGb = 0;
             string perfCap = "None";
 
+            // Parse NVAPI sidecar output if available
             if (!string.IsNullOrEmpty(readData) && readData.Contains(','))
             {
                 var parts = readData.Split(',');
@@ -354,6 +361,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 }
             }
 
+            // Parse nvidia-smi output if available
             if (smiData != null && smiData.Count >= 12)
             {
                 double.TryParse(CleanSmiValue(smiData[0]), NumberStyles.Any, CultureInfo.InvariantCulture, out gpuTemp);
@@ -367,6 +375,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 int.TryParse(CleanSmiValue(smiData[6]), out memLoad);
                 double.TryParse(CleanSmiValue(smiData[7]), NumberStyles.Any, CultureInfo.InvariantCulture, out memUsedMb);
 
+                // If memory temperature not provided by NVAPI, fallback to nvidia-smi
                 if (memTemp == 0) double.TryParse(CleanSmiValue(smiData[8]), NumberStyles.Any, CultureInfo.InvariantCulture, out memTemp);
 
                 int.TryParse(CleanSmiValue(smiData[9]), out encLoad);
@@ -376,6 +385,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             }
             else
             {
+                // Fallback to hwmon sysfs if nvidia-smi is not available
                 gpuTemp = ReadHwmonDouble("temp1_input") / 1000.0;
                 gpuClock = ReadHwmonDouble("freq1_input") / 1000000.0;
             }
@@ -412,7 +422,11 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
     #region Sensor Availability
 
-public SensorAvailability GetSensorAvailability()
+    /// <summary>
+    /// Determines which sensors are available for the current GPU by probing nvidia-smi,
+    /// hwmon, and NVAPI sidecar, and caches the result for future queries.
+    /// </summary>
+    public SensorAvailability GetSensorAvailability()
     {
         var cache = GetState();
         
@@ -424,6 +438,7 @@ public SensorAvailability GetSensorAvailability()
 
         var avail = new SensorAvailability();
 
+        // Probe nvidia-smi for sensor support
         if (IsNvidiaSmiAvailable())
         {
             var smiData = QueryNvidiaSmi("temperature.gpu,fan.speed,power.draw,utilization.gpu,utilization.memory,memory.used,temperature.memory,utilization.encoder,utilization.decoder,clocks_throttle_reasons.active");
@@ -440,12 +455,14 @@ public SensorAvailability GetSensorAvailability()
                 avail.HasPerfCapReason = !string.IsNullOrEmpty(CleanSmiValue(smiData[9]));
             }
         }
+        // Probe hwmon sysfs as a fallback for basic sensors
         else if (!string.IsNullOrEmpty(_hwmonPath))
         {
             if (File.Exists(Path.Combine(_hwmonPath, "fan1_input"))) avail.HasFan = true;
             if (File.Exists(Path.Combine(_hwmonPath, "power1_average")) || File.Exists(Path.Combine(_hwmonPath, "power1_input"))) avail.HasPower = true;
         }
 
+        // Probe NVAPI sidecar for advanced sensors if available
         if (!cache.IsNvapiSupported.HasValue)
         {
             string checkResult = RunNvapiSidecar("--check");
