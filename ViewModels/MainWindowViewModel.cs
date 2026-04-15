@@ -21,6 +21,17 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     #region PRIVATE FIELDS & STATE
 
+
+    /// <summary>
+    /// Store a few raw numeric values from the probe that are used for on-the-fly calculations of displayed specs
+    /// like pixel fillrate and bandwidth, as well as for adjusting clocks based on overclocking offsets read from the NVAPI sidecar.
+    /// </summary>
+    private double _rawDefGpuClock, _rawDefBoostClock, _rawDefMemClock;
+    private double _rawRops, _rawTmus, _rawBusWidth;
+    private string _rawMemoryType = "";
+    private int _lastCoreOffset = 0;
+    private int _lastMemOffset = 0;
+
     /// <summary>
     /// Stores the current lookup URL returned by the GPU probe; used by the Lookup command.
     /// </summary>
@@ -482,6 +493,18 @@ public partial class MainWindowViewModel : ViewModelBase
         IsPhysXEnabled = data.IsPhysXEnabled;
         IsOpenglEnabled = data.IsOpenglAvailable;
 
+        _rawDefGpuClock = GPU_T.Services.Probes.CommonGpuHelpers.ExtractNumber(data.DefaultGpuClock);
+        _rawDefBoostClock = GPU_T.Services.Probes.CommonGpuHelpers.ExtractNumber(data.DefaultBoostClock);
+        _rawDefMemClock = GPU_T.Services.Probes.CommonGpuHelpers.ExtractNumber(data.DefaultMemoryClock);
+        
+        string[] ropsTmusParts = data.RopsTmus.Split('/');
+        if (ropsTmusParts.Length == 2)        {
+            _rawRops = GPU_T.Services.Probes.CommonGpuHelpers.ExtractNumber(ropsTmusParts[0]);
+            _rawTmus = GPU_T.Services.Probes.CommonGpuHelpers.ExtractNumber(ropsTmusParts[1]);
+        }
+
+        _rawBusWidth = GPU_T.Services.Probes.CommonGpuHelpers.ExtractNumber(BusWidth);
+        _rawMemoryType = data.MemoryType;
 
        if (data.DeviceName.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase))
             _currentVendorName = "NVIDIA";

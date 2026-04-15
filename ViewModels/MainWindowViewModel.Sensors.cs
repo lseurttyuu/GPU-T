@@ -246,6 +246,35 @@ public partial class MainWindowViewModel
                 // Ignore IO locking scenarios during append; logging should not disrupt runtime sensor updates.
             }
         }
+
+        // If we detect a change in overclocking offsets, we recalculate the dynamic specs which depend on them and update the main tab values accordingly.
+        // (Right now NVIDIA only)
+        if(data.CoreOcOffset != _lastCoreOffset || data.MemOcOffset != _lastMemOffset)
+        {
+            _lastCoreOffset = data.CoreOcOffset;
+            _lastMemOffset = data.MemOcOffset;
+
+            //var memOcOffsetEffective = (int)(data.MemOcOffset * GPU_T.Services.Probes.CommonGpuHelpers.GetMemoryMultiplier(_rawMemoryType));
+
+            if (_currentVendorName == "NVIDIA")
+            {
+                var dynamicSpecs = GPU_T.Services.Probes.LinuxNvidia.LinuxNvidiaGpuProbe.CalculateDynamicSpecs(
+                    _rawDefGpuClock, _rawDefBoostClock, _rawDefMemClock,
+                    _rawRops, _rawTmus, _rawBusWidth, _rawMemoryType,
+                    data.CoreOcOffset, data.MemOcOffset);
+
+                // These update the Main Tab ObservableProperties
+                GpuClock = dynamicSpecs.GpuClock;
+                BoostClock = dynamicSpecs.BoostClock;
+                MemoryClock = dynamicSpecs.MemClock;
+                PixelFillrate = dynamicSpecs.PixelFill;
+                TextureFillrate = dynamicSpecs.TexFill;
+                Bandwidth = dynamicSpecs.Bandwidth;
+            }
+
+        }
+
+
     }
 
     private void UpdateSensor(string name, double value, string? textValue = null)

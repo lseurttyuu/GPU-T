@@ -20,7 +20,6 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
     private readonly string _hwmonPath;
     private readonly string _gpuId;
     private readonly string _busId;
-
     private readonly string _memoryType;
 
     private class ProbeStateCache
@@ -152,15 +151,11 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
         bool isOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("nvidia.icd");
 
-        string pixelFill = "N/A";
-        string texFill = "N/A";
-        string bandwidth = "N/A";
         string ropsTmus = "N/A";
         string lookupUrl = "";
 
-        string currentGpuClock = "---";
-        string currentMemClock = "---";
-        string currentBoostClock = "---";
+        (string GpuClock, string BoostClock, string MemClock, 
+        string PixelFill, string TexFill, string Bandwidth) dynamicSpecs = ("---", "---", "---", "N/A", "N/A", "N/A");
 
         if (spec != null)
         {
@@ -187,31 +182,14 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 {
                     int.TryParse(parts[5], out coreOffset);
                     int.TryParse(parts[6], out memOffset);
-
-                    memOffset=(int)(memOffset/CommonGpuHelpers.GetMemoryMultiplier(resolvedMemType));
                 }
             }
 
-            double currentGpuClock_nvapi = defGpuClock > 0 ? defGpuClock + coreOffset : 0;
-            double currentBoostClock_nvapi = defBoostClock > 0 ? defBoostClock + coreOffset : 0;
-            double currentMemClock_nvapi = defMemClock > 0 ? defMemClock + memOffset : 0;
+            dynamicSpecs = CalculateDynamicSpecs(
+                defGpuClock, defBoostClock, defMemClock, 
+                rops, tmus, busWidth, resolvedMemType, 
+                coreOffset, memOffset);
 
-            currentGpuClock = currentGpuClock_nvapi > 0 ? $"{currentGpuClock_nvapi} MHz" : "---";
-            currentBoostClock = currentBoostClock_nvapi > 0 ? $"{currentBoostClock_nvapi} MHz" : "---";
-            currentMemClock = currentMemClock_nvapi > 0 ? $"{currentMemClock_nvapi} MHz" : "---";
-
-            if (currentBoostClock_nvapi > 0 && rops > 0 && tmus > 0)
-            {
-                pixelFill = $"{(currentBoostClock_nvapi * rops / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GPixel/s";
-                texFill = $"{(currentBoostClock_nvapi * tmus / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GTexel/s";
-            }
-
-            if (currentMemClock_nvapi > 0 && busWidth > 0)
-            {
-                double multiplier = CommonGpuHelpers.GetMemoryMultiplier(spec.MemoryType);
-                double bandwidthValue = (currentMemClock_nvapi * multiplier * busWidth) / 8000.0;
-                bandwidth = $"{bandwidthValue.ToString("0.0", CultureInfo.InvariantCulture)} GB/s";
-            }
         }
 
         return new GpuStaticData
@@ -238,18 +216,18 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             RopsTmus = ropsTmus,
             Shaders = spec?.Shaders ?? "N/A",
             ComputeUnits = spec?.ComputeUnits ?? "N/A",
-            PixelFillrate = pixelFill,
-            TextureFillrate = texFill,
+            PixelFillrate = dynamicSpecs.PixelFill,
+            TextureFillrate = dynamicSpecs.TexFill,
             MemoryType = spec?.MemoryType ?? "N/A",
             BusWidth = spec?.BusWidth ?? "N/A",
-            Bandwidth = bandwidth,
+            Bandwidth = dynamicSpecs.Bandwidth,
 
             DefaultGpuClock = spec?.DefGpuClock ?? "---",
             DefaultBoostClock = spec?.DefBoostClock ?? "---",
             DefaultMemoryClock = spec?.DefMemClock ?? "---",
-            CurrentGpuClock = currentGpuClock,
-            BoostClock = currentBoostClock,
-            CurrentMemClock = currentMemClock,
+            CurrentGpuClock = dynamicSpecs.GpuClock,
+            BoostClock = dynamicSpecs.BoostClock,
+            CurrentMemClock = dynamicSpecs.MemClock,
 
             MemorySize = memorySize,
 
@@ -341,6 +319,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             double gpuTemp = 0, fanPercent = 0, powerW = 0, gpuClock = 0, memClock = 0;
             int gpuLoad = 0, memLoad = 0, encLoad = 0, decLoad = 0;
             double memUsedMb = 0, memTemp = 0, GpuVoltage = 0, hotSpotTemp = 0, pcieTxGb = 0, pcieRxGb = 0;
+            int coreOcOffset = 0;
+            int memOcOffset = 0;
             string perfCap = "None";
 
             // Parse NVAPI sidecar output if available
@@ -360,6 +340,11 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 {
                     if (int.TryParse(parts[3], out int tx) && tx >= 0) pcieTxGb = tx / 1048576.0;
                     if (int.TryParse(parts[4], out int rx) && rx >= 0) pcieRxGb = rx / 1048576.0;
+                }
+                if (parts.Length >= 7)
+                {
+                    if (int.TryParse(parts[5], out int co)) coreOcOffset = co;
+                    if (int.TryParse(parts[6], out int mo)) memOcOffset = mo;
                 }
             }
 
@@ -398,6 +383,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 FanPercent = (int)fanPercent, BoardPower = powerW, GpuLoad = gpuLoad, MemControllerLoad = memLoad,
                 MemoryUsed = memUsedMb, GpuVoltage = GpuVoltage, MemoryTemp = memTemp, EncoderLoad = encLoad,
                 DecoderLoad = decLoad, PerfCapReason = perfCap, PcieTx = pcieTxGb, PcieRx = pcieRxGb,
+                CoreOcOffset = coreOcOffset,
+                MemOcOffset = memOcOffset,
                 // These read fast local files, so we keep them in the background thread too!
                 CpuTemperature = CommonGpuHelpers.GetCpuTemperature(),
                 SystemRamUsed = CommonGpuHelpers.GetSystemRamUsage()
@@ -608,6 +595,59 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         // nvidia-smi always reports (Effective / 2). 
         // Therefore, Base = (smiClock * 2) / Multiplier.
         return (smiClock * 2.0) / multiplier;
+    }
+
+    /// <summary>
+    /// Calculates the actual current GPU clock, boost clock, memory clock, pixel fillrate, texture fillrate, and bandwidth
+    /// </summary>
+    /// <param name="defGpuClock"></param>
+    /// <param name="defBoostClock"></param>
+    /// <param name="defMemClock"></param>
+    /// <param name="rops"></param>
+    /// <param name="tmus"></param>
+    /// <param name="busWidth"></param>
+    /// <param name="memoryType"></param>
+    /// <param name="coreOffset"></param>
+    /// <param name="memOffset"></param>
+    /// <returns>The real specs of the GPU, calculated on demand.</returns>
+    public static (string GpuClock, string BoostClock, string MemClock, string PixelFill, string TexFill, string Bandwidth) 
+        CalculateDynamicSpecs(
+            double defGpuClock, double defBoostClock, double defMemClock,
+            double rops, double tmus, double busWidth, string memoryType,
+            int coreOffset, int memOffset)
+    {
+        int actualMemOffsetBase = 0;
+        if (memOffset != 0)
+        {
+            actualMemOffsetBase = (int)(memOffset / CommonGpuHelpers.GetMemoryMultiplier(memoryType));
+        }
+
+        double currentGpuClock_nvapi = defGpuClock > 0 ? defGpuClock + coreOffset : 0;
+        double currentBoostClock_nvapi = defBoostClock > 0 ? defBoostClock + coreOffset : 0;
+        double currentMemClock_nvapi = defMemClock > 0 ? defMemClock + actualMemOffsetBase : 0;
+
+        string gpuClockStr = currentGpuClock_nvapi > 0 ? $"{currentGpuClock_nvapi} MHz" : "---";
+        string boostClockStr = currentBoostClock_nvapi > 0 ? $"{currentBoostClock_nvapi} MHz" : "---";
+        string memClockStr = currentMemClock_nvapi > 0 ? $"{currentMemClock_nvapi} MHz" : "---";
+
+        string pixelFill = "---";
+        string texFill = "---";
+        string bandwidth = "---";
+
+        if (currentBoostClock_nvapi > 0 && rops > 0 && tmus > 0)
+        {
+            pixelFill = $"{(currentBoostClock_nvapi * rops / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GPixel/s";
+            texFill = $"{(currentBoostClock_nvapi * tmus / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GTexel/s";
+        }
+
+        if (currentMemClock_nvapi > 0 && busWidth > 0)
+        {
+            double multiplier = CommonGpuHelpers.GetMemoryMultiplier(memoryType);
+            double bandwidthValue = (currentMemClock_nvapi * multiplier * busWidth) / 8000.0;
+            bandwidth = $"{bandwidthValue.ToString("0.0", CultureInfo.InvariantCulture)} GB/s";
+        }
+
+        return (gpuClockStr, boostClockStr, memClockStr, pixelFill, texFill, bandwidth);
     }
 
     /// <summary>
