@@ -83,20 +83,15 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         // Try nvidia-smi first for rich data, fall back to sysfs
         var smiData = QueryNvidiaSmi(
             "name,driver_version,vbios_version,pci.bus_id,memory.total," +
-            "pci.device_id,pci.sub_device_id,clocks.max.graphics,clocks.max.memory," +
-            "clocks.current.graphics,clocks.current.memory");
+            "pci.device_id,pci.sub_device_id");
 
         string deviceName = "Unknown NVIDIA GPU";
         string driverVersion = "Unknown";
         string biosVersion = "Unknown";
         string busId = _busId;
         string memorySize = "N/A";
-        string currentGpuClock = "---";
-        string currentMemClock = "---";
-        string maxGpuClock = "N/A";
-        string maxMemClock = "N/A";
 
-        if (smiData != null && smiData.Count >= 11)
+        if (smiData != null && smiData.Count >= 7)
         {
             deviceName = CleanSmiValue(smiData[0], "Unknown NVIDIA GPU");
             // Prefix "NVIDIA" if not already present
@@ -117,31 +112,6 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                     memorySize = $"{(int)memMb} MB";
             }
 
-            string maxGpuClockStr = CleanSmiValue(smiData[7]);
-            if (!string.IsNullOrEmpty(maxGpuClockStr))
-                maxGpuClock = $"{maxGpuClockStr} MHz";
-
-            string maxMemClockStr = CleanSmiValue(smiData[8]);
-            if (!string.IsNullOrEmpty(maxMemClockStr))
-            {
-                if (double.TryParse(maxMemClockStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double rawClock))
-                {
-                    maxMemClock = $"{NormalizeMemoryClock(rawClock, resolvedMemType):0} MHz";
-                }
-            }
-
-            string curGpuClockStr = CleanSmiValue(smiData[9]);
-            if (!string.IsNullOrEmpty(curGpuClockStr))
-                currentGpuClock = $"{curGpuClockStr} MHz";
-
-            string curMemClockStr = CleanSmiValue(smiData[10]);
-            if (!string.IsNullOrEmpty(curMemClockStr))
-            {
-                if (double.TryParse(curMemClockStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double rawClock))
-                {
-                    currentMemClock = $"{NormalizeMemoryClock(rawClock, resolvedMemType):0} MHz";
-                }
-            }
         }
         else
         {
@@ -188,26 +158,58 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         string ropsTmus = "N/A";
         string lookupUrl = "";
 
+        string currentGpuClock = "---";
+        string currentMemClock = "---";
+        string currentBoostClock = "---";
+
         if (spec != null)
         {
             lookupUrl = spec.LookupUrl;
             ropsTmus = $"{spec.Rops} / {spec.Tmus}";
-            double boostClock = CommonGpuHelpers.ExtractNumber(spec.DefBoostClock);
-            double memClock = CommonGpuHelpers.ExtractNumber(spec.DefMemClock);
+            double defGpuClock = CommonGpuHelpers.ExtractNumber(spec.DefGpuClock);
+            double defBoostClock = CommonGpuHelpers.ExtractNumber(spec.DefBoostClock);
+            double defMemClock = CommonGpuHelpers.ExtractNumber(spec.DefMemClock);
+
             double busWidth = CommonGpuHelpers.ExtractNumber(spec.BusWidth);
             double rops = CommonGpuHelpers.ExtractNumber(spec.Rops);
             double tmus = CommonGpuHelpers.ExtractNumber(spec.Tmus);
 
-            if (boostClock > 0 && rops > 0 && tmus > 0)
+            int coreOffset = 0;
+            int memOffset = 0;
+            string sidecarOutput = RunNvapiSidecar("--read");
+            
+            //calculate real current clocks by applying OC offsets from NVAPI sidecar to the default clocks from our DB.
+            //This allows us to report actual current clocks even when user has an overclock applied.
+            if (!string.IsNullOrEmpty(sidecarOutput) && sidecarOutput.Contains(','))
             {
-                pixelFill = $"{(boostClock * rops / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GPixel/s";
-                texFill = $"{(boostClock * tmus / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GTexel/s";
+                var parts = sidecarOutput.Split(',');
+                if (parts.Length >= 7)
+                {
+                    int.TryParse(parts[5], out coreOffset);
+                    int.TryParse(parts[6], out memOffset);
+
+                    memOffset=(int)(memOffset/CommonGpuHelpers.GetMemoryMultiplier(resolvedMemType));
+                }
             }
 
-            if (memClock > 0 && busWidth > 0)
+            double currentGpuClock_nvapi = defGpuClock > 0 ? defGpuClock + coreOffset : 0;
+            double currentBoostClock_nvapi = defBoostClock > 0 ? defBoostClock + coreOffset : 0;
+            double currentMemClock_nvapi = defMemClock > 0 ? defMemClock + memOffset : 0;
+
+            currentGpuClock = currentGpuClock_nvapi > 0 ? $"{currentGpuClock_nvapi} MHz" : "---";
+            currentBoostClock = currentBoostClock_nvapi > 0 ? $"{currentBoostClock_nvapi} MHz" : "---";
+            currentMemClock = currentMemClock_nvapi > 0 ? $"{currentMemClock_nvapi} MHz" : "---";
+
+            if (currentBoostClock_nvapi > 0 && rops > 0 && tmus > 0)
+            {
+                pixelFill = $"{(currentBoostClock_nvapi * rops / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GPixel/s";
+                texFill = $"{(currentBoostClock_nvapi * tmus / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GTexel/s";
+            }
+
+            if (currentMemClock_nvapi > 0 && busWidth > 0)
             {
                 double multiplier = CommonGpuHelpers.GetMemoryMultiplier(spec.MemoryType);
-                double bandwidthValue = (memClock * multiplier * busWidth) / 8000.0;
+                double bandwidthValue = (currentMemClock_nvapi * multiplier * busWidth) / 8000.0;
                 bandwidth = $"{bandwidthValue.ToString("0.0", CultureInfo.InvariantCulture)} GB/s";
             }
         }
@@ -245,9 +247,9 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             DefaultGpuClock = spec?.DefGpuClock ?? "---",
             DefaultBoostClock = spec?.DefBoostClock ?? "---",
             DefaultMemoryClock = spec?.DefMemClock ?? "---",
-            CurrentGpuClock = maxGpuClock,
-            BoostClock = maxGpuClock,
-            CurrentMemClock = maxMemClock,
+            CurrentGpuClock = currentGpuClock,
+            BoostClock = currentBoostClock,
+            CurrentMemClock = currentMemClock,
 
             MemorySize = memorySize,
 
@@ -598,6 +600,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
     private double NormalizeMemoryClock(double smiClock, string memoryType)
     {
         if (smiClock <= 0) return 0;
+        if(memoryType.ToUpperInvariant().Contains("N/A")) return smiClock; // If memory type is unknown, return as-is to avoid incorrect normalization
         
         // Use the common helper to get the divisor (8 for GDDR6, 4 for GDDR5, etc.)
         double multiplier = CommonGpuHelpers.GetMemoryMultiplier(memoryType);
