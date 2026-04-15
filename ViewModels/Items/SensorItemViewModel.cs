@@ -31,7 +31,7 @@ public partial class SensorItemViewModel : ViewModelBase
     private const double GraphHeight = 18.0; 
 
     private readonly List<double> _graphHistory = new();
-    
+    private readonly List<string?> _textHistory = new(); // Stores text values for string-based sensors (eg. PerfCap Reason)
     private double _globalMin = double.MaxValue;
     private double _globalMax = double.MinValue;
     private double _globalSum = 0;
@@ -42,6 +42,7 @@ public partial class SensorItemViewModel : ViewModelBase
     private bool _hasInitializedScale = false;
 
     private bool _isHovering = false;
+    private string? _currentTextValue = null;
 
     #endregion
 
@@ -73,9 +74,19 @@ public partial class SensorItemViewModel : ViewModelBase
     [ObservableProperty] private List<Point> _graphPoints;
 
     /// <summary>
+    /// Property to bind the graph color to, allowing dynamic changes based on sensor type or value thresholds.
+    /// </summary>
+    [ObservableProperty] private IBrush _graphColor;
+
+    /// <summary>
     /// Public access to the current raw numeric value (used by loggers and other services).
     /// </summary>
     public double CurrentValue { get; private set; }
+
+    /// <summary>
+    /// Public access to the raw text value for string-based sensors (used by loggers).
+    /// </summary>
+    public string? CurrentTextValue { get; private set; }
 
     #endregion
 
@@ -89,12 +100,16 @@ public partial class SensorItemViewModel : ViewModelBase
     /// <param name="minLimit">Optional initial minimum scale.</param>
     /// <param name="maxLimit">Optional initial maximum scale.</param>
     /// <param name="isFixed">Specifies whether the scale is fixed.</param>
-    public SensorItemViewModel(string name, string unit, double? minLimit = null, double? maxLimit = null, bool isFixed = false)
+    /// <param name="hexColor">Hex string for the graph color (eg. "#FF0000" for red).</param>
+    public SensorItemViewModel(string name, string unit, double? minLimit = null, double? maxLimit = null, bool isFixed = false, string hexColor = "#FF0000")
     {
         _name = name;
         _unit = unit;
         _graphPoints = new List<Point>();
         _isFixedRange = isFixed;
+
+        // Parse the hex color string into a usable Avalonia Brush
+        _graphColor = SolidColorBrush.Parse(hexColor);
 
         if (minLimit.HasValue) _scaleMin = minLimit.Value;
         if (maxLimit.HasValue) _scaleMax = maxLimit.Value;
@@ -110,12 +125,20 @@ public partial class SensorItemViewModel : ViewModelBase
     /// Updates the sensor with a new raw value: appends history, updates statistics and regenerates UI data.
     /// </summary>
     /// <param name="rawValue">The latest sensor reading.</param>
-    public void UpdateValue(double rawValue)
+    /// <param name="textValue">Optional text value for string-based sensors (eg. PerfCap Reason).</param>
+    public void UpdateValue(double rawValue, string? textValue = null)
     {
         CurrentValue = rawValue;
+        CurrentTextValue = _currentTextValue = textValue;
 
         _graphHistory.Add(rawValue);
-        if (_graphHistory.Count > GraphWidth) _graphHistory.RemoveAt(0);
+        _textHistory.Add(textValue);
+
+        if (_graphHistory.Count > GraphWidth) 
+        {
+            _graphHistory.RemoveAt(0);
+            _textHistory.RemoveAt(0);
+        }
 
         _globalCount++;
         _globalSum += rawValue;
@@ -137,7 +160,7 @@ public partial class SensorItemViewModel : ViewModelBase
             }
         }
 
-        UpdateDisplayString(rawValue);
+        UpdateDisplayString(rawValue, textValue);
         GeneratePolygon();
     }
 
@@ -147,6 +170,8 @@ public partial class SensorItemViewModel : ViewModelBase
     public void Reset()
     {
         _graphHistory.Clear();
+        _textHistory.Clear();
+        
         _graphPoints = new List<Point>();
         OnPropertyChanged(nameof(GraphPoints));
         
@@ -182,8 +207,17 @@ public partial class SensorItemViewModel : ViewModelBase
         }
         else
         {
-            double value = _graphHistory[index];
-            DisplayValue = $"@ {value.ToString(GetFormatString(), System.Globalization.CultureInfo.InvariantCulture)}";
+            // If the sensor has a text history at this point, show the text instead of the number
+            string? histText = _textHistory[index];
+            if (histText != null)
+            {
+                DisplayValue = $"@ {histText}";
+            }
+            else
+            {
+                double value = _graphHistory[index];
+                DisplayValue = $"@ {value.ToString(GetFormatString(), System.Globalization.CultureInfo.InvariantCulture)}";
+            }
         }
     }
 
@@ -195,7 +229,7 @@ public partial class SensorItemViewModel : ViewModelBase
         _isHovering = false;
         if (_graphHistory.Count > 0)
         {
-            UpdateDisplayString(CurrentValue); 
+            UpdateDisplayString(CurrentValue, _currentTextValue); 
         }
     }
 
@@ -206,6 +240,9 @@ public partial class SensorItemViewModel : ViewModelBase
     [RelayCommand]
     private void ToggleMode()
     {
+        // Disable Min/Max/Avg toggling for text-based sensors (like PerfCap)
+        if (_currentTextValue != null) return;
+
         CurrentMode = CurrentMode switch
         {
             SensorMode.Current => SensorMode.Min,
@@ -214,17 +251,25 @@ public partial class SensorItemViewModel : ViewModelBase
             _ => SensorMode.Current
         };
 
-        if (_graphHistory.Count > 0) UpdateDisplayString(CurrentValue);
+        if (_graphHistory.Count > 0) UpdateDisplayString(CurrentValue, _currentTextValue);
     }
 
     #endregion
 
     #region PRIVATE METHODS
 
-    private void UpdateDisplayString(double currentValue)
+    private void UpdateDisplayString(double currentValue, string? currentText)
     {
         if (_isHovering) return;
         if (!_hasInitializedScale && _graphHistory.Count == 0) return;
+
+        // If it's a text sensor, bypass math formatting and just show the string
+        if (currentText != null)
+        {
+            ModeLabel = "";
+            DisplayValue = currentText;
+            return;
+        }
 
         double valToShow = currentValue;
         string label = "";

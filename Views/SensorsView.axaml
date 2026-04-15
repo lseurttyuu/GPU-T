@@ -61,8 +61,8 @@
                                 <!-- Clipped drawing surface bound to GraphPoints; the polygon is a low-cost visual representation of recent history. -->
                                 <Border Background="{DynamicResource ApplicationPageBackgroundThemeBrush}" ClipToBounds="True" Margin="1">
                                     <Polygon Points="{Binding GraphPoints}"
-                                             Fill="#FF0000"
-                                             Stroke="#FF0000"
+                                             Fill="{Binding GraphColor}"
+                                             Stroke="{Binding GraphColor}"
                                              StrokeThickness="1"
                                              IsHitTestVisible="False"
                                              VerticalAlignment="Top"

@@ -135,10 +135,23 @@ internal static class CommonGpuHelpers
     {
         if (string.IsNullOrEmpty(memoryType)) return 1;
         string type = memoryType.ToUpperInvariant();
-        if (type.Contains("GDDR6") || type.Contains("GDDR6X")) return 8.0;
-        if (type.Contains("GDDR5") || type.Contains("GDDR5X")) return 4.0;
-        if (type.Contains("HBM") || type.Contains("HBM2")) return 2.0;
+        
+        // Next-Gen PAM3 / Advanced PAM4 (16 words per clock)
+        if (type.Contains("GDDR7")) return 16.0;
+        if (type.Contains("GDDR6X")) return 16.0;
+        
+        // Standard QDR / Basic PAM4 (8 words per clock)
+        if (type.Contains("GDDR6")) return 8.0;
+        if (type.Contains("GDDR5X")) return 8.0;
+        
+        // Standard WCK Dual Data Rate (4 words per clock)
+        if (type.Contains("GDDR5")) return 4.0;
+        
+        // Standard Double Data Rate (2 words per clock)
+        // Note: type.Contains("HBM") naturally catches HBM, HBM2, HBM2e, and HBM3!
+        if (type.Contains("HBM")) return 2.0; 
         if (type.Contains("DDR")) return 2.0;
+        
         return 1.0;
     }
 }

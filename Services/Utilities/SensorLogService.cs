@@ -50,8 +50,9 @@ public static class SensorLogService
             string label = $"{sensor.Name} [{sensor.Unit}]";
             int headerWidth = 1 + label.Length + 1; // left space + label + right space
 
-            string valStr = sensor.CurrentValue.ToString(GetFormat(sensor.Unit), CultureInfo.InvariantCulture);
-
+            string valStr = sensor.CurrentTextValue ?? 
+                            sensor.CurrentValue.ToString(GetFormat(sensor.Unit), CultureInfo.InvariantCulture);
+                            
             // Compute left padding so that the value plus three trailing spaces fits the header width.
             int paddingCount = headerWidth - valStr.Length - 3;
             if (paddingCount < 0) paddingCount = 0;

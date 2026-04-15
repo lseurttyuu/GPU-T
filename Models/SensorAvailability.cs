@@ -10,4 +10,9 @@ public class SensorAvailability
     public bool HasPower { get; set; }
     public bool HasVoltage { get; set; }
     public bool HasMemUsed { get; set; } 
+    public bool HasEncoderLoad { get; set; }
+    public bool HasDecoderLoad { get; set; }
+    public bool HasPerfCapReason { get; set; }
+    public bool HasPcieTx { get; set; }
+    public bool HasPcieRx { get; set; }
 }
