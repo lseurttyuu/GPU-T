@@ -56,11 +56,16 @@ public partial class LinuxAmdGpuProbe
         double maxCoreDpm = GetMaxClockFromDpm("pp_dpm_sclk");
         double maxMemDpm = GetMaxClockFromDpm("pp_dpm_mclk") * dpmMemMultiplier;
 
-        // Detect presence of optional runtime libraries or capabilities; these checks reflect user-facing feature toggles.
-        bool isHipAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libamdhip64.so");
+        bool isRocmAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libhsa-runtime64.so.1") && 
+                                                    (Directory.Exists("/opt/rocm") || Directory.Exists("/usr/lib/x86_64-linux-gnu/rocm"));
 
-        bool isOpenglAvailable = CheckOpenglSupport();
-        bool isRayTracingAvailable = CheckRayTracingSupportVulkan(ids.Device);
+        // Detect presence of optional runtime libraries or capabilities; these checks reflect user-facing feature toggles.
+        bool isHipAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libamdhip64.so") && isRocmAvailable;
+
+        bool isOpenglAvailable = GpuFeatureDetection.CheckOpenglSupport();
+        bool isRayTracingAvailable = GpuFeatureDetection.CheckRayTracingSupportVulkan(ids.Device);
+
+        bool isOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("amdocl64.icd", "mesa.icd");
 
         string pixelFill = "N/A";
         string texFill = "N/A";
@@ -149,9 +154,9 @@ public partial class LinuxAmdGpuProbe
             CurrentMemClock = memClockDisplay,
 
             IsHsaAvailable = isHipAvailable,
-            IsRocmAvailable = Directory.Exists("/opt/rocm") || Directory.Exists("/usr/lib/x86_64-linux-gnu/rocm"),
+            IsRocmAvailable = isRocmAvailable,
             IsVulkanAvailable = vulkanApi != "N/A" || GpuFeatureDetection.CheckVulkanIcdInstalled("radeon_icd.x86_64.json", "radeon_icd.i686.json"),
-            IsOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("amdocl64.icd", "mesa.icd"),
+            IsOpenClAvailable = isOpenClAvailable,
             IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),
 
             IsCudaAvailable = false,

@@ -133,11 +133,15 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         bool isOpenglAvailable = GpuFeatureDetection.CheckOpenglSupport();
         bool isRayTracingAvailable = GpuFeatureDetection.CheckRayTracingSupportVulkan(ids.Device);
 
-        bool isCudaAvailable = IsNvidiaSmiAvailable() ||
+        bool isPhysXEnabled = false;
+        //If CUDA environment is detected, we assume hardware accelerated PhysX is most probably available as well,
+        //since it's been true for many years that NVIDIA includes PhysX support in all their consumer GPUs with driver support.
+        //we don't check the PhysX libraries directly as they don't have to be present unless a PhysX-using game is installed.
+        bool isCudaAvailable = isPhysXEnabled = IsNvidiaSmiAvailable() ||
                                GpuFeatureDetection.IsNativeLibraryAvailable("libcuda.so.1") ||
                                GpuFeatureDetection.CheckEglVendorInstalled("10_nvidia.json");
 
-        bool isPhysXEnabled = GpuFeatureDetection.IsNativeLibraryAvailable("libPhysXCommon.so");
+        //bool isPhysXEnabled = GpuFeatureDetection.IsNativeLibraryAvailable("libPhysXCommon.so");
 
         // Resizable BAR: nvidia-smi doesn't expose this directly, use PCI resource heuristic
         long totalVramBytes = 0;
@@ -236,6 +240,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             IsVulkanAvailable = vulkanApi != "N/A" || GpuFeatureDetection.CheckVulkanIcdInstalled("nvidia_icd.json", "nvidia_icd.x86_64.json"),
             IsOpenClAvailable = isOpenClAvailable,
             IsOpenglAvailable = isOpenglAvailable,
+            IsHsaAvailable = false,     //we treat HIP as AMD-specific (user-perspective!)
+            IsRocmAvailable = false,
             IsRayTracingAvailable = isRayTracingAvailable,
             IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),
         };

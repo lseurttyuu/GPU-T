@@ -276,6 +276,16 @@ public partial class MainWindowViewModel : ViewModelBase
     #region OBSERVABLE PROPERTIES - UI STATE
 
     /// <summary>
+    /// Indicates if the current GPU is from NVIDIA (used to enable/disable specific UI elements).
+    /// </summary>
+    [ObservableProperty] private bool _isNvidiaVendor;
+
+    /// <summary>
+    /// Indicates if the current GPU is from AMD (used to enable/disable specific UI elements).
+    /// </summary>
+    [ObservableProperty] private bool _isAmdVendor;
+    
+    /// <summary>
     /// Index of the currently selected tab in the main view.
     /// </summary>
     [ObservableProperty] private int _selectedTabIndex;
@@ -514,6 +524,9 @@ public partial class MainWindowViewModel : ViewModelBase
             _currentVendorName = "AMD";
         else
             _currentVendorName = "Unknown";
+
+        IsNvidiaVendor = _currentVendorName == "NVIDIA";
+        IsAmdVendor = _currentVendorName == "AMD";
 
         VendorLogo = LoadBitmapFromAssets(GetVendorLogoPath());
 

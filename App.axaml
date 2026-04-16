@@ -108,6 +108,10 @@
             <Setter Property="Stroke" Value="#808080"/> 
         </Style>
 
+        <Style Selector="CheckBox.GpuZ:disabled /template/ ContentPresenter">
+            <Setter Property="Opacity" Value="0.5"/>
+        </Style>
+
         <Style Selector="TextBlock.CheckText">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="3,0,10,0"/> 
