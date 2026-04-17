@@ -429,7 +429,7 @@ public static class GpuFeatureDetection
             }
             catch
             {
-                currentWidth = "x16";
+                currentWidth = maxWidthStr ?? "Unknown";
                 currentGen = "Unknown";
             }
         }

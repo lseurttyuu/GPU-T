@@ -5,7 +5,7 @@ namespace GPU_T.Nvapi;
 
 /// <summary>
 /// NVIDIA GPU telemetry reader using NVAPI and NVML libraries.
-/// Retrieves thermal data, voltage, and PCIe throughput metrics from NVIDIA GPUs.
+/// Retrieves thermal data, voltage, and PCIe throughput metrics and clock offsets from NVIDIA GPUs.
 /// </summary>
 class Program
 {
@@ -69,6 +69,12 @@ class Program
 
     [DllImport(NvmlLibrary, EntryPoint = "nvmlDeviceGetPcieThroughput")]
     private static extern int NvmlDeviceGetPcieThroughput(IntPtr device, uint counter, out uint value);
+
+    [DllImport(NvmlLibrary, EntryPoint = "nvmlDeviceGetGpcClkVfOffset")]
+    private static extern int NvmlDeviceGetGpcClkVfOffset(IntPtr device, out int offset);
+
+    [DllImport(NvmlLibrary, EntryPoint = "nvmlDeviceGetMemClkVfOffset")]
+    private static extern int NvmlDeviceGetMemClkVfOffset(IntPtr device, out int offset);
 
     /// <summary>
     /// Entry point. Provides GPU metrics in CSV format.
@@ -188,9 +194,11 @@ class Program
                 }
             }
 
-            // Read PCIe throughput metrics via NVML
+            // Read PCIe throughput metrics and OC offsets via NVML
             int finalTxKbps = -1;
             int finalRxKbps = -1;
+            int coreOcOffset = 0;
+            int memOcOffset = 0;
 
             if (!string.IsNullOrEmpty(targetPciString))
             {
@@ -201,12 +209,25 @@ class Program
                         // 0 = TX (Transmit), 1 = RX (Receive). NVML returns values in KB/s.
                         if (NvmlDeviceGetPcieThroughput(nvmlDevice, 0, out uint tx) == 0) finalTxKbps = (int)tx;
                         if (NvmlDeviceGetPcieThroughput(nvmlDevice, 1, out uint rx) == 0) finalRxKbps = (int)rx;
+
+                        // Attempt to read GPU and Memory clock offsets for establishing real current clocks. These are returned as MHz values.
+                        try
+                        {
+                            if (NvmlDeviceGetGpcClkVfOffset(nvmlDevice, out int coreOc) == 0) 
+                            coreOcOffset = coreOc;
+                            
+                            if (NvmlDeviceGetMemClkVfOffset(nvmlDevice, out int memOc) == 0) 
+                                memOcOffset = memOc;
+                        }
+                        catch 
+                        { }
+
                     }
                 }
             }
 
-            // Output 5 values: hotspot(degC), vram(degC), voltage(mV), tx(KB/s), rx(KB/s)
-            Console.WriteLine($"{finalHotspot},{finalVram},{finalVoltageMv},{finalTxKbps},{finalRxKbps}");
+            // Output 7 values: hotspot(degC), vram(degC), voltage(mV), tx(KB/s), rx(KB/s), core_oc_offset(MHz), mem_oc_offset(MHz)
+            Console.WriteLine($"{finalHotspot},{finalVram},{finalVoltageMv},{finalTxKbps},{finalRxKbps},{coreOcOffset},{memOcOffset}");
             return 0;
 
         }

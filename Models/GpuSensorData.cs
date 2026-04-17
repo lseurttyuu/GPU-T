@@ -25,6 +25,12 @@ public record GpuSensorData
     public double PcieRx { get; set; }
     public double MemoryUsedDynamic { get; init; } // MB (GTT)
     
+    // Overclocking offsets read from NVAPI sidecar - they allow to show proper clocks at GPU-T runtime
+    // plus they can be used to recalculate pixel fillrate and bandwidth values on the fly (main tab)
+    public int CoreOcOffset { get; set; }
+    public int MemOcOffset { get; set; }
+    
+    //standard system readings
     public double CpuTemperature { get; init; } // °C
     public double SystemRamUsed { get; init; }  // GB or MB
 }
