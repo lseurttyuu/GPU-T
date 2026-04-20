@@ -2,9 +2,11 @@
 set -eu
 
 ARCH=$(uname -m)
-VERSION=$(git describe --tags --always | sed 's/^v//') 
+# Extract version from main .csproj file
+VERSION=$(grep '<Version>' GPU-T.csproj | sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p')
 
 export ARCH VERSION
+export OUTNAME="GPU-T-${VERSION}-${ARCH}.AppImage"
 export OUTPATH=./dist
 export ICON=./Assets/app_icon.png
 export DEPLOY_DOTNET=1
