@@ -3,7 +3,7 @@ set -eu
 
 ARCH=$(uname -m)
 # Extract version from main .csproj file
-VERSION=$(grep '<Version>' GPU-T.csproj | sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p')
+VERSION=$(awk -F'<|>' '/<Version>/{print $3; exit}' ./GPU-T.csproj)
 
 export ARCH VERSION
 export OUTNAME="GPU-T-${VERSION}-${ARCH}.AppImage"
