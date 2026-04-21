@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using GPU_T.Services.Utilities;
 using GPU_T.ViewModels;
 
 namespace GPU_T.Services.Advanced;
@@ -20,6 +21,16 @@ public class GeneralProvider : AdvancedDataProvider
     public override void LoadData(ObservableCollection<AdvancedItemViewModel> list, GpuListItem? selectedGpu)
     {
         ResetCounter();
+
+        bool isAmd = false;
+        bool isNvidia = false;
+        string gpuId = selectedGpu?.Id ?? "card0";
+        if (selectedGpu != null)
+        {
+            var gpuVendor = GpuProbeFactory.GetVendorId(gpuId);
+            isAmd = (gpuVendor == "0X1002" || gpuVendor == "0X1022"); // AMD Vendor IDs
+            isNvidia = (gpuVendor == "0X10DE"); // NVIDIA Vendor ID
+        }
 
         AddRow(list, "System", "", true);
 
@@ -50,42 +61,21 @@ public class GeneralProvider : AdvancedDataProvider
         catch {}
         AddRow(list, "Kernel Driver", driverModule);
 
-        CheckOpengl(list);
+        CheckOpengl(list, isAmd, isNvidia);
 
-        AddRow(list, "Firmware", "", true);
-
-        string fwDirPath = $"/sys/class/drm/{selectedGpu?.Id ?? "card0"}/device/fw_version";
-        
-        if (Directory.Exists(fwDirPath))
+        // FIRMWARE (AMD Only)
+        if (isAmd)
         {
-            try
-            {
-                // Enumerates firmware version files and adds their contents to the list.
-                var files = Directory.GetFiles(fwDirPath, "*_fw_version");
-                Array.Sort(files);
-                foreach (var filePath in files)
-                {
-                    string fileName = Path.GetFileName(filePath);
-                    string shortName = fileName.Replace("_fw_version", "").ToUpper();
-                    string version = File.ReadAllText(filePath).Trim();
-                    AddRow(list, shortName, version);
-                }
-                if (files.Length == 0) AddRow(list, "Info", "No firmware files found");
-            }
-            catch (Exception ex) { AddRow(list, "Error", ex.Message); }
-        }
-        else
-        {
-             if (File.Exists(fwDirPath)) AddRow(list, "Legacy Info", "Old kernel format detected");
-             else AddRow(list, "Firmware Info", "Not available");
+            AddRow(list, "Firmware", "", true);
+            LoadAmdFirmwareInfo(list, gpuId);
         }
     }
 
     /// <summary>
     /// Queries OpenGL and Mesa information using glxinfo and adds relevant details to the list.
+    /// Adapts the driver output based on GPU vendor.
     /// </summary>
-    /// <param name="list">The collection to populate with OpenGL-related information.</param>
-    private void CheckOpengl(ObservableCollection<AdvancedItemViewModel> list)
+    private void CheckOpengl(ObservableCollection<AdvancedItemViewModel> list, bool isAmd, bool isNvidia)
     {
         try
         {
@@ -119,10 +109,20 @@ public class GeneralProvider : AdvancedDataProvider
                 }
 
                 AddRow(list, "OpenGL Version", glVersion);
-                AddRow(list, "Mesa Version", mesaVersion);
+
+                // Dynamically inject the proprietary NVIDIA driver instead of empty Mesa strings
+                if (isAmd)
+                {
+                    AddRow(list, "Mesa Version", !string.IsNullOrEmpty(mesaVersion) ? mesaVersion : "Unknown");
+                }
+                else if(isNvidia)
+                {
+                    string nvDriver = GpuFeatureDetection.GetNvidiaDriverVersion();
+                    AddRow(list, "NVIDIA Driver Version", nvDriver);
+                }
+
                 AddRow(list, "Direct Rendering", directRendering);
 
-                // Detects LLVM software rendering and adds a warning if llvmpipe is present.
                 if (renderer.Contains("LLVM"))
                 {
                     var match = Regex.Match(renderer, @"LLVM\s+([\d\.]+)");
@@ -132,6 +132,44 @@ public class GeneralProvider : AdvancedDataProvider
             }
             else AddRow(list, "OpenGL Info", "Failed to start glxinfo");
         }
-        catch { AddRow(list, "OpenGL Info", "Not available ('glxinfo' missing?)"); }
+        catch 
+        { 
+            AddRow(list, "OpenGL Info", "Not available ('glxinfo' missing?)"); 
+        }
+
+
     }
+
+    private void LoadAmdFirmwareInfo(ObservableCollection<AdvancedItemViewModel> list, string gpuId)
+    {
+        string fwDirPath = $"/sys/class/drm/{gpuId}/device/fw_version";
+        
+        if (Directory.Exists(fwDirPath))
+        {
+            try
+            {
+                // Enumerates firmware version files and adds their contents to the list.
+                var files = Directory.GetFiles(fwDirPath, "*_fw_version");
+                Array.Sort(files);
+                foreach (var filePath in files)
+                {
+                    string fileName = Path.GetFileName(filePath);
+                    string shortName = fileName.Replace("_fw_version", "").ToUpper();
+                    string version = File.ReadAllText(filePath).Trim();
+                    AddRow(list, shortName, version);
+                }
+                if (files.Length == 0) AddRow(list, "Info", "No firmware files found");
+            }
+            catch (Exception ex) { AddRow(list, "Error", ex.Message); }
+        }
+        else
+        {
+             if (File.Exists(fwDirPath)) AddRow(list, "Legacy Info", "Old kernel format detected");
+             else AddRow(list, "Firmware Info", "Not available");
+        }
+
+
+    }
+
+
 }
