@@ -73,7 +73,7 @@ public class OpenClProvider : AdvancedDataProvider
 
             if (platforms == null || devicesGroups == null) { AddRow(list, "Error", "Invalid clinfo JSON structure"); return; }
 
-            JsonNode? refClover = null, refRusticl = null, refAmdApp = null;
+            JsonNode? refClover = null, refRusticl = null, refAmdApp = null, refCuda = null;
             
             // Categorize available OpenCL platforms to correlate devices with their drivers later.
             foreach (var p in platforms)
@@ -82,15 +82,19 @@ public class OpenClProvider : AdvancedDataProvider
                 
                 if (pName.Contains("Clover", StringComparison.OrdinalIgnoreCase)) refClover = p;
                 else if (pName.Contains("rusticl", StringComparison.OrdinalIgnoreCase)) refRusticl = p;
-                else if (refAmdApp == null && !pName.Contains("Clover") && !pName.Contains("rusticl")) refAmdApp = p;
+                else if (pName.Contains("CUDA", StringComparison.OrdinalIgnoreCase)) refCuda = p;
+                else if (refAmdApp == null && !pName.Contains("Clover") && !pName.Contains("CUDA") && !pName.Contains("rusticl")) refAmdApp = p;
             }
 
             // Retrieve the authoritative device name for the selected GPU ID to filter the OpenCL device list.
             string appGpuName = "Unknown";
+            string appBusId = "";
             if (selectedGpu != null)
             {
                 var probe = GpuProbeFactory.Create(selectedGpu.Id);
-                appGpuName = probe.LoadStaticData().DeviceName;
+                var staticData = probe.LoadStaticData();
+                appGpuName = staticData.DeviceName;
+                appBusId = NormalizeBusId(staticData.BusId);
             }
 
             bool foundAny = false;
@@ -121,6 +125,11 @@ public class OpenClProvider : AdvancedDataProvider
                         impl = "Clover";
                         platform = refClover;
                     }
+                    else if (devName.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase))
+                    {
+                        impl = "NVIDIA CUDA OpenCL";
+                        platform = refCuda;
+                    }
                     // 3. AMD APP: Default proprietary driver when 'radeonsi' is absent.
                     else if (!devName.Contains("radeonsi", StringComparison.OrdinalIgnoreCase))
                     {
@@ -130,13 +139,61 @@ public class OpenClProvider : AdvancedDataProvider
 
                     if (platform != null)
                     {
-                        // Match the OpenCL device against the selected GPU name to ensure we only display relevant data.
-                        string dispName = devName;
-                        var board = device["CL_DEVICE_BOARD_NAME_AMD"]?.ToString();
-                        if (!string.IsNullOrEmpty(board)) dispName = board;
+                        bool isMatch = false;
 
-                        string clean = dispName.Split('(')[0].Trim();
-                        if (!string.IsNullOrEmpty(clean) && appGpuName.Contains(clean, StringComparison.OrdinalIgnoreCase))
+                        string? pciBusInfoKhr = device["CL_DEVICE_PCI_BUS_INFO_KHR"]?.ToString();
+                        var topoAmd = device["CL_DEVICE_TOPOLOGY_AMD"] as JsonObject;
+
+                        // NVIDIA specific PCIe keys
+                        var nvBus = device["CL_DEVICE_PCI_BUS_ID_NV"];
+                        var nvSlot = device["CL_DEVICE_PCI_SLOT_ID_NV"];
+
+                        // 1. Try Standard OpenCL 3.0 Bus Info
+                        if (!string.IsNullOrEmpty(pciBusInfoKhr))
+                        {
+                            isMatch = (NormalizeBusId(pciBusInfoKhr) == appBusId);
+                        }
+                        // 2. Try AMD-Specific Topology
+                        else if (topoAmd != null && topoAmd.ContainsKey("bus"))
+                        {
+                            int bus = (int?)topoAmd["bus"] ?? -1;
+                            int dev = (int?)topoAmd["device"] ?? -1;
+                            int func = (int?)topoAmd["function"] ?? -1;
+                            if (bus >= 0 && dev >= 0 && func >= 0)
+                            {
+                                string topoBusId = $"0000:{bus:X2}:{dev:X2}.{func:X}";
+                                isMatch = (NormalizeBusId(topoBusId) == appBusId);
+                            }
+                        }
+                        // 3. Try NVIDIA-Specific Topology (For older CUDA OpenCL drivers)
+                        else if (nvBus != null && nvSlot != null)
+                        {
+                            int bus = (int?)nvBus ?? -1;
+                            int slot = (int?)nvSlot ?? -1;
+                            if (bus >= 0 && slot >= 0)
+                            {
+                                // NVIDIA maps the "slot" directly to the PCIe Device ID.
+                                // Function is virtually always 0 for the primary OpenCL GPU node.
+                                string topoBusId = $"0000:{bus:X2}:{slot:X2}.0";
+                                isMatch = (NormalizeBusId(topoBusId) == appBusId);
+                            }
+                        }
+                        // 4. Fallback to old String Name Matching
+                        else
+                        {
+                            string dispName = devName;
+                            var board = device["CL_DEVICE_BOARD_NAME_AMD"]?.ToString();
+                            if (!string.IsNullOrEmpty(board)) dispName = board;
+
+                            string clean = dispName.Split('(')[0].Trim();
+                            if (!string.IsNullOrEmpty(clean) && appGpuName.Contains(clean, StringComparison.OrdinalIgnoreCase))
+                            {
+                                isMatch = true;
+                            }
+                        }
+
+                        // If any of the above methods succeeded, render the device!
+                        if (isMatch)
                         {
                             foundAny = true;
                             RenderDevice(list, device, platform, impl);
@@ -351,4 +408,26 @@ public class OpenClProvider : AdvancedDataProvider
         if (m.Success && float.TryParse(m.Groups[1].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out float v)) return v;
         return 0f;
     }
+
+    /// <summary>
+    /// Normalizes PCI Bus IDs by extracting the Domain:Bus:Device.Function and 
+    /// ensuring the Domain is exactly 4 characters (fixes sysfs 8-character domain padding).
+    /// </summary>
+    private string NormalizeBusId(string? input)
+    {
+        if (string.IsNullOrEmpty(input)) return "";
+        
+        // Matches forms like "00000000:01:00.0" or "PCI-E, 0000:01:00.0"
+        var match = Regex.Match(input, @"([0-9a-fA-F]+):([0-9a-fA-F]{2}):([0-9a-fA-F]{2})\.([0-9a-fA-F])");
+        if (match.Success)
+        {
+            string domain = match.Groups[1].Value.TrimStart('0');
+            if (string.IsNullOrEmpty(domain)) domain = "0";
+            domain = domain.PadLeft(4, '0'); // Force 4-character domain (e.g., 0000)
+            
+            return $"{domain}:{match.Groups[2].Value.ToLower()}:{match.Groups[3].Value.ToLower()}.{match.Groups[4].Value.ToLower()}";
+        }
+        return input;
+    }
+
 }
