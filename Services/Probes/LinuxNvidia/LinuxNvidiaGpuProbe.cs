@@ -508,13 +508,14 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             "Vulkan" => new VulkanProvider(),
             "OpenCL" => new OpenClProvider(),
             "CUDA" => new LinuxNvidiaCudaProvider(),
+            "PCIe Resizable BAR" => new ResizableBarProvider(),
             _ => null
         };
     }
 
     public string[] GetAdvancedCategories()
     {
-        return new[] { "General", "Vulkan", "OpenCL", "CUDA" };
+        return new[] { "General", "Vulkan", "OpenCL", "CUDA", "PCIe Resizable BAR" };
     }
 
     #endregion
