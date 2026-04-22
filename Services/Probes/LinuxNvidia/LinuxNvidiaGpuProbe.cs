@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GPU_T.Models;
 using GPU_T.Services.Advanced;
+using GPU_T.Services.Advanced.LinuxNvidia;
 using GPU_T.Services.Utilities;
 
 namespace GPU_T.Services.Probes.LinuxNvidia;
@@ -175,7 +176,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
             int coreOffset = 0;
             int memOffset = 0;
-            string sidecarOutput = RunNvapiSidecar("--read");
+            string sidecarOutput = LinuxNvidiaSidecarHelper.Run(LinuxNvidiaSidecarHelper.BuildTelemetryArgs("--read", _busId));
+            
             
             //calculate real current clocks by applying OC offsets from NVAPI sidecar to the default clocks from our DB.
             //This allows us to report actual current clocks even when user has an overclock applied.
@@ -312,7 +314,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             Task<string> nvapiTask = Task.FromResult("");
             if (cache.IsNvapiSupported == true)
             {
-                nvapiTask = Task.Run(() => RunNvapiSidecar("--read"));
+                nvapiTask = Task.Run(() => LinuxNvidiaSidecarHelper.Run(LinuxNvidiaSidecarHelper.BuildTelemetryArgs("--read", _busId)));
             }
 
             // Wait for both to finish (takes only as long as the slowest process)
@@ -460,13 +462,13 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         // Probe NVAPI sidecar for advanced sensors if available
         if (!cache.IsNvapiSupported.HasValue)
         {
-            string checkResult = RunNvapiSidecar("--check");
+            string checkResult=LinuxNvidiaSidecarHelper.Run(LinuxNvidiaSidecarHelper.BuildTelemetryArgs("--check", _busId));
             cache.IsNvapiSupported = (checkResult != null);
         }
 
         if (cache.IsNvapiSupported == true)
         {
-            string readData = RunNvapiSidecar("--read");
+            string readData = LinuxNvidiaSidecarHelper.Run(LinuxNvidiaSidecarHelper.BuildTelemetryArgs("--read", _busId));
             if (!string.IsNullOrEmpty(readData) && readData.Contains(','))
             {
                 var parts = readData.Split(',');
@@ -505,13 +507,14 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             "General" => new GeneralProvider(),
             "Vulkan" => new VulkanProvider(),
             "OpenCL" => new OpenClProvider(),
+            "CUDA" => new LinuxNvidiaCudaProvider(),
             _ => null
         };
     }
 
     public string[] GetAdvancedCategories()
     {
-        return new[] { "General", "Vulkan", "OpenCL" };
+        return new[] { "General", "Vulkan", "OpenCL", "CUDA" };
     }
 
     #endregion
@@ -655,62 +658,6 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
         return (gpuClockStr, boostClockStr, memClockStr, pixelFill, texFill, bandwidth);
     }
-
-    /// <summary>
-    /// Calls the isolated NVAPI sidecar executable. 
-    /// </summary>
-    private string RunNvapiSidecar(string arg)
-    {
-        try
-        {
-            // Extract the Hex Bus ID from Linux format (e.g. "0000:0A:00.0" -> "0A")
-            string busArg = "";
-            if (!string.IsNullOrEmpty(_busId) && _busId != "Unknown")
-            {
-                var parts = _busId.Split(':');
-                if (parts.Length >= 2)
-                {
-                    // Parse the Hex string ("0A") into an integer (10) for NVAPI
-                    if (uint.TryParse(parts[1], System.Globalization.NumberStyles.HexNumber, null, out uint busInt))
-                    {
-                        busArg = $" --bus {busInt}";
-                    }
-                }
-            }
-
-            string pciArg = !string.IsNullOrEmpty(_busId) && _busId != "Unknown" ? $" --pci {_busId}" : "";
-
-            // Append the target bus to the command (E.g., "--read --bus 10 --pci 0000:0A:00.0")
-            string fullArg = $"{arg}{busArg}{pciArg}";
-
-            string appDir = AppDomain.CurrentDomain.BaseDirectory;
-            string sidecarPath = System.IO.Path.Combine(appDir, "GPU-T.Nvapi");
-
-            if (!System.IO.File.Exists(sidecarPath))
-                sidecarPath += ".dll"; 
-
-            var psi = new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = sidecarPath.EndsWith(".dll") ? "dotnet" : sidecarPath,
-                Arguments = sidecarPath.EndsWith(".dll") ? $"\"{sidecarPath}\" {fullArg}" : fullArg,
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            using var process = System.Diagnostics.Process.Start(psi);
-            if (process != null)
-            {
-                string output = process.StandardOutput.ReadToEnd().Trim();
-                process.WaitForExit(500); 
-                if (process.ExitCode == 0) return output;
-            }
-        }
-        catch { }
-        return "";
-    }
-
-
 
     #endregion
 

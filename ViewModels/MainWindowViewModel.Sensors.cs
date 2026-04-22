@@ -225,8 +225,8 @@ public partial class MainWindowViewModel
         UpdateSensor("Board Power Draw", data.BoardPower);
 
         // PerfCap Reason is a decoded string value that also has an associated graph value (0.0 for None/Idle, 1.0 for any active limit); both are updated in the UI.
-        string perfCapStr = GPU_T.Services.Probes.LinuxNvidia.NvidiaPerfCapDecoder.Decode(data.PerfCapReason);
-        double perfCapVal = GPU_T.Services.Probes.LinuxNvidia.NvidiaPerfCapDecoder.GetGraphValue(perfCapStr);
+        string perfCapStr = GPU_T.Services.Probes.LinuxNvidia.LinuxNvidiaPerfCapDecoder.Decode(data.PerfCapReason);
+        double perfCapVal = GPU_T.Services.Probes.LinuxNvidia.LinuxNvidiaPerfCapDecoder.GetGraphValue(perfCapStr);
         UpdateSensor("PerfCap Reason", perfCapVal, perfCapStr);
 
         UpdateSensor("GPU Voltage", data.GpuVoltage);
