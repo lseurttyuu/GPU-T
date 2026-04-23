@@ -1,7 +1,34 @@
-using System;
 using System.Runtime.InteropServices;
+using GPU_T.Nvapi.Interop;
 
 namespace GPU_T.Nvapi;
+
+
+/// <summary>
+/// Hardcoded SDK constants matching the nvEncodeAPI.h header used to generate the bindings.
+/// Currently mapped to NVENC SDK v13.0.
+/// </summary>
+internal static class NvencApi
+{
+    public const uint MAJOR_VERSION = 13;
+    public const uint MINOR_VERSION = 0;
+    
+    // The version format expected inside the structs
+    public const uint SDK_VERSION = MAJOR_VERSION | (MINOR_VERSION << 24);
+
+    // The C-macro replication
+    private static uint StructVersion(uint ver) => SDK_VERSION | (ver << 16) | (0x7u << 28);
+
+    //Tuple Decoder for the API Version
+    public static (uint Major, uint Minor) DecodeVersion(uint rawVer) => (rawVer >> 4, rawVer & 0xF);
+
+    // The exact constants defined in the NVIDIA header
+    public static readonly uint NV_ENCODE_API_FUNCTION_LIST_VER = StructVersion(2);
+    public static readonly uint NV_ENC_OPEN_ENCODE_SESSION_EX_PARAMS_VER = StructVersion(1);
+    public static readonly uint NV_ENC_CAPS_PARAM_VER = StructVersion(1);
+}
+
+
 
 /// <summary>
 /// NVIDIA Hardware Encoder (NVENC) sidecar reader.
@@ -10,7 +37,6 @@ namespace GPU_T.Nvapi;
 internal static unsafe class NvencReader
 {
     private const string CudaLibrary = "libcuda.so.1";
-    private const string NvencLibrary = "libnvidia-encode.so.1";
 
     // CUDA Driver API
     [DllImport(CudaLibrary, EntryPoint = "cuInit")]
@@ -28,155 +54,7 @@ internal static unsafe class NvencReader
     [DllImport(CudaLibrary, EntryPoint = "cuDeviceGetAttribute")]
     private static extern int CuDeviceGetAttribute(out int pi, int attrib, int dev);
 
-    // NVENC API
-    [DllImport(NvencLibrary, EntryPoint = "NvEncodeAPIGetMaxSupportedVersion")]
-    private static extern int NvEncodeAPIGetMaxSupportedVersion(out uint version);
-
-    [DllImport(NvencLibrary, EntryPoint = "NvEncodeAPICreateInstance")]
-    private static extern int NvEncodeAPICreateInstance(ref NV_ENCODE_API_FUNCTION_LIST functionList);
-
-    // Common NVENC Codec GUIDs (v13.0 Header)
-    private static readonly Guid NV_ENC_CODEC_H264_GUID = new Guid("6bc82762-4e63-4ca4-aa85-1e50f321f6bf");
-    private static readonly Guid NV_ENC_CODEC_HEVC_GUID = new Guid("790cdc88-4522-4d7b-9425-bda9975f7603");
-    private static readonly Guid NV_ENC_CODEC_AV1_GUID  = new Guid("0a352289-0aa7-4759-862d-5d15cd16d254");
-    // H.264 Profiles
-    private static readonly Guid NV_ENC_H264_PROFILE_BASELINE_GUID = new Guid("0727bcaa-78c4-4c83-8c2f-ef3dff267c6a");
-    private static readonly Guid NV_ENC_H264_PROFILE_MAIN_GUID = new Guid("60b5c1d4-67fe-4790-94d5-c4726d7b6e6d");
-    private static readonly Guid NV_ENC_H264_PROFILE_HIGH_GUID = new Guid("e7cbc309-4f7a-4b89-af2a-d537c92be310");
-
-    // HEVC Profiles
-    private static readonly Guid NV_ENC_HEVC_PROFILE_MAIN_GUID = new Guid("b514c39a-b55b-40fa-878f-f1253b4dfdec");
-    private static readonly Guid NV_ENC_HEVC_PROFILE_MAIN10_GUID = new Guid("fa4d2b6c-3a5b-411a-8018-0a3f5e3c9be5");
-    private static readonly Guid NV_ENC_HEVC_PROFILE_FREXT_GUID = new Guid("51ec32b5-1b4c-453c-9cbd-b616bd621341");
-
-    // AV1 Profiles
-    private static readonly Guid NV_ENC_AV1_PROFILE_MAIN_GUID = new Guid("5f2a39f5-f14e-4f95-9a9e-b76d568fcf97");
-
-    // NVENC Preset GUIDs (v13.0)
-    private static readonly Guid NV_ENC_PRESET_P1_GUID = new Guid("fc0a8d3e-45f8-4cf8-80c7-298871590ebf");
-    private static readonly Guid NV_ENC_PRESET_P2_GUID = new Guid("f581cfb8-88d6-4381-93f0-df13f9c27dab");
-    private static readonly Guid NV_ENC_PRESET_P3_GUID = new Guid("36850110-3a07-441f-94d5-3670631f91f6");
-    private static readonly Guid NV_ENC_PRESET_P4_GUID = new Guid("90a7b826-df06-4862-b9d2-cd6d73a08681");
-    private static readonly Guid NV_ENC_PRESET_P5_GUID = new Guid("21c6e6b4-297a-4cba-998f-b6cbde72ade3");
-    private static readonly Guid NV_ENC_PRESET_P6_GUID = new Guid("8e75c279-6299-4ab6-8302-0b215a335cf5");
-    private static readonly Guid NV_ENC_PRESET_P7_GUID = new Guid("84848c12-6f71-4c13-931b-53e283f57974");
-
-    // NVENC Capabilities Enums (v13.0)
-    private const int NV_ENC_CAPS_NUM_MAX_BFRAMES = 0;
-    private const int NV_ENC_CAPS_WIDTH_MAX = 16;
-    private const int NV_ENC_CAPS_HEIGHT_MAX = 17;
-    private const int NV_ENC_CAPS_MB_PER_SEC_MAX = 32;
-    private const int NV_ENC_CAPS_SUPPORT_YUV444_ENCODE = 33;
-    private const int NV_ENC_CAPS_SUPPORT_LOSSLESS_ENCODE = 34;
-    private const int NV_ENC_CAPS_SUPPORT_10BIT_ENCODE = 39;
-    private const int NV_ENC_CAPS_NUM_ENCODER_ENGINES = 49;
-
-    // Helper to replicate the NVENCAPI_STRUCT_VERSION C-Macro exactly
-    private static uint StructVersion(uint ver, uint apiVersion)
-    {
-        return apiVersion | (ver << 16) | (0x7u << 28);
-    }
-
-    // NVENC Struct Definitions (Strict 64-bit alignment)
-   [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct NV_ENCODE_API_FUNCTION_LIST
-    {
-        public uint version;
-        public uint reserved;
-        public IntPtr nvEncOpenEncodeSession;
-        public IntPtr nvEncGetEncodeGUIDCount;
-        public IntPtr nvEncGetEncodeProfileGUIDCount;
-        public IntPtr nvEncGetEncodeProfileGUIDs;
-        public IntPtr nvEncGetEncodeGUIDs;
-        public IntPtr nvEncGetInputFormatCount;
-        public IntPtr nvEncGetInputFormats;
-        public IntPtr nvEncGetEncodeCaps;
-        public IntPtr nvEncGetEncodePresetCount;
-        public IntPtr nvEncGetEncodePresetGUIDs;
-        public IntPtr nvEncGetEncodePresetConfig;
-        public IntPtr nvEncInitializeEncoder;
-        public IntPtr nvEncCreateInputBuffer;
-        public IntPtr nvEncDestroyInputBuffer;
-        public IntPtr nvEncCreateBitstreamBuffer;
-        public IntPtr nvEncDestroyBitstreamBuffer;
-        public IntPtr nvEncEncodePicture;
-        public IntPtr nvEncLockBitstream;
-        public IntPtr nvEncUnlockBitstream;
-        public IntPtr nvEncLockInputBuffer;
-        public IntPtr nvEncUnlockInputBuffer;
-        public IntPtr nvEncGetEncodeStats;
-        public IntPtr nvEncGetSequenceParams;
-        public IntPtr nvEncRegisterAsyncEvent;
-        public IntPtr nvEncUnregisterAsyncEvent;
-        public IntPtr nvEncMapInputResource;
-        public IntPtr nvEncUnmapInputResource;
-        public IntPtr nvEncDestroyEncoder;
-        public IntPtr nvEncInvalidateRefFrames;
-        public IntPtr nvEncOpenEncodeSessionEx;
-        public IntPtr nvEncRegisterResource;
-        public IntPtr nvEncUnregisterResource;
-        public IntPtr nvEncReconfigureEncoder;
-        public IntPtr reserved1;
-        public IntPtr nvEncCreateMVBuffer;
-        public IntPtr nvEncDestroyMVBuffer;
-        public IntPtr nvEncRunMotionEstimationOnly;
-        public IntPtr nvEncGetLastErrorString;
-        public IntPtr nvEncSetIOCudaStreams;
-        public IntPtr nvEncGetEncodePresetConfigEx;
-        public IntPtr nvEncGetSequenceParamEx;
-        public IntPtr nvEncRestoreEncoderState;
-        public IntPtr nvEncLookaheadPicture;
-        public fixed ulong reserved2[275]; // Exactly 275 per the header
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct NV_ENC_OPEN_ENCODE_SESSION_EX_PARAMS
-    {
-        public uint version;
-        public uint deviceType; 
-        public IntPtr device;   
-        public IntPtr reserved;
-        public uint apiVersion;
-        public fixed uint reserved1[253];
-        public fixed ulong reserved2[64]; 
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct NV_ENC_CAPS_PARAM
-    {
-        public uint version;
-        public int capsToQuery;
-        public fixed uint reserved[62];
-    }
-
-    // Function Delegates
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate int NvEncOpenEncodeSessionEx(ref NV_ENC_OPEN_ENCODE_SESSION_EX_PARAMS openParams, out IntPtr encoder);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate int NvEncGetEncodeGUIDCount(IntPtr encoder, out uint encodeGUIDCount);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate int NvEncGetEncodeGUIDs(IntPtr encoder, Guid* GUIDs, uint guidArraySize, out uint GUIDCount);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate int NvEncGetEncodeCaps(IntPtr encoder, Guid encodeGUID, ref NV_ENC_CAPS_PARAM capsParam, out int capsVal);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate int NvEncDestroyEncoder(IntPtr encoder);
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate int NvEncGetEncodeProfileGUIDCount(IntPtr encoder, Guid encodeGUID, out uint encodeProfileGUIDCount);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate int NvEncGetEncodeProfileGUIDs(IntPtr encoder, Guid encodeGUID, Guid* profileGUIDs, uint guidArraySize, out uint GUIDCount);
-
-    // Preset Delegates
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate int NvEncGetEncodePresetCount(IntPtr encoder, Guid encodeGUID, out uint encodePresetGUIDCount);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate int NvEncGetEncodePresetGUIDs(IntPtr encoder, Guid encodeGUID, Guid* presetGUIDs, uint guidArraySize, out uint encodePresetGUIDCount);
-
+ 
     /// <summary>
     /// Entry point for the NVENC reader. Initializes CUDA context, creates NVENC session, and queries encoding capabilities.
     /// Outputs results in a structured format for GPU-T to consume. Implements robust error handling to ensure
@@ -187,8 +65,8 @@ internal static unsafe class NvencReader
     public static int Run(string targetPciString)
     {
         IntPtr cuContext = IntPtr.Zero;
-        IntPtr encoder = IntPtr.Zero;
-        NV_ENCODE_API_FUNCTION_LIST api = new NV_ENCODE_API_FUNCTION_LIST();
+        void* encoder = null;
+        _NV_ENCODE_API_FUNCTION_LIST api = default;
 
         try
         {
@@ -200,222 +78,255 @@ internal static unsafe class NvencReader
                 if (CuDeviceGetByPCIBusId(out cuDevice, targetPciString) != 0) return 1;
             }
 
-            // 1. Mandatory Contract: Output Compute Capability for the Hybrid Fallback safety net.
+            // Mandatory Contract: Output Compute Capability for the Hybrid Fallback safety net.
             CuDeviceGetAttribute(out int ccMajor, 75, cuDevice);
             CuDeviceGetAttribute(out int ccMinor, 76, cuDevice);
             Console.WriteLine($"Compute Capability={ccMajor}.{ccMinor}");
 
             // Create CUDA Context (Required to initialize NVENC)
-            if (CuCtxCreate(out cuContext, 0, cuDevice) != 0) return 0; 
+            if (CuCtxCreate(out cuContext, 0, cuDevice) != 0) return 1; 
 
-            // 2. Fetch the dynamic API Version from the local NVIDIA Driver
-            if (NvEncodeAPIGetMaxSupportedVersion(out uint rawApiVersion) != 0) return 0;
+            // Fetch the dynamic API Version from the local NVIDIA Driver
+            uint rawApiVersion;
+            if (Methods.NvEncodeAPIGetMaxSupportedVersion(&rawApiVersion) != _NVENCSTATUS.NV_ENC_SUCCESS) return 1;
 
-            // Reformat the raw version (Major << 4 | Minor) to the Struct format (Major | Minor << 24)
-            uint major = rawApiVersion >> 4;
-            uint minor = rawApiVersion & 0xF;
-            uint apiVersion = major | (minor << 24); 
+            // Reformat the raw version to the Struct format
+            var apiVersion = NvencApi.DecodeVersion(rawApiVersion);
 
-            // 3. Load NVENC API using the magic struct version macro
-            api.version = StructVersion(2, apiVersion);
-
-            // 3. Load NVENC API using the magic struct version macro
-            api.version = StructVersion(2, apiVersion); // NV_ENCODE_API_FUNCTION_LIST_VER = 2
-
-            if (NvEncodeAPICreateInstance(ref api) != 0) return 0;
-
-            var OpenSessionEx = Marshal.GetDelegateForFunctionPointer<NvEncOpenEncodeSessionEx>(api.nvEncOpenEncodeSessionEx);
-            
-            // 4. Open Encode Session
-            var sessionParams = new NV_ENC_OPEN_ENCODE_SESSION_EX_PARAMS
+            // Validate the driver is new enough to understand our v13.0 C# structs
+            if (apiVersion.Major < NvencApi.MAJOR_VERSION || 
+            (apiVersion.Major == NvencApi.MAJOR_VERSION && apiVersion.Minor < NvencApi.MINOR_VERSION))
             {
-                version = StructVersion(1, apiVersion), // NV_ENC_OPEN_ENCODE_SESSION_EX_PARAMS_VER = 1
-                deviceType = 1, // NV_ENC_DEVICE_TYPE_CUDA = 1
-                device = cuContext,
-                apiVersion = apiVersion
+                Console.WriteLine($"NVENC Driver too old! Requires v{NvencApi.MAJOR_VERSION}.{NvencApi.MINOR_VERSION}, found v{apiVersion.Major}.{apiVersion.Minor}");
+                return 1;
+            }
+        
+            // Load NVENC API using the magic struct version macro
+            api.version = NvencApi.NV_ENCODE_API_FUNCTION_LIST_VER;
+
+            // The CreateInstance function will populate the rest of the function pointers in the struct based on the version we passed in.
+            if (Methods.NvEncodeAPICreateInstance(&api) != _NVENCSTATUS.NV_ENC_SUCCESS) return 1;
+
+            // We should now have a fully populated _NV_ENCODE_API_FUNCTION_LIST struct with all supported functions up to the version we specified.
+            var sessionParams = new _NV_ENC_OPEN_ENCODE_SESSIONEX_PARAMS
+            {
+                version = NvencApi.NV_ENC_OPEN_ENCODE_SESSION_EX_PARAMS_VER,
+                deviceType = _NV_ENC_DEVICE_TYPE.NV_ENC_DEVICE_TYPE_CUDA,
+                device = (void*)cuContext,
+                apiVersion = NvencApi.SDK_VERSION
             };
 
-            if (OpenSessionEx(ref sessionParams, out encoder) != 0) return 0;
+            // Create an NVENC session for the target GPU
+            if (api.nvEncOpenEncodeSessionEx(&sessionParams, &encoder) != _NVENCSTATUS.NV_ENC_SUCCESS) return 1;
 
-            // 5. Query Codecs
-            var GetGuidCount = Marshal.GetDelegateForFunctionPointer<NvEncGetEncodeGUIDCount>(api.nvEncGetEncodeGUIDCount);
-            var GetGuids = Marshal.GetDelegateForFunctionPointer<NvEncGetEncodeGUIDs>(api.nvEncGetEncodeGUIDs);
-            var GetCaps = Marshal.GetDelegateForFunctionPointer<NvEncGetEncodeCaps>(api.nvEncGetEncodeCaps);
-
-            if (GetGuidCount(encoder, out uint guidCount) == 0 && guidCount > 0)
+            // Query Codecs
+            uint guidCount = 0;
+            if (api.nvEncGetEncodeGUIDCount(encoder, &guidCount) == _NVENCSTATUS.NV_ENC_SUCCESS && guidCount > 0)
             {
                 Guid[] guids = new Guid[guidCount];
                 fixed (Guid* pGuids = guids)
-                if (GetGuids(encoder, pGuids, guidCount, out uint actualCount) == 0)
                 {
-                    bool hasH264 = false, hasHevc = false, hasAv1 = false;
-                    foreach (var g in guids)
+                    if (api.nvEncGetEncodeGUIDs(encoder, pGuids, guidCount, &guidCount) == _NVENCSTATUS.NV_ENC_SUCCESS)
                     {
-                        if (g == NV_ENC_CODEC_H264_GUID) hasH264 = true;
-                        if (g == NV_ENC_CODEC_HEVC_GUID) hasHevc = true;
-                        if (g == NV_ENC_CODEC_AV1_GUID) hasAv1 = true;
+                        ProcessHardwareReport(encoder, api, guids);
                     }
-
-                    // 6. Output Native Data
-                    Console.WriteLine("[NVENC]");
-                    
-                    if (hasH264)
-                    {
-                        Console.WriteLine($"H.264 (AVC) Encode=Supported");
-                        Console.WriteLine($"H.264 B-Frames={(QueryCap(GetCaps, encoder, NV_ENC_CODEC_H264_GUID, NV_ENC_CAPS_NUM_MAX_BFRAMES, apiVersion) > 0 ? "Supported" : "No")}");
-                        Console.WriteLine($"H.264 Profiles={QueryProfiles(encoder, NV_ENC_CODEC_H264_GUID, api)}");
-                        Console.WriteLine($"H.264 Presets={QueryPresets(encoder, NV_ENC_CODEC_H264_GUID, api)}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"H.264 (AVC) Encode=No");
-                    }
-
-                    if (hasHevc)
-                    {
-                        Console.WriteLine($"HEVC (H.265) Encode=Supported");
-                        Console.WriteLine($"HEVC 10-bit Encode={(QueryCap(GetCaps, encoder, NV_ENC_CODEC_HEVC_GUID, NV_ENC_CAPS_SUPPORT_10BIT_ENCODE, apiVersion) == 1 ? "Supported" : "No")}");
-                        Console.WriteLine($"HEVC 4:4:4 Chroma={(QueryCap(GetCaps, encoder, NV_ENC_CODEC_HEVC_GUID, NV_ENC_CAPS_SUPPORT_YUV444_ENCODE, apiVersion) == 1 ? "Supported" : "No")}");
-                        Console.WriteLine($"HEVC B-Frames={(QueryCap(GetCaps, encoder, NV_ENC_CODEC_HEVC_GUID, NV_ENC_CAPS_NUM_MAX_BFRAMES, apiVersion) > 0 ? "Supported" : "No")}");
-                        Console.WriteLine($"HEVC Profiles={QueryProfiles(encoder, NV_ENC_CODEC_HEVC_GUID, api)}");
-                        Console.WriteLine($"HEVC Presets={QueryPresets(encoder, NV_ENC_CODEC_HEVC_GUID, api)}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"HEVC (H.265) Encode=No");
-                    }
-
-                    if (hasAv1)
-                    {
-                        Console.WriteLine($"AV1 Encode=Supported");
-                        Console.WriteLine($"AV1 10-bit Encode={(QueryCap(GetCaps, encoder, NV_ENC_CODEC_AV1_GUID, NV_ENC_CAPS_SUPPORT_10BIT_ENCODE, apiVersion) == 1 ? "Supported" : "No")}");
-                        Console.WriteLine($"AV1 Profiles={QueryProfiles(encoder, NV_ENC_CODEC_AV1_GUID, api)}");
-                        Console.WriteLine($"AV1 Presets={QueryPresets(encoder, NV_ENC_CODEC_AV1_GUID, api)}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"AV1 Encode=No");
-                    }
-
-                    // Print Max Resolution (Uses H264 as a baseline)
-                    int maxW = QueryCap(GetCaps, encoder, hasHevc ? NV_ENC_CODEC_HEVC_GUID : NV_ENC_CODEC_H264_GUID, NV_ENC_CAPS_WIDTH_MAX, apiVersion);
-                    int maxH = QueryCap(GetCaps, encoder, hasHevc ? NV_ENC_CODEC_HEVC_GUID : NV_ENC_CODEC_H264_GUID, NV_ENC_CAPS_HEIGHT_MAX, apiVersion);
-                    if (maxW > 0 && maxH > 0) Console.WriteLine($"Max Encoding Resolution={maxW} x {maxH}");
-
-                    int engines = QueryCap(GetCaps, encoder, NV_ENC_CODEC_H264_GUID, NV_ENC_CAPS_NUM_ENCODER_ENGINES, apiVersion);
-                    if (engines > 0) Console.WriteLine($"Hardware Encoder Engines={engines}");
-
-                    int mbPerSec = QueryCap(GetCaps, encoder, NV_ENC_CODEC_H264_GUID, NV_ENC_CAPS_MB_PER_SEC_MAX, apiVersion);
-                    if (mbPerSec > 0) Console.WriteLine($"Max Throughput={mbPerSec} Macroblocks/sec");
-
-                    Console.WriteLine($"Lossless Encoding={(QueryCap(GetCaps, encoder, NV_ENC_CODEC_H264_GUID, NV_ENC_CAPS_SUPPORT_LOSSLESS_ENCODE, apiVersion) == 1 ? "Supported" : "No")}");
                 }
             }
 
             return 0;
+
         }
         catch
         {
-            return 0; 
+            return 1; 
         }
         finally
         {
-            // Clean up Native Pointers to prevent context leaking
-            if (encoder != IntPtr.Zero && api.nvEncDestroyEncoder != IntPtr.Zero)
+            // 1. Clean up NVENC session FIRST (if it was successfully created)
+            if (encoder != null && api.nvEncDestroyEncoder != null)
             {
-                var Destroy = Marshal.GetDelegateForFunctionPointer<NvEncDestroyEncoder>(api.nvEncDestroyEncoder);
-                Destroy(encoder);
+                api.nvEncDestroyEncoder(encoder);
             }
-            if (cuContext != IntPtr.Zero) CuCtxDestroy(cuContext);
+
+            // 2. Clean up CUDA context LAST
+            if (cuContext != IntPtr.Zero) 
+            {
+                CuCtxDestroy(cuContext);
+            }
         }
     }
 
-    private static int QueryCap(NvEncGetEncodeCaps getCapsFunc, IntPtr encoder, Guid codec, int capId, uint apiVersion)
+
+/// <summary>
+    /// Analyzes the supported codecs and global hardware metrics, then outputs a formatted report to the console.
+    /// </summary>
+    /// <param name="encoder">The initialized NVENC encoder session pointer.</param>
+    /// <param name="api">The populated NVENC API function list.</param>
+    /// <param name="guids">Array of supported codec GUIDs retrieved from the hardware.</param>
+    private static void ProcessHardwareReport(void* encoder, _NV_ENCODE_API_FUNCTION_LIST api, Guid[] guids)
     {
-        var capParam = new NV_ENC_CAPS_PARAM
-        {
-            version = StructVersion(1, apiVersion), // NV_ENC_CAPS_PARAM_VER = 1
-            capsToQuery = capId
-        };
+        // Determine baseline support for major codecs
+        bool hasH264 = Array.Exists(guids, g => g == Methods.NV_ENC_CODEC_H264_GUID);
+        bool hasHevc = Array.Exists(guids, g => g == Methods.NV_ENC_CODEC_HEVC_GUID);
+        bool hasAv1  = Array.Exists(guids, g => g == Methods.NV_ENC_CODEC_AV1_GUID);
+
+        Console.WriteLine("[NVENC]");
+
+        // Report specific capabilities for each codec
+        ReportCodec("H.264 (AVC)", hasH264, Methods.NV_ENC_CODEC_H264_GUID, encoder, api);
+        ReportCodec("HEVC (H.265)", hasHevc, Methods.NV_ENC_CODEC_HEVC_GUID, encoder, api);
+        ReportCodec("AV1", hasAv1, Methods.NV_ENC_CODEC_AV1_GUID, encoder, api);
+
+        // --- Global Hardware Metrics ---
+        // Use HEVC as the primary metric baseline if available; otherwise fallback to H.264
+        Guid primaryCodec = hasHevc ? Methods.NV_ENC_CODEC_HEVC_GUID : Methods.NV_ENC_CODEC_H264_GUID;
         
-        if (getCapsFunc(encoder, codec, ref capParam, out int val) == 0) return val;
-        return 0;
+        // Query maximum encoding resolution
+        int maxW = QueryCap(encoder, api, primaryCodec, _NV_ENC_CAPS.NV_ENC_CAPS_WIDTH_MAX);
+        int maxH = QueryCap(encoder, api, primaryCodec, _NV_ENC_CAPS.NV_ENC_CAPS_HEIGHT_MAX);
+        if (maxW > 0) Console.WriteLine($"Max Encoding Resolution={maxW} x {maxH}");
+
+        // Query total number of physical NVENC engines on the GPU die
+        int engines = QueryCap(encoder, api, Methods.NV_ENC_CODEC_H264_GUID, _NV_ENC_CAPS.NV_ENC_CAPS_NUM_ENCODER_ENGINES);
+        if (engines > 0) Console.WriteLine($"Hardware Encoder Engines={engines}");
+
+        // Query maximum macroblock throughput per second (indicates maximum framerate/resolution capability)
+        int mbPerSec = QueryCap(encoder, api, Methods.NV_ENC_CODEC_H264_GUID, _NV_ENC_CAPS.NV_ENC_CAPS_MB_PER_SEC_MAX);
+        if (mbPerSec > 0) Console.WriteLine($"Max Throughput={mbPerSec} Macroblocks/sec");
+
+        // Check for lossless encoding support
+        Console.WriteLine($"Lossless Encoding={(QueryCap(encoder, api, primaryCodec, _NV_ENC_CAPS.NV_ENC_CAPS_SUPPORT_LOSSLESS_ENCODE) == 1 ? "Supported" : "No")}");
     }
 
     /// <summary>
-    /// Helper to query and format supported presets for a given codec. Presets are predefined configurations that 
-    /// optimize encoding settings for specific use cases (e.g., low latency, high quality). This function checks 
-    /// which presets are supported by the hardware for the specified codec and returns a human-readable list of those presets.
+    /// Queries and prints detailed feature support (10-bit, B-frames, Chroma, Profiles, Presets) for a specific codec.
     /// </summary>
-    /// <param name="encoder">The encoder instance.</param>
-    /// <param name="codec">The codec for which to query presets.</param>
-    /// <param name="api">The NV_ENCODE_API_FUNCTION_LIST instance.</param>
-    /// <returns>The list of supported presets for the specified codec.</returns>
-    private static string QueryPresets(IntPtr encoder, Guid codec, NV_ENCODE_API_FUNCTION_LIST api)
+    /// <param name="label">The human-readable name of the codec (e.g., "H.264 (AVC)").</param>
+    /// <param name="supported">Whether the hardware supports this codec at all.</param>
+    /// <param name="guid">The NVENC GUID for the codec being queried.</param>
+    /// <param name="encoder">The initialized NVENC encoder session pointer.</param>
+    /// <param name="api">The populated NVENC API function list.</param>
+    private static void ReportCodec(string label, bool supported, Guid guid, void* encoder, _NV_ENCODE_API_FUNCTION_LIST api)
     {
-        var GetPresetCount = Marshal.GetDelegateForFunctionPointer<NvEncGetEncodePresetCount>(api.nvEncGetEncodePresetCount);
-        var GetPresets = Marshal.GetDelegateForFunctionPointer<NvEncGetEncodePresetGUIDs>(api.nvEncGetEncodePresetGUIDs);
-
-        if (GetPresetCount(encoder, codec, out uint presetCount) != 0 || presetCount == 0) return "None";
-
-        Guid[] presets = new Guid[presetCount];
-        fixed (Guid* pPresets = presets)
+        // Fast-fail if the GPU doesn't support this codec
+        if (!supported)
         {
-            if (GetPresets(encoder, codec, pPresets, presetCount, out uint actualCount) == 0)
-            {
-                var supported = new System.Collections.Generic.List<string>();
-                foreach (var p in presets)
-                {
-                    if (p == NV_ENC_PRESET_P1_GUID) supported.Add("P1");
-                    if (p == NV_ENC_PRESET_P2_GUID) supported.Add("P2");
-                    if (p == NV_ENC_PRESET_P3_GUID) supported.Add("P3");
-                    if (p == NV_ENC_PRESET_P4_GUID) supported.Add("P4");
-                    if (p == NV_ENC_PRESET_P5_GUID) supported.Add("P5");
-                    if (p == NV_ENC_PRESET_P6_GUID) supported.Add("P6");
-                    if (p == NV_ENC_PRESET_P7_GUID) supported.Add("P7");
-                }
-                if (supported.Count > 0) return string.Join(", ", supported);
-            }
+            Console.WriteLine($"{label} Encode=No");
+            return;
         }
-        return "None";
+
+        Console.WriteLine($"{label} Encode=Supported");
+
+        // 10-Bit Check (Specific to newer architectures handling HEVC and AV1; H.264 is excluded)
+        if (label != "H.264 (AVC)")
+        {
+            bool bit10 = QueryCap(encoder, api, guid, _NV_ENC_CAPS.NV_ENC_CAPS_SUPPORT_10BIT_ENCODE) == 1;
+            Console.WriteLine($"{label} 10-bit Encode={(bit10 ? "Supported" : "No")}");
+        }
+        
+        // B-Frames check (Evaluates if the maximum number of B-frames is greater than 0)
+        bool bFrames = QueryCap(encoder, api, guid, _NV_ENC_CAPS.NV_ENC_CAPS_NUM_MAX_BFRAMES) > 0;
+        Console.WriteLine($"{label} B-Frames={(bFrames ? "Supported" : "No")}");
+
+        // 4:4:4 Chroma Check (Supported by select GPU architectures for high color fidelity)
+        bool chroma444 = QueryCap(encoder, api, guid, _NV_ENC_CAPS.NV_ENC_CAPS_SUPPORT_YUV444_ENCODE) == 1;
+        Console.WriteLine($"{label} 4:4:4 Chroma={(chroma444 ? "Supported" : "No")}");
+
+        // Print dynamically queried profiles and presets
+        Console.WriteLine($"{label} Profiles={QueryProfiles(encoder, api, guid)}");
+        Console.WriteLine($"{label} Presets={QueryPresets(encoder, api, guid)}");
     }
 
     /// <summary>
-    /// Helper to query and format supported profiles for a given codec. Profiles are a key aspect of encoding capabilities,
-    /// defining specific feature sets and constraints. This function checks which profiles are supported 
-    /// by the hardware for the specified codec and returns a human-readable list of those profiles.
+    /// Helper method to safely invoke the native nvEncGetEncodeCaps function and return an integer value.
     /// </summary>
-    /// <param name="encoder">The encoder instance.</param>
-    /// <param name="codec">The codec for which to query profiles.</param>
-    /// <param name="api">The NV_ENCODE_API_FUNCTION_LIST instance.</param>
-    /// <returns>The list of supported profiles for the specified codec.</returns>
-    private static string QueryProfiles(IntPtr encoder, Guid codec, NV_ENCODE_API_FUNCTION_LIST api)
+    /// <param name="encoder">The initialized NVENC encoder session pointer.</param>
+    /// <param name="api">The populated NVENC API function list.</param>
+    /// <param name="codec">The target codec GUID to query against.</param>
+    /// <param name="cap">The specific capability enum to query.</param>
+    /// <returns>The integer value of the capability, or 0 if unsupported/failed.</returns>
+    private static int QueryCap(void* encoder, _NV_ENCODE_API_FUNCTION_LIST api, Guid codec, _NV_ENC_CAPS cap)
     {
-        var GetProfileCount = Marshal.GetDelegateForFunctionPointer<NvEncGetEncodeProfileGUIDCount>(api.nvEncGetEncodeProfileGUIDCount);
-        var GetProfiles = Marshal.GetDelegateForFunctionPointer<NvEncGetEncodeProfileGUIDs>(api.nvEncGetEncodeProfileGUIDs);
+        // Prepare the unmanaged struct with the necessary hardcoded version and capability target
+        var param = new _NV_ENC_CAPS_PARAM 
+        { 
+            version = NvencApi.NV_ENC_CAPS_PARAM_VER, 
+            capsToQuery = cap 
+        };
 
-        if (GetProfileCount(encoder, codec, out uint profCount) != 0 || profCount == 0) return "None";
+        int val = 0;
+        // Execute the native call via C# 9 function pointer; return the output value if successful
+        return api.nvEncGetEncodeCaps(encoder, codec, &param, &val) == _NVENCSTATUS.NV_ENC_SUCCESS ? val : 0;
+    }
 
-        Guid[] profiles = new Guid[profCount];
-        fixed (Guid* pProfiles = profiles)
+    /// <summary>
+    /// Queries the hardware for supported encoding profiles (e.g., Main, High) for a given codec.
+    /// </summary>
+    /// <param name="encoder">The initialized NVENC encoder session pointer.</param>
+    /// <param name="api">The populated NVENC API function list.</param>
+    /// <param name="codec">The specific codec GUID to query.</param>
+    /// <returns>A comma-separated string of supported profiles, or "None"/"Unknown".</returns>
+    private static string QueryProfiles(void* encoder, _NV_ENCODE_API_FUNCTION_LIST api, Guid codec)
+    {
+        uint count = 0;
+        // Step 1: Query how many profiles are supported to allocate the correct buffer size
+        if (api.nvEncGetEncodeProfileGUIDCount(encoder, codec, &count) != _NVENCSTATUS.NV_ENC_SUCCESS || count == 0) return "None";
+
+        Guid[] profiles = new Guid[count];
+        // Pin the array in memory so unmanaged code can safely write to it
+        fixed (Guid* p = profiles)
         {
-            if (GetProfiles(encoder, codec, pProfiles, profCount, out uint actualCount) == 0)
+            // Step 2: Fetch the actual profile GUIDs into the pinned buffer
+            if (api.nvEncGetEncodeProfileGUIDs(encoder, codec, p, count, &count) != _NVENCSTATUS.NV_ENC_SUCCESS) return "None";
+            
+            var result = new List<string>();
+            // Map the raw hardware GUIDs to human-readable string names
+            foreach (var g in profiles)
             {
-                var supported = new System.Collections.Generic.List<string>();
-                foreach (var p in profiles)
-                {
-                    if (p == NV_ENC_H264_PROFILE_BASELINE_GUID) supported.Add("Baseline");
-                    else if (p == NV_ENC_H264_PROFILE_MAIN_GUID) supported.Add("Main");
-                    else if (p == NV_ENC_H264_PROFILE_HIGH_GUID) supported.Add("High");
-                    else if (p == NV_ENC_HEVC_PROFILE_MAIN_GUID) supported.Add("Main");
-                    else if (p == NV_ENC_HEVC_PROFILE_MAIN10_GUID) supported.Add("Main10");
-                    else if (p == NV_ENC_HEVC_PROFILE_FREXT_GUID) supported.Add("FREXT");
-                    else if (p == NV_ENC_AV1_PROFILE_MAIN_GUID) supported.Add("Main");
-                }
-                if (supported.Count > 0) return string.Join(", ", supported);
+                if (g == Methods.NV_ENC_H264_PROFILE_BASELINE_GUID) result.Add("Baseline");
+                else if (g == Methods.NV_ENC_H264_PROFILE_MAIN_GUID) result.Add("Main");
+                else if (g == Methods.NV_ENC_H264_PROFILE_HIGH_GUID) result.Add("High");
+                else if (g == Methods.NV_ENC_HEVC_PROFILE_MAIN_GUID) result.Add("Main");
+                else if (g == Methods.NV_ENC_HEVC_PROFILE_MAIN10_GUID) result.Add("Main10");
+                else if (g == Methods.NV_ENC_HEVC_PROFILE_FREXT_GUID) result.Add("FREXT");
+                else if (g == Methods.NV_ENC_AV1_PROFILE_MAIN_GUID) result.Add("Main");
             }
+            
+            return result.Count > 0 ? string.Join(", ", result) : "Unknown";
         }
-        return "None";
+    }
+
+    /// <summary>
+    /// Queries the hardware for supported encoding tuning presets (e.g., P1 through P7) for a given codec.
+    /// </summary>
+    /// <param name="encoder">The initialized NVENC encoder session pointer.</param>
+    /// <param name="api">The populated NVENC API function list.</param>
+    /// <param name="codec">The specific codec GUID to query.</param>
+    /// <returns>A comma-separated string of supported presets, or "None".</returns>
+    private static string QueryPresets(void* encoder, _NV_ENCODE_API_FUNCTION_LIST api, Guid codec)
+    {
+        uint count = 0;
+        // Step 1: Query the total number of supported presets to size the buffer
+        if (api.nvEncGetEncodePresetCount(encoder, codec, &count) != _NVENCSTATUS.NV_ENC_SUCCESS || count == 0) return "None";
+
+        Guid[] presets = new Guid[count];
+        // Pin the array so the native driver can populate it
+        fixed (Guid* p = presets)
+        {
+            // Step 2: Fetch the actual preset GUIDs
+            if (api.nvEncGetEncodePresetGUIDs(encoder, codec, p, count, &count) != _NVENCSTATUS.NV_ENC_SUCCESS) return "None";
+            
+            var result = new List<string>();
+            
+            // Loop through P1 to P7 and use reflection to dynamically check if the hardware array contains that preset GUID
+            for (int i = 1; i <= 7; i++)
+            {
+                if (Array.Exists(presets, g => g == (Guid)typeof(Methods).GetField($"NV_ENC_PRESET_P{i}_GUID").GetValue(null)))
+                    result.Add($"P{i}");
+            }
+            
+            return result.Count > 0 ? string.Join(", ", result) : "None";
+        }
     }
 
 }
