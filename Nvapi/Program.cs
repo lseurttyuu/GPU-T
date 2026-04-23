@@ -13,6 +13,7 @@ class Program
     {
         if (args.Length == 0) return 1;
         bool isCheck = false, isRead = false, isCuda = false;
+        bool isNvenc = false;
         uint targetBusId = uint.MaxValue;
         string targetPciString = "";
 
@@ -22,6 +23,7 @@ class Program
             if (args[i] == "--check") isCheck = true;
             if (args[i] == "--read") isRead = true;
             if (args[i] == "--cuda") isCuda = true;
+            if (args[i] == "--nvenc") isNvenc = true;
             if (args[i] == "--bus" && i + 1 < args.Length) uint.TryParse(args[i + 1], out targetBusId);
             if (args[i] == "--pci" && i + 1 < args.Length) targetPciString = args[i + 1];
         }
@@ -38,6 +40,12 @@ class Program
             if (isCheck || isRead)
             {
                 return TelemetryReader.Run(isCheck, targetBusId, targetPciString);
+            }
+
+            // Route to NVENC reader
+            if (isNvenc)
+            {
+                return NvencReader.Run(targetPciString);
             }
 
             return 1;
