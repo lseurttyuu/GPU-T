@@ -172,6 +172,10 @@ internal static unsafe class NvencReader
 
         Console.WriteLine("[NVENC]");
 
+        // Query total number of physical NVENC engines on the GPU die
+        int engines = QueryCap(encoder, api, Methods.NV_ENC_CODEC_H264_GUID, _NV_ENC_CAPS.NV_ENC_CAPS_NUM_ENCODER_ENGINES);
+        if (engines > 0) Console.WriteLine($"Hardware Encoder Engines={engines}");
+
         // Report specific capabilities for each codec
         ReportCodec("H.264 (AVC)", hasH264, Methods.NV_ENC_CODEC_H264_GUID, encoder, api);
         ReportCodec("HEVC (H.265)", hasHevc, Methods.NV_ENC_CODEC_HEVC_GUID, encoder, api);
@@ -185,10 +189,6 @@ internal static unsafe class NvencReader
         int maxW = QueryCap(encoder, api, primaryCodec, _NV_ENC_CAPS.NV_ENC_CAPS_WIDTH_MAX);
         int maxH = QueryCap(encoder, api, primaryCodec, _NV_ENC_CAPS.NV_ENC_CAPS_HEIGHT_MAX);
         if (maxW > 0) Console.WriteLine($"Max Encoding Resolution={maxW} x {maxH}");
-
-        // Query total number of physical NVENC engines on the GPU die
-        int engines = QueryCap(encoder, api, Methods.NV_ENC_CODEC_H264_GUID, _NV_ENC_CAPS.NV_ENC_CAPS_NUM_ENCODER_ENGINES);
-        if (engines > 0) Console.WriteLine($"Hardware Encoder Engines={engines}");
 
         // Query maximum macroblock throughput per second (indicates maximum framerate/resolution capability)
         int mbPerSec = QueryCap(encoder, api, Methods.NV_ENC_CODEC_H264_GUID, _NV_ENC_CAPS.NV_ENC_CAPS_MB_PER_SEC_MAX);

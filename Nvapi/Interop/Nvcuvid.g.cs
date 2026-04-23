@@ -1,0 +1,3128 @@
+using System;
+using System.Runtime.InteropServices;
+
+namespace GPU_T.Nvapi.Interop
+{
+    public partial struct @void
+    {
+    }
+
+    [NativeTypeName("unsigned int")]
+    public enum cudaVideoCodec_enum : uint
+    {
+        cudaVideoCodec_MPEG1 = 0,
+        cudaVideoCodec_MPEG2,
+        cudaVideoCodec_MPEG4,
+        cudaVideoCodec_VC1,
+        cudaVideoCodec_H264,
+        cudaVideoCodec_JPEG,
+        cudaVideoCodec_H264_SVC,
+        cudaVideoCodec_H264_MVC,
+        cudaVideoCodec_HEVC,
+        cudaVideoCodec_VP8,
+        cudaVideoCodec_VP9,
+        cudaVideoCodec_AV1,
+        cudaVideoCodec_NumCodecs,
+        cudaVideoCodec_YUV420 = (((sbyte)('I') << 24) | ((sbyte)('Y') << 16) | ((sbyte)('U') << 8) | ((sbyte)('V'))),
+        cudaVideoCodec_YV12 = (((sbyte)('Y') << 24) | ((sbyte)('V') << 16) | ((sbyte)('1') << 8) | ((sbyte)('2'))),
+        cudaVideoCodec_NV12 = (((sbyte)('N') << 24) | ((sbyte)('V') << 16) | ((sbyte)('1') << 8) | ((sbyte)('2'))),
+        cudaVideoCodec_YUYV = (((sbyte)('Y') << 24) | ((sbyte)('U') << 16) | ((sbyte)('Y') << 8) | ((sbyte)('V'))),
+        cudaVideoCodec_UYVY = (((sbyte)('U') << 24) | ((sbyte)('Y') << 16) | ((sbyte)('V') << 8) | ((sbyte)('Y'))),
+    }
+
+    [NativeTypeName("unsigned int")]
+    public enum cudaVideoSurfaceFormat_enum : uint
+    {
+        cudaVideoSurfaceFormat_NV12 = 0,
+        cudaVideoSurfaceFormat_P016 = 1,
+        cudaVideoSurfaceFormat_YUV444 = 2,
+        cudaVideoSurfaceFormat_YUV444_16Bit = 3,
+        cudaVideoSurfaceFormat_NV16 = 4,
+        cudaVideoSurfaceFormat_P216 = 5,
+    }
+
+    [NativeTypeName("unsigned int")]
+    public enum cudaVideoDeinterlaceMode_enum : uint
+    {
+        cudaVideoDeinterlaceMode_Weave = 0,
+        cudaVideoDeinterlaceMode_Bob,
+        cudaVideoDeinterlaceMode_Adaptive,
+    }
+
+    [NativeTypeName("unsigned int")]
+    public enum cudaVideoChromaFormat_enum : uint
+    {
+        cudaVideoChromaFormat_Monochrome = 0,
+        cudaVideoChromaFormat_420,
+        cudaVideoChromaFormat_422,
+        cudaVideoChromaFormat_444,
+    }
+
+    [NativeTypeName("unsigned int")]
+    public enum cudaVideoCreateFlags_enum : uint
+    {
+        cudaVideoCreate_Default = 0x00,
+        cudaVideoCreate_PreferCUDA = 0x01,
+        cudaVideoCreate_PreferDXVA = 0x02,
+        cudaVideoCreate_PreferCUVID = 0x04,
+    }
+
+    [NativeTypeName("unsigned int")]
+    public enum cuvidDecodeStatus_enum : uint
+    {
+        cuvidDecodeStatus_Invalid = 0,
+        cuvidDecodeStatus_InProgress = 1,
+        cuvidDecodeStatus_Success = 2,
+        cuvidDecodeStatus_Error = 8,
+        cuvidDecodeStatus_Error_Concealed = 9,
+    }
+
+    public unsafe partial struct _CUVIDDECODECAPS
+    {
+        [NativeTypeName("cudaVideoCodec")]
+        public cudaVideoCodec_enum eCodecType;
+
+        [NativeTypeName("cudaVideoChromaFormat")]
+        public cudaVideoChromaFormat_enum eChromaFormat;
+
+        [NativeTypeName("unsigned int")]
+        public uint nBitDepthMinus8;
+
+        [NativeTypeName("unsigned int[3]")]
+        public fixed uint reserved1[3];
+
+        [NativeTypeName("unsigned char")]
+        public byte bIsSupported;
+
+        [NativeTypeName("unsigned char")]
+        public byte nNumNVDECs;
+
+        [NativeTypeName("unsigned short")]
+        public ushort nOutputFormatMask;
+
+        [NativeTypeName("unsigned int")]
+        public uint nMaxWidth;
+
+        [NativeTypeName("unsigned int")]
+        public uint nMaxHeight;
+
+        [NativeTypeName("unsigned int")]
+        public uint nMaxMBCount;
+
+        [NativeTypeName("unsigned short")]
+        public ushort nMinWidth;
+
+        [NativeTypeName("unsigned short")]
+        public ushort nMinHeight;
+
+        [NativeTypeName("unsigned char")]
+        public byte bIsHistogramSupported;
+
+        [NativeTypeName("unsigned char")]
+        public byte nCounterBitDepth;
+
+        [NativeTypeName("unsigned short")]
+        public ushort nMaxHistogramBins;
+
+        [NativeTypeName("unsigned int[10]")]
+        public fixed uint reserved3[10];
+    }
+
+    public unsafe partial struct _CUVIDDECODECREATEINFO
+    {
+        [NativeTypeName("unsigned long")]
+        public nuint ulWidth;
+
+        [NativeTypeName("unsigned long")]
+        public nuint ulHeight;
+
+        [NativeTypeName("unsigned long")]
+        public nuint ulNumDecodeSurfaces;
+
+        [NativeTypeName("cudaVideoCodec")]
+        public cudaVideoCodec_enum CodecType;
+
+        [NativeTypeName("cudaVideoChromaFormat")]
+        public cudaVideoChromaFormat_enum ChromaFormat;
+
+        [NativeTypeName("unsigned long")]
+        public nuint ulCreationFlags;
+
+        [NativeTypeName("unsigned long")]
+        public nuint bitDepthMinus8;
+
+        [NativeTypeName("unsigned long")]
+        public nuint ulIntraDecodeOnly;
+
+        [NativeTypeName("unsigned long")]
+        public nuint ulMaxWidth;
+
+        [NativeTypeName("unsigned long")]
+        public nuint ulMaxHeight;
+
+        [NativeTypeName("unsigned long")]
+        public nuint Reserved1;
+
+        [NativeTypeName("__AnonymousRecord_cuviddec_L203_C5")]
+        public _display_area_e__Struct display_area;
+
+        [NativeTypeName("cudaVideoSurfaceFormat")]
+        public cudaVideoSurfaceFormat_enum OutputFormat;
+
+        [NativeTypeName("cudaVideoDeinterlaceMode")]
+        public cudaVideoDeinterlaceMode_enum DeinterlaceMode;
+
+        [NativeTypeName("unsigned long")]
+        public nuint ulTargetWidth;
+
+        [NativeTypeName("unsigned long")]
+        public nuint ulTargetHeight;
+
+        [NativeTypeName("unsigned long")]
+        public nuint ulNumOutputSurfaces;
+
+        [NativeTypeName("CUvideoctxlock")]
+        public void* vidLock;
+
+        [NativeTypeName("__AnonymousRecord_cuviddec_L221_C5")]
+        public _target_rect_e__Struct target_rect;
+
+        [NativeTypeName("unsigned long")]
+        public nuint enableHistogram;
+
+        [NativeTypeName("unsigned long[4]")]
+        public _Reserved2_e__FixedBuffer Reserved2;
+
+        public partial struct _display_area_e__Struct
+        {
+            public short left;
+
+            public short top;
+
+            public short right;
+
+            public short bottom;
+        }
+
+        public partial struct _target_rect_e__Struct
+        {
+            public short left;
+
+            public short top;
+
+            public short right;
+
+            public short bottom;
+        }
+
+        public partial struct _Reserved2_e__FixedBuffer
+        {
+            public nuint e0;
+            public nuint e1;
+            public nuint e2;
+            public nuint e3;
+
+            public ref nuint this[int index]
+            {
+                get
+                {
+                    return ref AsSpan()[index];
+                }
+            }
+
+            public Span<nuint> AsSpan() => MemoryMarshal.CreateSpan(ref e0, 4);
+        }
+    }
+
+    public unsafe partial struct _CUVIDH264DPBENTRY
+    {
+        public int PicIdx;
+
+        public int FrameIdx;
+
+        public int is_long_term;
+
+        public int not_existing;
+
+        public int used_for_reference;
+
+        [NativeTypeName("int[2]")]
+        public fixed int FieldOrderCnt[2];
+    }
+
+    public unsafe partial struct _CUVIDH264MVCEXT
+    {
+        public int num_views_minus1;
+
+        public int view_id;
+
+        [NativeTypeName("unsigned char")]
+        public byte inter_view_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte num_inter_view_refs_l0;
+
+        [NativeTypeName("unsigned char")]
+        public byte num_inter_view_refs_l1;
+
+        [NativeTypeName("unsigned char")]
+        public byte MVCReserved8Bits;
+
+        [NativeTypeName("int[16]")]
+        public fixed int InterViewRefsL0[16];
+
+        [NativeTypeName("int[16]")]
+        public fixed int InterViewRefsL1[16];
+    }
+
+    public unsafe partial struct _CUVIDH264SVCEXT
+    {
+        [NativeTypeName("unsigned char")]
+        public byte profile_idc;
+
+        [NativeTypeName("unsigned char")]
+        public byte level_idc;
+
+        [NativeTypeName("unsigned char")]
+        public byte DQId;
+
+        [NativeTypeName("unsigned char")]
+        public byte DQIdMax;
+
+        [NativeTypeName("unsigned char")]
+        public byte disable_inter_layer_deblocking_filter_idc;
+
+        [NativeTypeName("unsigned char")]
+        public byte ref_layer_chroma_phase_y_plus1;
+
+        [NativeTypeName("signed char")]
+        public sbyte inter_layer_slice_alpha_c0_offset_div2;
+
+        [NativeTypeName("signed char")]
+        public sbyte inter_layer_slice_beta_offset_div2;
+
+        [NativeTypeName("unsigned short")]
+        public ushort DPBEntryValidFlag;
+
+        [NativeTypeName("unsigned char")]
+        public byte inter_layer_deblocking_filter_control_present_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte extended_spatial_scalability_idc;
+
+        [NativeTypeName("unsigned char")]
+        public byte adaptive_tcoeff_level_prediction_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte slice_header_restriction_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte chroma_phase_x_plus1_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte chroma_phase_y_plus1;
+
+        [NativeTypeName("unsigned char")]
+        public byte tcoeff_level_prediction_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte constrained_intra_resampling_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte ref_layer_chroma_phase_x_plus1_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte store_ref_base_pic_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte Reserved8BitsA;
+
+        [NativeTypeName("unsigned char")]
+        public byte Reserved8BitsB;
+
+        public short scaled_ref_layer_left_offset;
+
+        public short scaled_ref_layer_top_offset;
+
+        public short scaled_ref_layer_right_offset;
+
+        public short scaled_ref_layer_bottom_offset;
+
+        [NativeTypeName("unsigned short")]
+        public ushort Reserved16Bits;
+
+        [NativeTypeName("struct _CUVIDPICPARAMS *")]
+        public _CUVIDPICPARAMS* pNextLayer;
+
+        public int bRefBaseLayer;
+    }
+
+    public unsafe partial struct _CUVIDH264PICPARAMS
+    {
+        public int log2_max_frame_num_minus4;
+
+        public int pic_order_cnt_type;
+
+        public int log2_max_pic_order_cnt_lsb_minus4;
+
+        public int delta_pic_order_always_zero_flag;
+
+        public int frame_mbs_only_flag;
+
+        public int direct_8x8_inference_flag;
+
+        public int num_ref_frames;
+
+        [NativeTypeName("unsigned char")]
+        public byte residual_colour_transform_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte bit_depth_luma_minus8;
+
+        [NativeTypeName("unsigned char")]
+        public byte bit_depth_chroma_minus8;
+
+        [NativeTypeName("unsigned char")]
+        public byte qpprime_y_zero_transform_bypass_flag;
+
+        public int entropy_coding_mode_flag;
+
+        public int pic_order_present_flag;
+
+        public int num_ref_idx_l0_active_minus1;
+
+        public int num_ref_idx_l1_active_minus1;
+
+        public int weighted_pred_flag;
+
+        public int weighted_bipred_idc;
+
+        public int pic_init_qp_minus26;
+
+        public int deblocking_filter_control_present_flag;
+
+        public int redundant_pic_cnt_present_flag;
+
+        public int transform_8x8_mode_flag;
+
+        public int MbaffFrameFlag;
+
+        public int constrained_intra_pred_flag;
+
+        public int chroma_qp_index_offset;
+
+        public int second_chroma_qp_index_offset;
+
+        public int ref_pic_flag;
+
+        public int frame_num;
+
+        [NativeTypeName("int[2]")]
+        public fixed int CurrFieldOrderCnt[2];
+
+        [NativeTypeName("CUVIDH264DPBENTRY[16]")]
+        public _dpb_e__FixedBuffer dpb;
+
+        [NativeTypeName("unsigned char[6][16]")]
+        public fixed byte WeightScale4x4[6 * 16];
+
+        [NativeTypeName("unsigned char[2][64]")]
+        public fixed byte WeightScale8x8[2 * 64];
+
+        [NativeTypeName("unsigned char")]
+        public byte fmo_aso_enable;
+
+        [NativeTypeName("unsigned char")]
+        public byte num_slice_groups_minus1;
+
+        [NativeTypeName("unsigned char")]
+        public byte slice_group_map_type;
+
+        [NativeTypeName("signed char")]
+        public sbyte pic_init_qs_minus26;
+
+        [NativeTypeName("unsigned int")]
+        public uint slice_group_change_rate_minus1;
+
+        [NativeTypeName("__AnonymousRecord_cuviddec_L353_C5")]
+        public _fmo_e__Union fmo;
+
+        public uint _bitfield;
+
+        [NativeTypeName("unsigned int : 2")]
+        public uint mb_adaptive_frame_field_flag
+        {
+            readonly get
+            {
+                return _bitfield & 0x3u;
+            }
+
+            set
+            {
+                _bitfield = (_bitfield & ~0x3u) | (value & 0x3u);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 30")]
+        public uint Reserved1
+        {
+            readonly get
+            {
+                return (_bitfield >> 2) & 0x3FFFFFFFu;
+            }
+
+            set
+            {
+                _bitfield = (_bitfield & ~(0x3FFFFFFFu << 2)) | ((value & 0x3FFFFFFFu) << 2);
+            }
+        }
+
+        [NativeTypeName("unsigned int[11]")]
+        public fixed uint Reserved[11];
+
+        [NativeTypeName("__AnonymousRecord_cuviddec_L363_C5")]
+        public _Anonymous_e__Union Anonymous;
+
+        public ref _CUVIDH264MVCEXT mvcext
+        {
+            get
+            {
+                return ref MemoryMarshal.GetReference(MemoryMarshal.CreateSpan(ref Anonymous.mvcext, 1));
+            }
+        }
+
+        public ref _CUVIDH264SVCEXT svcext
+        {
+            get
+            {
+                return ref MemoryMarshal.GetReference(MemoryMarshal.CreateSpan(ref Anonymous.svcext, 1));
+            }
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public unsafe partial struct _fmo_e__Union
+        {
+            [FieldOffset(0)]
+            [NativeTypeName("unsigned long long")]
+            public ulong slice_group_map_addr;
+
+            [FieldOffset(0)]
+            [NativeTypeName("const unsigned char *")]
+            public byte* pMb2SliceGroupMap;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public partial struct _Anonymous_e__Union
+        {
+            [FieldOffset(0)]
+            [NativeTypeName("CUVIDH264MVCEXT")]
+            public _CUVIDH264MVCEXT mvcext;
+
+            [FieldOffset(0)]
+            [NativeTypeName("CUVIDH264SVCEXT")]
+            public _CUVIDH264SVCEXT svcext;
+        }
+
+        public partial struct _dpb_e__FixedBuffer
+        {
+            public _CUVIDH264DPBENTRY e0;
+            public _CUVIDH264DPBENTRY e1;
+            public _CUVIDH264DPBENTRY e2;
+            public _CUVIDH264DPBENTRY e3;
+            public _CUVIDH264DPBENTRY e4;
+            public _CUVIDH264DPBENTRY e5;
+            public _CUVIDH264DPBENTRY e6;
+            public _CUVIDH264DPBENTRY e7;
+            public _CUVIDH264DPBENTRY e8;
+            public _CUVIDH264DPBENTRY e9;
+            public _CUVIDH264DPBENTRY e10;
+            public _CUVIDH264DPBENTRY e11;
+            public _CUVIDH264DPBENTRY e12;
+            public _CUVIDH264DPBENTRY e13;
+            public _CUVIDH264DPBENTRY e14;
+            public _CUVIDH264DPBENTRY e15;
+
+            public ref _CUVIDH264DPBENTRY this[int index]
+            {
+                get
+                {
+                    return ref AsSpan()[index];
+                }
+            }
+
+            public Span<_CUVIDH264DPBENTRY> AsSpan() => MemoryMarshal.CreateSpan(ref e0, 16);
+        }
+    }
+
+    public unsafe partial struct _CUVIDMPEG2PICPARAMS
+    {
+        public int ForwardRefIdx;
+
+        public int BackwardRefIdx;
+
+        public int picture_coding_type;
+
+        public int full_pel_forward_vector;
+
+        public int full_pel_backward_vector;
+
+        [NativeTypeName("int[2][2]")]
+        public fixed int f_code[2 * 2];
+
+        public int intra_dc_precision;
+
+        public int frame_pred_frame_dct;
+
+        public int concealment_motion_vectors;
+
+        public int q_scale_type;
+
+        public int intra_vlc_format;
+
+        public int alternate_scan;
+
+        public int top_field_first;
+
+        [NativeTypeName("unsigned char[64]")]
+        public fixed byte QuantMatrixIntra[64];
+
+        [NativeTypeName("unsigned char[64]")]
+        public fixed byte QuantMatrixInter[64];
+    }
+
+    public unsafe partial struct _CUVIDMPEG4PICPARAMS
+    {
+        public int ForwardRefIdx;
+
+        public int BackwardRefIdx;
+
+        public int video_object_layer_width;
+
+        public int video_object_layer_height;
+
+        public int vop_time_increment_bitcount;
+
+        public int top_field_first;
+
+        public int resync_marker_disable;
+
+        public int quant_type;
+
+        public int quarter_sample;
+
+        public int short_video_header;
+
+        public int divx_flags;
+
+        public int vop_coding_type;
+
+        public int vop_coded;
+
+        public int vop_rounding_type;
+
+        public int alternate_vertical_scan_flag;
+
+        public int interlaced;
+
+        public int vop_fcode_forward;
+
+        public int vop_fcode_backward;
+
+        [NativeTypeName("int[2]")]
+        public fixed int trd[2];
+
+        [NativeTypeName("int[2]")]
+        public fixed int trb[2];
+
+        [NativeTypeName("unsigned char[64]")]
+        public fixed byte QuantMatrixIntra[64];
+
+        [NativeTypeName("unsigned char[64]")]
+        public fixed byte QuantMatrixInter[64];
+
+        public int gmc_enabled;
+    }
+
+    public partial struct _CUVIDVC1PICPARAMS
+    {
+        public int ForwardRefIdx;
+
+        public int BackwardRefIdx;
+
+        public int FrameWidth;
+
+        public int FrameHeight;
+
+        public int intra_pic_flag;
+
+        public int ref_pic_flag;
+
+        public int progressive_fcm;
+
+        public int profile;
+
+        public int postprocflag;
+
+        public int pulldown;
+
+        public int interlace;
+
+        public int tfcntrflag;
+
+        public int finterpflag;
+
+        public int psf;
+
+        public int multires;
+
+        public int syncmarker;
+
+        public int rangered;
+
+        public int maxbframes;
+
+        public int panscan_flag;
+
+        public int refdist_flag;
+
+        public int extended_mv;
+
+        public int dquant;
+
+        public int vstransform;
+
+        public int loopfilter;
+
+        public int fastuvmc;
+
+        public int overlap;
+
+        public int quantizer;
+
+        public int extended_dmv;
+
+        public int range_mapy_flag;
+
+        public int range_mapy;
+
+        public int range_mapuv_flag;
+
+        public int range_mapuv;
+
+        public int rangeredfrm;
+    }
+
+    public unsafe partial struct _CUVIDJPEGPICPARAMS
+    {
+        [NativeTypeName("unsigned char")]
+        public byte numComponents;
+
+        [NativeTypeName("unsigned char")]
+        public byte bitDepth;
+
+        [NativeTypeName("unsigned char[4]")]
+        public fixed byte quantizationTableSelector[4];
+
+        [NativeTypeName("unsigned int[4]")]
+        public fixed uint scanOffset[4];
+
+        [NativeTypeName("unsigned int[4]")]
+        public fixed uint scanSize[4];
+
+        [NativeTypeName("unsigned short")]
+        public ushort restartInterval;
+
+        [NativeTypeName("unsigned char[4]")]
+        public fixed byte componentIdentifier[4];
+
+        [NativeTypeName("unsigned char")]
+        public byte hasQMatrix;
+
+        [NativeTypeName("unsigned char")]
+        public byte hasHuffman;
+
+        [NativeTypeName("unsigned short[4][64]")]
+        public fixed ushort quantvals[4 * 64];
+
+        [NativeTypeName("unsigned char[4][16]")]
+        public fixed byte bits_ac[4 * 16];
+
+        [NativeTypeName("unsigned char[4][256]")]
+        public fixed byte table_ac[4 * 256];
+
+        [NativeTypeName("unsigned char[4][16]")]
+        public fixed byte bits_dc[4 * 16];
+
+        [NativeTypeName("unsigned char[4][256]")]
+        public fixed byte table_dc[4 * 256];
+    }
+
+    public unsafe partial struct _CUVIDHEVCPICPARAMS
+    {
+        public int pic_width_in_luma_samples;
+
+        public int pic_height_in_luma_samples;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_min_luma_coding_block_size_minus3;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_diff_max_min_luma_coding_block_size;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_min_transform_block_size_minus2;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_diff_max_min_transform_block_size;
+
+        [NativeTypeName("unsigned char")]
+        public byte pcm_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_min_pcm_luma_coding_block_size_minus3;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_diff_max_min_pcm_luma_coding_block_size;
+
+        [NativeTypeName("unsigned char")]
+        public byte pcm_sample_bit_depth_luma_minus1;
+
+        [NativeTypeName("unsigned char")]
+        public byte pcm_sample_bit_depth_chroma_minus1;
+
+        [NativeTypeName("unsigned char")]
+        public byte pcm_loop_filter_disabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte strong_intra_smoothing_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte max_transform_hierarchy_depth_intra;
+
+        [NativeTypeName("unsigned char")]
+        public byte max_transform_hierarchy_depth_inter;
+
+        [NativeTypeName("unsigned char")]
+        public byte amp_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte separate_colour_plane_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_max_pic_order_cnt_lsb_minus4;
+
+        [NativeTypeName("unsigned char")]
+        public byte num_short_term_ref_pic_sets;
+
+        [NativeTypeName("unsigned char")]
+        public byte long_term_ref_pics_present_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte num_long_term_ref_pics_sps;
+
+        [NativeTypeName("unsigned char")]
+        public byte sps_temporal_mvp_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte sample_adaptive_offset_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte scaling_list_enable_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte IrapPicFlag;
+
+        [NativeTypeName("unsigned char")]
+        public byte IdrPicFlag;
+
+        [NativeTypeName("unsigned char")]
+        public byte bit_depth_luma_minus8;
+
+        [NativeTypeName("unsigned char")]
+        public byte bit_depth_chroma_minus8;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_max_transform_skip_block_size_minus2;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_sao_offset_scale_luma;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_sao_offset_scale_chroma;
+
+        [NativeTypeName("unsigned char")]
+        public byte high_precision_offsets_enabled_flag;
+
+        [NativeTypeName("unsigned char[10]")]
+        public fixed byte reserved1[10];
+
+        [NativeTypeName("unsigned char")]
+        public byte dependent_slice_segments_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte slice_segment_header_extension_present_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte sign_data_hiding_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte cu_qp_delta_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte diff_cu_qp_delta_depth;
+
+        [NativeTypeName("signed char")]
+        public sbyte init_qp_minus26;
+
+        [NativeTypeName("signed char")]
+        public sbyte pps_cb_qp_offset;
+
+        [NativeTypeName("signed char")]
+        public sbyte pps_cr_qp_offset;
+
+        [NativeTypeName("unsigned char")]
+        public byte constrained_intra_pred_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte weighted_pred_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte weighted_bipred_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte transform_skip_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte transquant_bypass_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte entropy_coding_sync_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_parallel_merge_level_minus2;
+
+        [NativeTypeName("unsigned char")]
+        public byte num_extra_slice_header_bits;
+
+        [NativeTypeName("unsigned char")]
+        public byte loop_filter_across_tiles_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte loop_filter_across_slices_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte output_flag_present_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte num_ref_idx_l0_default_active_minus1;
+
+        [NativeTypeName("unsigned char")]
+        public byte num_ref_idx_l1_default_active_minus1;
+
+        [NativeTypeName("unsigned char")]
+        public byte lists_modification_present_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte cabac_init_present_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte pps_slice_chroma_qp_offsets_present_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte deblocking_filter_override_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte pps_deblocking_filter_disabled_flag;
+
+        [NativeTypeName("signed char")]
+        public sbyte pps_beta_offset_div2;
+
+        [NativeTypeName("signed char")]
+        public sbyte pps_tc_offset_div2;
+
+        [NativeTypeName("unsigned char")]
+        public byte tiles_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte uniform_spacing_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte num_tile_columns_minus1;
+
+        [NativeTypeName("unsigned char")]
+        public byte num_tile_rows_minus1;
+
+        [NativeTypeName("unsigned short[21]")]
+        public fixed ushort column_width_minus1[21];
+
+        [NativeTypeName("unsigned short[21]")]
+        public fixed ushort row_height_minus1[21];
+
+        [NativeTypeName("unsigned char")]
+        public byte sps_range_extension_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte transform_skip_rotation_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte transform_skip_context_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte implicit_rdpcm_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte explicit_rdpcm_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte extended_precision_processing_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte intra_smoothing_disabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte persistent_rice_adaptation_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte cabac_bypass_alignment_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte pps_range_extension_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte cross_component_prediction_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte chroma_qp_offset_list_enabled_flag;
+
+        [NativeTypeName("unsigned char")]
+        public byte diff_cu_chroma_qp_offset_depth;
+
+        [NativeTypeName("unsigned char")]
+        public byte chroma_qp_offset_list_len_minus1;
+
+        [NativeTypeName("signed char[6]")]
+        public fixed sbyte cb_qp_offset_list[6];
+
+        [NativeTypeName("signed char[6]")]
+        public fixed sbyte cr_qp_offset_list[6];
+
+        [NativeTypeName("unsigned char[2]")]
+        public fixed byte reserved2[2];
+
+        [NativeTypeName("unsigned int[8]")]
+        public fixed uint reserved3[8];
+
+        public int NumBitsForShortTermRPSInSlice;
+
+        public int NumDeltaPocsOfRefRpsIdx;
+
+        public int NumPocTotalCurr;
+
+        public int NumPocStCurrBefore;
+
+        public int NumPocStCurrAfter;
+
+        public int NumPocLtCurr;
+
+        public int CurrPicOrderCntVal;
+
+        [NativeTypeName("int[16]")]
+        public fixed int RefPicIdx[16];
+
+        [NativeTypeName("int[16]")]
+        public fixed int PicOrderCntVal[16];
+
+        [NativeTypeName("unsigned char[16]")]
+        public fixed byte IsLongTerm[16];
+
+        [NativeTypeName("unsigned char[8]")]
+        public fixed byte RefPicSetStCurrBefore[8];
+
+        [NativeTypeName("unsigned char[8]")]
+        public fixed byte RefPicSetStCurrAfter[8];
+
+        [NativeTypeName("unsigned char[8]")]
+        public fixed byte RefPicSetLtCurr[8];
+
+        [NativeTypeName("unsigned char[8]")]
+        public fixed byte RefPicSetInterLayer0[8];
+
+        [NativeTypeName("unsigned char[8]")]
+        public fixed byte RefPicSetInterLayer1[8];
+
+        [NativeTypeName("unsigned int[12]")]
+        public fixed uint reserved4[12];
+
+        [NativeTypeName("unsigned char[6][16]")]
+        public fixed byte ScalingList4x4[6 * 16];
+
+        [NativeTypeName("unsigned char[6][64]")]
+        public fixed byte ScalingList8x8[6 * 64];
+
+        [NativeTypeName("unsigned char[6][64]")]
+        public fixed byte ScalingList16x16[6 * 64];
+
+        [NativeTypeName("unsigned char[2][64]")]
+        public fixed byte ScalingList32x32[2 * 64];
+
+        [NativeTypeName("unsigned char[6]")]
+        public fixed byte ScalingListDCCoeff16x16[6];
+
+        [NativeTypeName("unsigned char[2]")]
+        public fixed byte ScalingListDCCoeff32x32[2];
+    }
+
+    public unsafe partial struct _CUVIDVP8PICPARAMS
+    {
+        public int width;
+
+        public int height;
+
+        [NativeTypeName("unsigned int")]
+        public uint first_partition_size;
+
+        [NativeTypeName("unsigned char")]
+        public byte LastRefIdx;
+
+        [NativeTypeName("unsigned char")]
+        public byte GoldenRefIdx;
+
+        [NativeTypeName("unsigned char")]
+        public byte AltRefIdx;
+
+        [NativeTypeName("__AnonymousRecord_cuviddec_L663_C5")]
+        public _Anonymous_e__Union Anonymous;
+
+        [NativeTypeName("unsigned char[4]")]
+        public fixed byte Reserved1[4];
+
+        [NativeTypeName("unsigned int[3]")]
+        public fixed uint Reserved2[3];
+
+        public ref _Anonymous_e__Union._vp8_frame_tag_e__Struct vp8_frame_tag
+        {
+            get
+            {
+                return ref MemoryMarshal.GetReference(MemoryMarshal.CreateSpan(ref Anonymous.vp8_frame_tag, 1));
+            }
+        }
+
+        public ref byte wFrameTagFlags
+        {
+            get
+            {
+                return ref MemoryMarshal.GetReference(MemoryMarshal.CreateSpan(ref Anonymous.wFrameTagFlags, 1));
+            }
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public partial struct _Anonymous_e__Union
+        {
+            [FieldOffset(0)]
+            [NativeTypeName("__AnonymousRecord_cuviddec_L664_C9")]
+            public _vp8_frame_tag_e__Struct vp8_frame_tag;
+
+            [FieldOffset(0)]
+            [NativeTypeName("unsigned char")]
+            public byte wFrameTagFlags;
+
+            public partial struct _vp8_frame_tag_e__Struct
+            {
+                public byte _bitfield;
+
+                [NativeTypeName("unsigned char : 1")]
+                public byte frame_type
+                {
+                    readonly get
+                    {
+                        return (byte)(_bitfield & 0x1u);
+                    }
+
+                    set
+                    {
+                        _bitfield = (byte)((_bitfield & ~0x1u) | (value & 0x1u));
+                    }
+                }
+
+                [NativeTypeName("unsigned char : 3")]
+                public byte version
+                {
+                    readonly get
+                    {
+                        return (byte)((_bitfield >> 1) & 0x7u);
+                    }
+
+                    set
+                    {
+                        _bitfield = (byte)((_bitfield & ~(0x7u << 1)) | ((value & 0x7u) << 1));
+                    }
+                }
+
+                [NativeTypeName("unsigned char : 1")]
+                public byte show_frame
+                {
+                    readonly get
+                    {
+                        return (byte)((_bitfield >> 4) & 0x1u);
+                    }
+
+                    set
+                    {
+                        _bitfield = (byte)((_bitfield & ~(0x1u << 4)) | ((value & 0x1u) << 4));
+                    }
+                }
+
+                [NativeTypeName("unsigned char : 1")]
+                public byte update_mb_segmentation_data
+                {
+                    readonly get
+                    {
+                        return (byte)((_bitfield >> 5) & 0x1u);
+                    }
+
+                    set
+                    {
+                        _bitfield = (byte)((_bitfield & ~(0x1u << 5)) | ((value & 0x1u) << 5));
+                    }
+                }
+
+                [NativeTypeName("unsigned char : 2")]
+                public byte Reserved2Bits
+                {
+                    readonly get
+                    {
+                        return (byte)((_bitfield >> 6) & 0x3u);
+                    }
+
+                    set
+                    {
+                        _bitfield = (byte)((_bitfield & ~(0x3u << 6)) | ((value & 0x3u) << 6));
+                    }
+                }
+            }
+        }
+    }
+
+    public unsafe partial struct _CUVIDVP9PICPARAMS
+    {
+        [NativeTypeName("unsigned int")]
+        public uint width;
+
+        [NativeTypeName("unsigned int")]
+        public uint height;
+
+        [NativeTypeName("unsigned char")]
+        public byte LastRefIdx;
+
+        [NativeTypeName("unsigned char")]
+        public byte GoldenRefIdx;
+
+        [NativeTypeName("unsigned char")]
+        public byte AltRefIdx;
+
+        [NativeTypeName("unsigned char")]
+        public byte colorSpace;
+
+        public ushort _bitfield1;
+
+        [NativeTypeName("unsigned short : 3")]
+        public ushort profile
+        {
+            readonly get
+            {
+                return (ushort)(_bitfield1 & 0x7u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~0x7u) | (value & 0x7u));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 2")]
+        public ushort frameContextIdx
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield1 >> 3) & 0x3u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~(0x3u << 3)) | ((value & 0x3u) << 3));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort frameType
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield1 >> 5) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~(0x1u << 5)) | ((value & 0x1u) << 5));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort showFrame
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield1 >> 6) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~(0x1u << 6)) | ((value & 0x1u) << 6));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort errorResilient
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield1 >> 7) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~(0x1u << 7)) | ((value & 0x1u) << 7));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort frameParallelDecoding
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield1 >> 8) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~(0x1u << 8)) | ((value & 0x1u) << 8));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort subSamplingX
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield1 >> 9) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~(0x1u << 9)) | ((value & 0x1u) << 9));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort subSamplingY
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield1 >> 10) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~(0x1u << 10)) | ((value & 0x1u) << 10));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort intraOnly
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield1 >> 11) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~(0x1u << 11)) | ((value & 0x1u) << 11));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort allow_high_precision_mv
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield1 >> 12) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~(0x1u << 12)) | ((value & 0x1u) << 12));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort refreshEntropyProbs
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield1 >> 13) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~(0x1u << 13)) | ((value & 0x1u) << 13));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 2")]
+        public ushort reserved2Bits
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield1 >> 14) & 0x3u);
+            }
+
+            set
+            {
+                _bitfield1 = (ushort)((_bitfield1 & ~(0x3u << 14)) | ((value & 0x3u) << 14));
+            }
+        }
+
+        [NativeTypeName("unsigned short")]
+        public ushort reserved16Bits;
+
+        [NativeTypeName("unsigned char[4]")]
+        public fixed byte refFrameSignBias[4];
+
+        [NativeTypeName("unsigned char")]
+        public byte bitDepthMinus8Luma;
+
+        [NativeTypeName("unsigned char")]
+        public byte bitDepthMinus8Chroma;
+
+        [NativeTypeName("unsigned char")]
+        public byte loopFilterLevel;
+
+        [NativeTypeName("unsigned char")]
+        public byte loopFilterSharpness;
+
+        [NativeTypeName("unsigned char")]
+        public byte modeRefLfEnabled;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_tile_columns;
+
+        [NativeTypeName("unsigned char")]
+        public byte log2_tile_rows;
+
+        public byte _bitfield2;
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte segmentEnabled
+        {
+            readonly get
+            {
+                return (byte)(_bitfield2 & 0x1u);
+            }
+
+            set
+            {
+                _bitfield2 = (byte)((_bitfield2 & ~0x1u) | (value & 0x1u));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte segmentMapUpdate
+        {
+            readonly get
+            {
+                return (byte)((_bitfield2 >> 1) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield2 = (byte)((_bitfield2 & ~(0x1u << 1)) | ((value & 0x1u) << 1));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte segmentMapTemporalUpdate
+        {
+            readonly get
+            {
+                return (byte)((_bitfield2 >> 2) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield2 = (byte)((_bitfield2 & ~(0x1u << 2)) | ((value & 0x1u) << 2));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte segmentFeatureMode
+        {
+            readonly get
+            {
+                return (byte)((_bitfield2 >> 3) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield2 = (byte)((_bitfield2 & ~(0x1u << 3)) | ((value & 0x1u) << 3));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 4")]
+        public byte reserved4Bits
+        {
+            readonly get
+            {
+                return (byte)((_bitfield2 >> 4) & 0xFu);
+            }
+
+            set
+            {
+                _bitfield2 = (byte)((_bitfield2 & ~(0xFu << 4)) | ((value & 0xFu) << 4));
+            }
+        }
+
+        [NativeTypeName("unsigned char[8][4]")]
+        public fixed byte segmentFeatureEnable[8 * 4];
+
+        [NativeTypeName("short[8][4]")]
+        public fixed short segmentFeatureData[8 * 4];
+
+        [NativeTypeName("unsigned char[7]")]
+        public fixed byte mb_segment_tree_probs[7];
+
+        [NativeTypeName("unsigned char[3]")]
+        public fixed byte segment_pred_probs[3];
+
+        [NativeTypeName("unsigned char[2]")]
+        public fixed byte reservedSegment16Bits[2];
+
+        public int qpYAc;
+
+        public int qpYDc;
+
+        public int qpChDc;
+
+        public int qpChAc;
+
+        [NativeTypeName("unsigned int[3]")]
+        public fixed uint activeRefIdx[3];
+
+        [NativeTypeName("unsigned int")]
+        public uint resetFrameContext;
+
+        [NativeTypeName("unsigned int")]
+        public uint mcomp_filter_type;
+
+        [NativeTypeName("unsigned int[4]")]
+        public fixed uint mbRefLfDelta[4];
+
+        [NativeTypeName("unsigned int[2]")]
+        public fixed uint mbModeLfDelta[2];
+
+        [NativeTypeName("unsigned int")]
+        public uint frameTagSize;
+
+        [NativeTypeName("unsigned int")]
+        public uint offsetToDctParts;
+
+        [NativeTypeName("unsigned int[4]")]
+        public fixed uint reserved128Bits[4];
+    }
+
+    public unsafe partial struct _CUVIDAV1PICPARAMS
+    {
+        [NativeTypeName("unsigned int")]
+        public uint width;
+
+        [NativeTypeName("unsigned int")]
+        public uint height;
+
+        [NativeTypeName("unsigned int")]
+        public uint frame_offset;
+
+        public int decodePicIdx;
+
+        public uint _bitfield1;
+
+        [NativeTypeName("unsigned int : 3")]
+        public uint profile
+        {
+            readonly get
+            {
+                return _bitfield1 & 0x7u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~0x7u) | (value & 0x7u);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint use_128x128_superblock
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 3) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 3)) | ((value & 0x1u) << 3);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint subsampling_x
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 4) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 4)) | ((value & 0x1u) << 4);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint subsampling_y
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 5) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 5)) | ((value & 0x1u) << 5);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint mono_chrome
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 6) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 6)) | ((value & 0x1u) << 6);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 4")]
+        public uint bit_depth_minus8
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 7) & 0xFu;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0xFu << 7)) | ((value & 0xFu) << 7);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint enable_filter_intra
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 11) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 11)) | ((value & 0x1u) << 11);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint enable_intra_edge_filter
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 12) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 12)) | ((value & 0x1u) << 12);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint enable_interintra_compound
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 13) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 13)) | ((value & 0x1u) << 13);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint enable_masked_compound
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 14) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 14)) | ((value & 0x1u) << 14);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint enable_dual_filter
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 15) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 15)) | ((value & 0x1u) << 15);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint enable_order_hint
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 16) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 16)) | ((value & 0x1u) << 16);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 3")]
+        public uint order_hint_bits_minus1
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 17) & 0x7u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x7u << 17)) | ((value & 0x7u) << 17);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint enable_jnt_comp
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 20) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 20)) | ((value & 0x1u) << 20);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint enable_superres
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 21) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 21)) | ((value & 0x1u) << 21);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint enable_cdef
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 22) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 22)) | ((value & 0x1u) << 22);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint enable_restoration
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 23) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 23)) | ((value & 0x1u) << 23);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint enable_fgs
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 24) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x1u << 24)) | ((value & 0x1u) << 24);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 7")]
+        public uint reserved0_7bits
+        {
+            readonly get
+            {
+                return (_bitfield1 >> 25) & 0x7Fu;
+            }
+
+            set
+            {
+                _bitfield1 = (_bitfield1 & ~(0x7Fu << 25)) | ((value & 0x7Fu) << 25);
+            }
+        }
+
+        public uint _bitfield2;
+
+        [NativeTypeName("unsigned int : 2")]
+        public uint frame_type
+        {
+            readonly get
+            {
+                return _bitfield2 & 0x3u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~0x3u) | (value & 0x3u);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint show_frame
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 2) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 2)) | ((value & 0x1u) << 2);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint disable_cdf_update
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 3) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 3)) | ((value & 0x1u) << 3);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint allow_screen_content_tools
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 4) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 4)) | ((value & 0x1u) << 4);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint force_integer_mv
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 5) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 5)) | ((value & 0x1u) << 5);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 3")]
+        public uint coded_denom
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 6) & 0x7u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x7u << 6)) | ((value & 0x7u) << 6);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint allow_intrabc
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 9) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 9)) | ((value & 0x1u) << 9);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint allow_high_precision_mv
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 10) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 10)) | ((value & 0x1u) << 10);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 3")]
+        public uint interp_filter
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 11) & 0x7u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x7u << 11)) | ((value & 0x7u) << 11);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint switchable_motion_mode
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 14) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 14)) | ((value & 0x1u) << 14);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint use_ref_frame_mvs
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 15) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 15)) | ((value & 0x1u) << 15);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint disable_frame_end_update_cdf
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 16) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 16)) | ((value & 0x1u) << 16);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint delta_q_present
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 17) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 17)) | ((value & 0x1u) << 17);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 2")]
+        public uint delta_q_res
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 18) & 0x3u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x3u << 18)) | ((value & 0x3u) << 18);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint using_qmatrix
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 20) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 20)) | ((value & 0x1u) << 20);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint coded_lossless
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 21) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 21)) | ((value & 0x1u) << 21);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint use_superres
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 22) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 22)) | ((value & 0x1u) << 22);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 2")]
+        public uint tx_mode
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 23) & 0x3u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x3u << 23)) | ((value & 0x3u) << 23);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint reference_mode
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 25) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 25)) | ((value & 0x1u) << 25);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint allow_warped_motion
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 26) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 26)) | ((value & 0x1u) << 26);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint reduced_tx_set
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 27) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 27)) | ((value & 0x1u) << 27);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 1")]
+        public uint skip_mode
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 28) & 0x1u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x1u << 28)) | ((value & 0x1u) << 28);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 3")]
+        public uint reserved1_3bits
+        {
+            readonly get
+            {
+                return (_bitfield2 >> 29) & 0x7u;
+            }
+
+            set
+            {
+                _bitfield2 = (_bitfield2 & ~(0x7u << 29)) | ((value & 0x7u) << 29);
+            }
+        }
+
+        public uint _bitfield3;
+
+        [NativeTypeName("unsigned int : 8")]
+        public uint num_tile_cols
+        {
+            readonly get
+            {
+                return _bitfield3 & 0xFFu;
+            }
+
+            set
+            {
+                _bitfield3 = (_bitfield3 & ~0xFFu) | (value & 0xFFu);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 8")]
+        public uint num_tile_rows
+        {
+            readonly get
+            {
+                return (_bitfield3 >> 8) & 0xFFu;
+            }
+
+            set
+            {
+                _bitfield3 = (_bitfield3 & ~(0xFFu << 8)) | ((value & 0xFFu) << 8);
+            }
+        }
+
+        [NativeTypeName("unsigned int : 16")]
+        public uint context_update_tile_id
+        {
+            readonly get
+            {
+                return (_bitfield3 >> 16) & 0xFFFFu;
+            }
+
+            set
+            {
+                _bitfield3 = (_bitfield3 & ~(0xFFFFu << 16)) | ((value & 0xFFFFu) << 16);
+            }
+        }
+
+        [NativeTypeName("unsigned short[64]")]
+        public fixed ushort tile_widths[64];
+
+        [NativeTypeName("unsigned short[64]")]
+        public fixed ushort tile_heights[64];
+
+        public byte _bitfield4;
+
+        [NativeTypeName("unsigned char : 2")]
+        public byte cdef_damping_minus_3
+        {
+            readonly get
+            {
+                return (byte)(_bitfield4 & 0x3u);
+            }
+
+            set
+            {
+                _bitfield4 = (byte)((_bitfield4 & ~0x3u) | (value & 0x3u));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 2")]
+        public byte cdef_bits
+        {
+            readonly get
+            {
+                return (byte)((_bitfield4 >> 2) & 0x3u);
+            }
+
+            set
+            {
+                _bitfield4 = (byte)((_bitfield4 & ~(0x3u << 2)) | ((value & 0x3u) << 2));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 4")]
+        public byte reserved2_4bits
+        {
+            readonly get
+            {
+                return (byte)((_bitfield4 >> 4) & 0xFu);
+            }
+
+            set
+            {
+                _bitfield4 = (byte)((_bitfield4 & ~(0xFu << 4)) | ((value & 0xFu) << 4));
+            }
+        }
+
+        [NativeTypeName("unsigned char[8]")]
+        public fixed byte cdef_y_strength[8];
+
+        [NativeTypeName("unsigned char[8]")]
+        public fixed byte cdef_uv_strength[8];
+
+        public byte _bitfield5;
+
+        [NativeTypeName("unsigned char : 4")]
+        public byte SkipModeFrame0
+        {
+            readonly get
+            {
+                return (byte)(_bitfield5 & 0xFu);
+            }
+
+            set
+            {
+                _bitfield5 = (byte)((_bitfield5 & ~0xFu) | (value & 0xFu));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 4")]
+        public byte SkipModeFrame1
+        {
+            readonly get
+            {
+                return (byte)((_bitfield5 >> 4) & 0xFu);
+            }
+
+            set
+            {
+                _bitfield5 = (byte)((_bitfield5 & ~(0xFu << 4)) | ((value & 0xFu) << 4));
+            }
+        }
+
+        [NativeTypeName("unsigned char")]
+        public byte base_qindex;
+
+        [NativeTypeName("char")]
+        public sbyte qp_y_dc_delta_q;
+
+        [NativeTypeName("char")]
+        public sbyte qp_u_dc_delta_q;
+
+        [NativeTypeName("char")]
+        public sbyte qp_v_dc_delta_q;
+
+        [NativeTypeName("char")]
+        public sbyte qp_u_ac_delta_q;
+
+        [NativeTypeName("char")]
+        public sbyte qp_v_ac_delta_q;
+
+        [NativeTypeName("unsigned char")]
+        public byte qm_y;
+
+        [NativeTypeName("unsigned char")]
+        public byte qm_u;
+
+        [NativeTypeName("unsigned char")]
+        public byte qm_v;
+
+        public byte _bitfield6;
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte segmentation_enabled
+        {
+            readonly get
+            {
+                return (byte)(_bitfield6 & 0x1u);
+            }
+
+            set
+            {
+                _bitfield6 = (byte)((_bitfield6 & ~0x1u) | (value & 0x1u));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte segmentation_update_map
+        {
+            readonly get
+            {
+                return (byte)((_bitfield6 >> 1) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield6 = (byte)((_bitfield6 & ~(0x1u << 1)) | ((value & 0x1u) << 1));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte segmentation_update_data
+        {
+            readonly get
+            {
+                return (byte)((_bitfield6 >> 2) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield6 = (byte)((_bitfield6 & ~(0x1u << 2)) | ((value & 0x1u) << 2));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte segmentation_temporal_update
+        {
+            readonly get
+            {
+                return (byte)((_bitfield6 >> 3) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield6 = (byte)((_bitfield6 & ~(0x1u << 3)) | ((value & 0x1u) << 3));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 4")]
+        public byte reserved3_4bits
+        {
+            readonly get
+            {
+                return (byte)((_bitfield6 >> 4) & 0xFu);
+            }
+
+            set
+            {
+                _bitfield6 = (byte)((_bitfield6 & ~(0xFu << 4)) | ((value & 0xFu) << 4));
+            }
+        }
+
+        [NativeTypeName("short[8][8]")]
+        public fixed short segmentation_feature_data[8 * 8];
+
+        [NativeTypeName("unsigned char[8]")]
+        public fixed byte segmentation_feature_mask[8];
+
+        [NativeTypeName("unsigned char[2]")]
+        public fixed byte loop_filter_level[2];
+
+        [NativeTypeName("unsigned char")]
+        public byte loop_filter_level_u;
+
+        [NativeTypeName("unsigned char")]
+        public byte loop_filter_level_v;
+
+        [NativeTypeName("unsigned char")]
+        public byte loop_filter_sharpness;
+
+        [NativeTypeName("char[8]")]
+        public fixed sbyte loop_filter_ref_deltas[8];
+
+        [NativeTypeName("char[2]")]
+        public fixed sbyte loop_filter_mode_deltas[2];
+
+        public byte _bitfield7;
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte loop_filter_delta_enabled
+        {
+            readonly get
+            {
+                return (byte)(_bitfield7 & 0x1u);
+            }
+
+            set
+            {
+                _bitfield7 = (byte)((_bitfield7 & ~0x1u) | (value & 0x1u));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte loop_filter_delta_update
+        {
+            readonly get
+            {
+                return (byte)((_bitfield7 >> 1) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield7 = (byte)((_bitfield7 & ~(0x1u << 1)) | ((value & 0x1u) << 1));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte delta_lf_present
+        {
+            readonly get
+            {
+                return (byte)((_bitfield7 >> 2) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield7 = (byte)((_bitfield7 & ~(0x1u << 2)) | ((value & 0x1u) << 2));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 2")]
+        public byte delta_lf_res
+        {
+            readonly get
+            {
+                return (byte)((_bitfield7 >> 3) & 0x3u);
+            }
+
+            set
+            {
+                _bitfield7 = (byte)((_bitfield7 & ~(0x3u << 3)) | ((value & 0x3u) << 3));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 1")]
+        public byte delta_lf_multi
+        {
+            readonly get
+            {
+                return (byte)((_bitfield7 >> 5) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield7 = (byte)((_bitfield7 & ~(0x1u << 5)) | ((value & 0x1u) << 5));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 2")]
+        public byte reserved4_2bits
+        {
+            readonly get
+            {
+                return (byte)((_bitfield7 >> 6) & 0x3u);
+            }
+
+            set
+            {
+                _bitfield7 = (byte)((_bitfield7 & ~(0x3u << 6)) | ((value & 0x3u) << 6));
+            }
+        }
+
+        [NativeTypeName("unsigned char[3]")]
+        public fixed byte lr_unit_size[3];
+
+        [NativeTypeName("unsigned char[3]")]
+        public fixed byte lr_type[3];
+
+        [NativeTypeName("unsigned char")]
+        public byte primary_ref_frame;
+
+        [NativeTypeName("unsigned char[8]")]
+        public fixed byte ref_frame_map[8];
+
+        public byte _bitfield8;
+
+        [NativeTypeName("unsigned char : 4")]
+        public byte temporal_layer_id
+        {
+            readonly get
+            {
+                return (byte)(_bitfield8 & 0xFu);
+            }
+
+            set
+            {
+                _bitfield8 = (byte)((_bitfield8 & ~0xFu) | (value & 0xFu));
+            }
+        }
+
+        [NativeTypeName("unsigned char : 4")]
+        public byte spatial_layer_id
+        {
+            readonly get
+            {
+                return (byte)((_bitfield8 >> 4) & 0xFu);
+            }
+
+            set
+            {
+                _bitfield8 = (byte)((_bitfield8 & ~(0xFu << 4)) | ((value & 0xFu) << 4));
+            }
+        }
+
+        [NativeTypeName("unsigned char[4]")]
+        public fixed byte reserved5_32bits[4];
+
+        [NativeTypeName("struct (anonymous struct at ../Nvapi/Interop/cuviddec.h:876:5)[7]")]
+        public _ref_frame_e__FixedBuffer ref_frame;
+
+        [NativeTypeName("struct (anonymous struct at ../Nvapi/Interop/cuviddec.h:885:5)[7]")]
+        public _global_motion_e__FixedBuffer global_motion;
+
+        public ushort _bitfield9;
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort apply_grain
+        {
+            readonly get
+            {
+                return (ushort)(_bitfield9 & 0x1u);
+            }
+
+            set
+            {
+                _bitfield9 = (ushort)((_bitfield9 & ~0x1u) | (value & 0x1u));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort overlap_flag
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield9 >> 1) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield9 = (ushort)((_bitfield9 & ~(0x1u << 1)) | ((value & 0x1u) << 1));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 2")]
+        public ushort scaling_shift_minus8
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield9 >> 2) & 0x3u);
+            }
+
+            set
+            {
+                _bitfield9 = (ushort)((_bitfield9 & ~(0x3u << 2)) | ((value & 0x3u) << 2));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort chroma_scaling_from_luma
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield9 >> 4) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield9 = (ushort)((_bitfield9 & ~(0x1u << 4)) | ((value & 0x1u) << 4));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 2")]
+        public ushort ar_coeff_lag
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield9 >> 5) & 0x3u);
+            }
+
+            set
+            {
+                _bitfield9 = (ushort)((_bitfield9 & ~(0x3u << 5)) | ((value & 0x3u) << 5));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 2")]
+        public ushort ar_coeff_shift_minus6
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield9 >> 7) & 0x3u);
+            }
+
+            set
+            {
+                _bitfield9 = (ushort)((_bitfield9 & ~(0x3u << 7)) | ((value & 0x3u) << 7));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 2")]
+        public ushort grain_scale_shift
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield9 >> 9) & 0x3u);
+            }
+
+            set
+            {
+                _bitfield9 = (ushort)((_bitfield9 & ~(0x3u << 9)) | ((value & 0x3u) << 9));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 1")]
+        public ushort clip_to_restricted_range
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield9 >> 11) & 0x1u);
+            }
+
+            set
+            {
+                _bitfield9 = (ushort)((_bitfield9 & ~(0x1u << 11)) | ((value & 0x1u) << 11));
+            }
+        }
+
+        [NativeTypeName("unsigned short : 4")]
+        public ushort reserved6_4bits
+        {
+            readonly get
+            {
+                return (ushort)((_bitfield9 >> 12) & 0xFu);
+            }
+
+            set
+            {
+                _bitfield9 = (ushort)((_bitfield9 & ~(0xFu << 12)) | ((value & 0xFu) << 12));
+            }
+        }
+
+        [NativeTypeName("unsigned char")]
+        public byte num_y_points;
+
+        [NativeTypeName("unsigned char[14][2]")]
+        public fixed byte scaling_points_y[14 * 2];
+
+        [NativeTypeName("unsigned char")]
+        public byte num_cb_points;
+
+        [NativeTypeName("unsigned char[10][2]")]
+        public fixed byte scaling_points_cb[10 * 2];
+
+        [NativeTypeName("unsigned char")]
+        public byte num_cr_points;
+
+        [NativeTypeName("unsigned char[10][2]")]
+        public fixed byte scaling_points_cr[10 * 2];
+
+        [NativeTypeName("unsigned char")]
+        public byte reserved7_8bits;
+
+        [NativeTypeName("unsigned short")]
+        public ushort random_seed;
+
+        [NativeTypeName("short[24]")]
+        public fixed short ar_coeffs_y[24];
+
+        [NativeTypeName("short[25]")]
+        public fixed short ar_coeffs_cb[25];
+
+        [NativeTypeName("short[25]")]
+        public fixed short ar_coeffs_cr[25];
+
+        [NativeTypeName("unsigned char")]
+        public byte cb_mult;
+
+        [NativeTypeName("unsigned char")]
+        public byte cb_luma_mult;
+
+        public short cb_offset;
+
+        [NativeTypeName("unsigned char")]
+        public byte cr_mult;
+
+        [NativeTypeName("unsigned char")]
+        public byte cr_luma_mult;
+
+        public short cr_offset;
+
+        [NativeTypeName("int[7]")]
+        public fixed int reserved[7];
+
+        public unsafe partial struct _Anonymous_e__Struct
+        {
+            [NativeTypeName("unsigned int")]
+            public uint width;
+
+            [NativeTypeName("unsigned int")]
+            public uint height;
+
+            [NativeTypeName("unsigned char")]
+            public byte index;
+
+            [NativeTypeName("unsigned char[3]")]
+            public fixed byte reserved24Bits[3];
+        }
+
+        public unsafe partial struct _Anonymous_e__Struct
+        {
+            public byte _bitfield;
+
+            [NativeTypeName("unsigned char : 1")]
+            public byte invalid
+            {
+                readonly get
+                {
+                    return (byte)(_bitfield & 0x1u);
+                }
+
+                set
+                {
+                    _bitfield = (byte)((_bitfield & ~0x1u) | (value & 0x1u));
+                }
+            }
+
+            [NativeTypeName("unsigned char : 2")]
+            public byte wmtype
+            {
+                readonly get
+                {
+                    return (byte)((_bitfield >> 1) & 0x3u);
+                }
+
+                set
+                {
+                    _bitfield = (byte)((_bitfield & ~(0x3u << 1)) | ((value & 0x3u) << 1));
+                }
+            }
+
+            [NativeTypeName("unsigned char : 5")]
+            public byte reserved5Bits
+            {
+                readonly get
+                {
+                    return (byte)((_bitfield >> 3) & 0x1Fu);
+                }
+
+                set
+                {
+                    _bitfield = (byte)((_bitfield & ~(0x1Fu << 3)) | ((value & 0x1Fu) << 3));
+                }
+            }
+
+            [NativeTypeName("char[3]")]
+            public fixed sbyte reserved24Bits2[3];
+
+            [NativeTypeName("int[6]")]
+            public fixed int wmmat[6];
+        }
+
+        public partial struct _ref_frame_e__FixedBuffer
+        {
+            public _Anonymous_e__Struct e0;
+            public _Anonymous_e__Struct e1;
+            public _Anonymous_e__Struct e2;
+            public _Anonymous_e__Struct e3;
+            public _Anonymous_e__Struct e4;
+            public _Anonymous_e__Struct e5;
+            public _Anonymous_e__Struct e6;
+
+            public ref _Anonymous_e__Struct this[int index]
+            {
+                get
+                {
+                    return ref AsSpan()[index];
+                }
+            }
+
+            public Span<_Anonymous_e__Struct> AsSpan() => MemoryMarshal.CreateSpan(ref e0, 7);
+        }
+
+        public partial struct _global_motion_e__FixedBuffer
+        {
+            public _Anonymous_e__Struct e0;
+            public _Anonymous_e__Struct e1;
+            public _Anonymous_e__Struct e2;
+            public _Anonymous_e__Struct e3;
+            public _Anonymous_e__Struct e4;
+            public _Anonymous_e__Struct e5;
+            public _Anonymous_e__Struct e6;
+
+            public ref _Anonymous_e__Struct this[int index]
+            {
+                get
+                {
+                    return ref AsSpan()[index];
+                }
+            }
+
+            public Span<_Anonymous_e__Struct> AsSpan() => MemoryMarshal.CreateSpan(ref e0, 7);
+        }
+    }
+
+    public unsafe partial struct _CUVIDPICPARAMS
+    {
+        public int PicWidthInMbs;
+
+        public int FrameHeightInMbs;
+
+        public int CurrPicIdx;
+
+        public int field_pic_flag;
+
+        public int bottom_field_flag;
+
+        public int second_field;
+
+        [NativeTypeName("unsigned int")]
+        public uint nBitstreamDataLen;
+
+        [NativeTypeName("const unsigned char *")]
+        public byte* pBitstreamData;
+
+        [NativeTypeName("unsigned int")]
+        public uint nNumSlices;
+
+        [NativeTypeName("const unsigned int *")]
+        public uint* pSliceDataOffsets;
+
+        public int ref_pic_flag;
+
+        public int intra_pic_flag;
+
+        [NativeTypeName("unsigned int[30]")]
+        public fixed uint Reserved[30];
+
+        [NativeTypeName("__AnonymousRecord_cuviddec_L948_C5")]
+        public _CodecSpecific_e__Union CodecSpecific;
+
+        [StructLayout(LayoutKind.Explicit)]
+        public unsafe partial struct _CodecSpecific_e__Union
+        {
+            [FieldOffset(0)]
+            [NativeTypeName("CUVIDMPEG2PICPARAMS")]
+            public _CUVIDMPEG2PICPARAMS mpeg2;
+
+            [FieldOffset(0)]
+            [NativeTypeName("CUVIDH264PICPARAMS")]
+            public _CUVIDH264PICPARAMS h264;
+
+            [FieldOffset(0)]
+            [NativeTypeName("CUVIDVC1PICPARAMS")]
+            public _CUVIDVC1PICPARAMS vc1;
+
+            [FieldOffset(0)]
+            [NativeTypeName("CUVIDMPEG4PICPARAMS")]
+            public _CUVIDMPEG4PICPARAMS mpeg4;
+
+            [FieldOffset(0)]
+            [NativeTypeName("CUVIDJPEGPICPARAMS")]
+            public _CUVIDJPEGPICPARAMS jpeg;
+
+            [FieldOffset(0)]
+            [NativeTypeName("CUVIDHEVCPICPARAMS")]
+            public _CUVIDHEVCPICPARAMS hevc;
+
+            [FieldOffset(0)]
+            [NativeTypeName("CUVIDVP8PICPARAMS")]
+            public _CUVIDVP8PICPARAMS vp8;
+
+            [FieldOffset(0)]
+            [NativeTypeName("CUVIDVP9PICPARAMS")]
+            public _CUVIDVP9PICPARAMS vp9;
+
+            [FieldOffset(0)]
+            [NativeTypeName("CUVIDAV1PICPARAMS")]
+            public _CUVIDAV1PICPARAMS av1;
+
+            [FieldOffset(0)]
+            [NativeTypeName("unsigned int[1024]")]
+            public fixed uint CodecReserved[1024];
+        }
+    }
+
+    public unsafe partial struct _CUVIDPROCPARAMS
+    {
+        public int progressive_frame;
+
+        public int second_field;
+
+        public int top_field_first;
+
+        public int unpaired_field;
+
+        [NativeTypeName("unsigned int")]
+        public uint reserved_flags;
+
+        [NativeTypeName("unsigned int")]
+        public uint reserved_zero;
+
+        [NativeTypeName("unsigned long long")]
+        public ulong raw_input_dptr;
+
+        [NativeTypeName("unsigned int")]
+        public uint raw_input_pitch;
+
+        [NativeTypeName("unsigned int")]
+        public uint raw_input_format;
+
+        [NativeTypeName("unsigned long long")]
+        public ulong raw_output_dptr;
+
+        [NativeTypeName("unsigned int")]
+        public uint raw_output_pitch;
+
+        [NativeTypeName("unsigned int")]
+        public uint Reserved1;
+
+        [NativeTypeName("CUstream")]
+        public void* output_stream;
+
+        [NativeTypeName("unsigned int[46]")]
+        public fixed uint Reserved[46];
+
+        [NativeTypeName("unsigned long long *")]
+        public ulong* histogram_dptr;
+
+        [NativeTypeName("void *[1]")]
+        public _Reserved2_e__FixedBuffer Reserved2;
+
+        public unsafe partial struct _Reserved2_e__FixedBuffer
+        {
+            public void* e0;
+
+            public ref void* this[int index]
+            {
+                get
+                {
+                    fixed (void** pThis = &e0)
+                    {
+                        return ref pThis[index];
+                    }
+                }
+            }
+        }
+    }
+
+    public unsafe partial struct _CUVIDGETDECODESTATUS
+    {
+        [NativeTypeName("cuvidDecodeStatus")]
+        public cuvidDecodeStatus_enum decodeStatus;
+
+        [NativeTypeName("unsigned int[31]")]
+        public fixed uint reserved[31];
+
+        [NativeTypeName("void *[8]")]
+        public _pReserved_e__FixedBuffer pReserved;
+
+        public unsafe partial struct _pReserved_e__FixedBuffer
+        {
+            public void* e0;
+            public void* e1;
+            public void* e2;
+            public void* e3;
+            public void* e4;
+            public void* e5;
+            public void* e6;
+            public void* e7;
+
+            public ref void* this[int index]
+            {
+                get
+                {
+                    fixed (void** pThis = &e0)
+                    {
+                        return ref pThis[index];
+                    }
+                }
+            }
+        }
+    }
+
+    public unsafe partial struct _CUVIDRECONFIGUREDECODERINFO
+    {
+        [NativeTypeName("unsigned int")]
+        public uint ulWidth;
+
+        [NativeTypeName("unsigned int")]
+        public uint ulHeight;
+
+        [NativeTypeName("unsigned int")]
+        public uint ulTargetWidth;
+
+        [NativeTypeName("unsigned int")]
+        public uint ulTargetHeight;
+
+        [NativeTypeName("unsigned int")]
+        public uint ulNumDecodeSurfaces;
+
+        [NativeTypeName("unsigned int[12]")]
+        public fixed uint reserved1[12];
+
+        [NativeTypeName("__AnonymousRecord_cuviddec_L1017_C5")]
+        public _display_area_e__Struct display_area;
+
+        [NativeTypeName("__AnonymousRecord_cuviddec_L1026_C5")]
+        public _target_rect_e__Struct target_rect;
+
+        [NativeTypeName("unsigned int[11]")]
+        public fixed uint reserved2[11];
+
+        public partial struct _display_area_e__Struct
+        {
+            public short left;
+
+            public short top;
+
+            public short right;
+
+            public short bottom;
+        }
+
+        public partial struct _target_rect_e__Struct
+        {
+            public short left;
+
+            public short top;
+
+            public short right;
+
+            public short bottom;
+        }
+    }
+
+    /*public unsafe partial struct CCtxAutoLock
+    {
+        [NativeTypeName("CUvideoctxlock")]
+        private void* m_ctx;
+
+        public CCtxAutoLock([NativeTypeName("CUvideoctxlock")] void* ctx)
+        {
+            m_ctx = ctx;
+            _ = cuvidCtxLock(m_ctx, 0);
+        }
+
+        public void Dispose()
+        {
+            _ = cuvidCtxUnlock(m_ctx, 0);
+        }
+    }
+
+    */
+    public static unsafe partial class Methods
+    {
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidGetDecoderCaps([NativeTypeName("CUVIDDECODECAPS *")] _CUVIDDECODECAPS* pdc);
+
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidCreateDecoder([NativeTypeName("CUvideodecoder *")] void** phDecoder, [NativeTypeName("CUVIDDECODECREATEINFO *")] _CUVIDDECODECREATEINFO* pdci);
+
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidDestroyDecoder([NativeTypeName("CUvideodecoder")] void* hDecoder);
+
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidDecodePicture([NativeTypeName("CUvideodecoder")] void* hDecoder, [NativeTypeName("CUVIDPICPARAMS *")] _CUVIDPICPARAMS* pPicParams);
+
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidGetDecodeStatus([NativeTypeName("CUvideodecoder")] void* hDecoder, int nPicIdx, [NativeTypeName("CUVIDGETDECODESTATUS *")] _CUVIDGETDECODESTATUS* pDecodeStatus);
+
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidReconfigureDecoder([NativeTypeName("CUvideodecoder")] void* hDecoder, [NativeTypeName("CUVIDRECONFIGUREDECODERINFO *")] _CUVIDRECONFIGUREDECODERINFO* pDecReconfigParams);
+
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidMapVideoFrame64([NativeTypeName("CUvideodecoder")] void* hDecoder, int nPicIdx, [NativeTypeName("unsigned long long *")] ulong* pDevPtr, [NativeTypeName("unsigned int *")] uint* pPitch, [NativeTypeName("CUVIDPROCPARAMS *")] _CUVIDPROCPARAMS* pVPP);
+
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidUnmapVideoFrame64([NativeTypeName("CUvideodecoder")] void* hDecoder, [NativeTypeName("unsigned long long")] ulong DevPtr);
+
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidCtxLockCreate([NativeTypeName("CUvideoctxlock *")] void** pLock, [NativeTypeName("CUcontext")] void* ctx);
+
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidCtxLockDestroy([NativeTypeName("CUvideoctxlock")] void* lck);
+
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidCtxLock([NativeTypeName("CUvideoctxlock")] void* lck, [NativeTypeName("unsigned int")] uint reserved_flags);
+
+        [DllImport("libnvcuvid.so.1", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("CUresult")]
+        public static extern int cuvidCtxUnlock([NativeTypeName("CUvideoctxlock")] void* lck, [NativeTypeName("unsigned int")] uint reserved_flags);
+    }
+}

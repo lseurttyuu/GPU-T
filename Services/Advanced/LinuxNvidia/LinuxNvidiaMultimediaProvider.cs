@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Threading.Tasks;
 using GPU_T.ViewModels;
 using GPU_T.Services.Probes;
-using GPU_T.Services.Probes.LinuxNvidia; // For NvidiaSidecarHelper
+using GPU_T.Services.Probes.LinuxNvidia; // For LinuxNvidiaSidecarHelper
 
 namespace GPU_T.Services.Advanced.LinuxNvidia;
 
 /// <summary>
 /// Provides advanced multimedia encoding (NVENC) and decoding (NVDEC) capabilities.
-/// Implements a Hybrid Approach: Prefers native libnvidia-encode API data, but falls back 
+/// Implements a Hybrid Approach: Prefers native libnvidia-encode/libnvcuvid API data, but falls back 
 /// to Compute Capability architecture estimation if the native libraries are missing or fail.
 /// </summary>
 public class LinuxNvidiaMultimediaProvider : AdvancedDataProvider
@@ -32,19 +33,50 @@ public class LinuxNvidiaMultimediaProvider : AdvancedDataProvider
                 deviceName = staticData.DeviceName;
             }
 
-            // Try the native NVENC sidecar first
             string pciArg = !string.IsNullOrEmpty(pciString) && pciString != "Unknown" ? $" --pci {pciString}" : "";
-            string rawData = LinuxNvidiaSidecarHelper.Run("--nvenc" + pciArg, 1000);
-            
-            // If NVENC crashes/fails, fallback to the safe CUDA call
-            if (string.IsNullOrWhiteSpace(rawData))
+
+            // Run NVENC and NVDEC sidecar queries SIMULTANEOUSLY to save time
+            var nvencTask = Task.Run(() => LinuxNvidiaSidecarHelper.Run("--nvenc" + pciArg, 1000));
+            var nvdecTask = Task.Run(() => LinuxNvidiaSidecarHelper.Run("--nvdec" + pciArg, 1000));
+
+            // Wait for both independent processes to finish
+            Task.WaitAll(nvencTask, nvdecTask);
+
+            // Stitch the outputs together into a single master string
+            string rawData = $"{nvencTask.Result}\n{nvdecTask.Result}";
+
+            // The Failsafe: If NVENC failed, it took the Compute Capability line down with it.
+            // We must fetch it using the safe CUDA argument before we parse.
+            if (!rawData.Contains("Compute Capability="))
             {
-                rawData = LinuxNvidiaSidecarHelper.Run("--cuda" + pciArg, 1000);
+                string cudaFallback = LinuxNvidiaSidecarHelper.Run("--cuda" + pciArg, 1000);
                 
-                // If CUDA also fails, the NVIDIA driver is completely broken or missing.
-                if (string.IsNullOrWhiteSpace(rawData))
+                if (string.IsNullOrWhiteSpace(cudaFallback))
                 {
                     AddRow(list, "Error", "Failed to communicate with NVIDIA sidecar (Driver error).");
+                    return;
+                }
+                
+                //Extract ONLY the Compute Capability line so we don't pollute the NVDEC UI
+                string extractedCcLine = "";
+                var fallbackLines = cudaFallback.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var line in fallbackLines)
+                {
+                    if (line.StartsWith("Compute Capability="))
+                    {
+                        extractedCcLine = line;
+                        break;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(extractedCcLine))
+                {
+                    // Append ONLY the single required line to the master string
+                    rawData += $"\n{extractedCcLine}";
+                }
+                else
+                {
+                    AddRow(list, "Error", "Failed to extract Compute Capability for architecture fallback.");
                     return;
                 }
             }
@@ -104,17 +136,11 @@ public class LinuxNvidiaMultimediaProvider : AdvancedDataProvider
                 RenderFallbackNvdec(list, cc);
             }
 
-            // GENERATIONS & LIMITS
-            AddRow(list, "Architecture Details", "", true);
+            // GENERATIONS
+            AddRow(list, "Architecture Details (estimated)", "", true);
             AddRow(list, "NVENC Generation", GetNvencGen(cc));
             AddRow(list, "NVDEC Generation", GetNvdecGen(cc));
-            
-            // Only render fallback session limits if the real NVENC API didn't already provide them
-            if (nvencLines.Count == 0 || !rawData.Contains("Concurrent Sessions"))
-            {
-                bool isConsumerCard = deviceName.Contains("GeForce") || deviceName.Contains("GTX") || deviceName.Contains("RTX 2") || deviceName.Contains("RTX 3") || deviceName.Contains("RTX 4");
-                AddRow(list, "Concurrent Encode Sessions", isConsumerCard ? "Max 8 (Driver Restricted Estimated)" : "Unlimited (Enterprise Estimated)");
-            }
+        
         }
         catch (Exception ex)
         {
