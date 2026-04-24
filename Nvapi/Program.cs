@@ -15,6 +15,7 @@ class Program
         bool isCheck = false, isRead = false, isCuda = false;
         bool isNvenc = false;
         bool isNvdec = false;
+        bool isLimits = false;
         uint targetBusId = uint.MaxValue;
         string targetPciString = "";
 
@@ -26,6 +27,7 @@ class Program
             if (args[i] == "--cuda") isCuda = true;
             if (args[i] == "--nvenc") isNvenc = true;
             if (args[i] == "--nvdec") isNvdec = true;
+            if (args[i] == "--limits") isLimits = true;
             if (args[i] == "--bus" && i + 1 < args.Length) uint.TryParse(args[i + 1], out targetBusId);
             if (args[i] == "--pci" && i + 1 < args.Length) targetPciString = args[i + 1];
         }
@@ -54,6 +56,12 @@ class Program
             if (isNvdec)
             {
                 return NvdecReader.Run(targetPciString);
+            }
+
+            // Route to Power & Limits reader
+            if (isLimits)
+            {
+                return PowerLimitsReader.Run(targetPciString);
             }
 
             return 1;
