@@ -81,7 +81,7 @@ public static class GpuProbeFactory
     /// </summary>
     /// <param name="gpuId">The GPU identifier.</param>
     /// <returns>The Vendor ID string, or empty if unavailable.</returns>
-    private static string GetVendorId(string gpuId)
+    public static string GetVendorId(string gpuId)
     {
         try
         {

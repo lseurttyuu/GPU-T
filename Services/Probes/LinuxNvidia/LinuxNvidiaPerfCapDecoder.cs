@@ -25,7 +25,7 @@ public enum NvidiaThrottleReason : long
 /// <summary>
 /// Decodes raw nvidia-smi hex values into human-readable PerfCap Reason strings.
 /// </summary>
-public static class NvidiaPerfCapDecoder
+public static class LinuxNvidiaPerfCapDecoder
 {
     // Maps the bitmask flags to clean, GPU-Z style strings
     private static readonly Dictionary<NvidiaThrottleReason, string> ReasonNames = new()

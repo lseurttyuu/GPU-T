@@ -54,7 +54,7 @@ public partial class LinuxAmdGpuProbe : IGpuProbe
             // AMD-specific categories; Nvidia will return null or other classes in future.
             "Multimedia (VA-API)" => new LinuxAmdMultimediaProvider(),
             "Power & Limits" => new LinuxAmdPowerProvider(),
-            "PCIe Resizable BAR" => new LinuxAmdResizableBarProvider(),
+            "PCIe Resizable BAR" => new ResizableBarProvider(),
             _ => null
         };
     }

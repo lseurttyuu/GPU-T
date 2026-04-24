@@ -4,18 +4,19 @@ using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 using GPU_T.ViewModels;
+using GPU_T.Services.Probes; // Needed for GpuProbeFactory
 
-namespace GPU_T.Services.Advanced.LinuxAmd;
+namespace GPU_T.Services.Advanced;
 
 /// <summary>
-/// Provides advanced diagnostic information about PCI-Express Resizable BAR support for AMD GPUs on Linux.
+/// Provides advanced diagnostic information about PCI-Express Resizable BAR support.
+/// Dynamically adapts hardware and driver requirement checks based on GPU vendor.
 /// </summary>
-public class LinuxAmdResizableBarProvider : AdvancedDataProvider
+public class ResizableBarProvider : AdvancedDataProvider
 {
-    /// <summary>
-    /// Loads Resizable BAR and related PCI/firmware information into the provided collection for the selected AMD GPU.
+        /// <summary>
+    /// Loads Resizable BAR and related PCI/firmware information into the provided collection for the selected GPU.
     /// </summary>
     /// <param name="list">The collection to populate with advanced item view models.</param>
     /// <param name="selectedGpu">The currently selected GPU item, or null if not specified.</param>
@@ -26,6 +27,8 @@ public class LinuxAmdResizableBarProvider : AdvancedDataProvider
         {
             string busId = "";
             string deviceName = "";
+            bool isAmd = false;
+            bool isNvidia = false;
 
             if (selectedGpu != null)
             {
@@ -34,6 +37,11 @@ public class LinuxAmdResizableBarProvider : AdvancedDataProvider
                 
                 busId = staticData.BusId;
                 deviceName = staticData.DeviceName;
+
+                // Dynamically detect vendor for the requirement checks
+                string gpuVendor = GpuProbeFactory.GetVendorId(selectedGpu.Id).ToUpper();
+                isAmd = (gpuVendor == "0X1002" || gpuVendor == "0X1022"); 
+                isNvidia = (gpuVendor == "0X10DE"); 
             }
 
             if (string.IsNullOrEmpty(busId)) { AddRow(list, "Error", "Could not determine PCI Bus ID"); return; }
@@ -75,7 +83,6 @@ public class LinuxAmdResizableBarProvider : AdvancedDataProvider
                             string sizeStr = t.Substring(sizeStart + 6, sizeEnd - sizeStart - 6); 
                             long bytes = ParseLspciSize(sizeStr);
                             
-                            // Tracks the largest BAR size and presence of 64-bit BAR for Resizable BAR eligibility.
                             if (bytes > maxBarSize) maxBarSize = bytes;
                             if (t.Contains("64-bit")) has64BitBar = true;
 
@@ -96,10 +103,24 @@ public class LinuxAmdResizableBarProvider : AdvancedDataProvider
             AddRow(list, "Resizable BAR", isReBarEnabled ? "Enabled" : "Disabled");
 
             AddRow(list, "Resizable BAR Requirements", "", true);
-            bool isRdna = deviceName.Contains("7900") || deviceName.Contains("Navi") || deviceName.Contains("RX 6") || deviceName.Contains("RX 7") || deviceName.Contains("RX 8") || deviceName.Contains("RX 9");
-            AddRow(list, "GPU Hardware Support", isRdna ? "Yes" : "Unknown");
-            AddRow(list, "Above 4G Decode enabled", has64BitBar ? "Yes" : "No/Unknown");
-            AddRow(list, "Resizable BAR enabled in BIOS", isReBarEnabled ? "Yes" : "Disabled or Unsupported");
+            
+            // --- DYNAMIC HARDWARE SUPPORT CHECK ---
+            bool hwSupport = false;
+            if (isNvidia)
+            {
+                hwSupport = deviceName.Contains("RTX 30") || deviceName.Contains("RTX 40") || deviceName.Contains("RTX 50") || deviceName.Contains("RTX A");
+            }
+            else if (isAmd)
+            {
+                hwSupport = deviceName.Contains("Navi") || deviceName.Contains("RX 6") || deviceName.Contains("RX 7") || deviceName.Contains("RX 8") || deviceName.Contains("RX 9");
+            }
+            // Intel Arc officially supports ReBAR as well, so we default to true if it's Intel
+            else hwSupport = deviceName.Contains("Arc") || true; 
+
+            AddRow(list, "GPU Hardware Support", hwSupport ? "Yes" : "Unknown / No");
+            
+            AddRow(list, "Above 4G Decode enabled", has64BitBar ? "Yes" : "No");
+            AddRow(list, "Resizable BAR enabled in BIOS", isReBarEnabled ? "Yes" : "Unknown / No");
 
             bool isUefi = Directory.Exists("/sys/firmware/efi");
             AddRow(list, "CSM disabled", isUefi ? "Yes" : "No (Legacy Mode)");
@@ -108,7 +129,13 @@ public class LinuxAmdResizableBarProvider : AdvancedDataProvider
 
             string kernelDriver = "";
             foreach (var l in lines) { string trimL = l.Trim(); if (trimL.StartsWith("Kernel driver in use:")) kernelDriver = trimL.Split(':')[1].Trim(); }
-            bool driverOk = kernelDriver.Contains("amdgpu");
+            
+            // --- DYNAMIC DRIVER SUPPORT CHECK ---
+            bool driverOk = false;
+            if (isNvidia) driverOk = kernelDriver.Contains("nvidia") || kernelDriver.Contains("nouveau");
+            else if (isAmd) driverOk = kernelDriver.Contains("amdgpu");
+            else driverOk = !string.IsNullOrEmpty(kernelDriver); // Intel uses i915 or xe
+
             AddRow(list, "Graphics Driver Support", driverOk ? "Yes" : $"Unknown ({kernelDriver})");
 
             AddRow(list, "PCI-Express BAR Sizes", "", true);
@@ -145,5 +172,4 @@ public class LinuxAmdResizableBarProvider : AdvancedDataProvider
             _ => (long)num
         };
     }
-    
 }
