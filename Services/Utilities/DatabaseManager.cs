@@ -35,6 +35,11 @@ public static class DatabaseManager
     public static GpuDatabaseRoot Database { get; private set; } = new();
 
     /// <summary>
+    /// Holds the  Max-Q specific GPU database (Nvidia RTX 3000+) (compact database).
+    /// </summary>
+    public static Dictionary<string, GpuSpecDto> MaxqGpus { get; private set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
     /// Initializes the database, scans PCI bus for vendors, and loads only the necessary JSON files.
     /// </summary>
     public static void Initialize()
@@ -45,7 +50,7 @@ public static class DatabaseManager
                 Directory.CreateDirectory(UserDataFolder);
 
             // 1. Always load the Vendors DB (lightweight, resolves subvendors for all cards)
-            ProcessDatabaseFile("gpu_vendors_db.json", loadedDb => 
+            ProcessDatabaseFile<GpuDatabaseRoot>("gpu_vendors_db.json", loadedDb => 
             {
                 foreach (var kvp in loadedDb.Vendors)
                 {
@@ -69,8 +74,22 @@ public static class DatabaseManager
             // 4. Load the required massive GPU databases
             foreach (var fileName in filesToLoad)
             {
-                ProcessDatabaseFile(fileName, MergeGpusIntoMaster);
+                ProcessDatabaseFile<GpuDatabaseRoot>(fileName, MergeGpusIntoMaster);
             }
+
+            // 5. Special handling for Max-Q database since it's a different structure and only relevant for Nvidia GPUs
+            if(presentVendors.Contains("0x10de"))
+            {
+                // Load the Max-Q database if an Nvidia GPU is present
+                ProcessDatabaseFile<MaxqDatabaseRoot>("nvidia_maxq_gpu_db.json", loadedDb =>
+                {
+                    foreach (var kvp in loadedDb.Gpus)
+                    {
+                        MaxqGpus[kvp.Key] = kvp.Value;
+                    }
+                });
+            }
+
         }
         catch (Exception ex)
         {
@@ -92,7 +111,7 @@ public static class DatabaseManager
     /// <summary>
     /// Abstracts the internal/external file logic, hashing, and safe-loading for any database file.
     /// </summary>
-    private static void ProcessDatabaseFile(string fileName, Action<GpuDatabaseRoot> mergeAction)
+    private static void ProcessDatabaseFile<T>(string fileName, Action<T> mergeAction) where T : new()
     {
         string dbPath = Path.Combine(UserDataFolder, fileName);
         string hashPath = Path.Combine(UserDataFolder, fileName.Replace(".json", ".hash"));
@@ -107,7 +126,7 @@ public static class DatabaseManager
                 // First launch for this specific file
                 File.WriteAllText(dbPath, internalJson);
                 File.WriteAllText(hashPath, internalHash);
-                mergeAction(DeserializeJson(internalJson));
+                mergeAction(JsonSerializer.Deserialize<T>(internalJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new T());
             }
             else
             {
@@ -123,11 +142,11 @@ public static class DatabaseManager
                     {
                         File.WriteAllText(dbPath, internalJson);
                         File.WriteAllText(hashPath, internalHash);
-                        mergeAction(DeserializeJson(internalJson));
+                        mergeAction(JsonSerializer.Deserialize<T>(internalJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new T());
                     }
                     else
                     {
-                        mergeAction(DeserializeJson(externalJson));
+                        mergeAction(JsonSerializer.Deserialize<T>(externalJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new T());
                     }
                 }
                 else
@@ -135,7 +154,7 @@ public static class DatabaseManager
                     // User has modified the file. Attempt safe load.
                     try 
                     {
-                        mergeAction(DeserializeJson(externalJson));
+                        mergeAction(JsonSerializer.Deserialize<T>(externalJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new T());
                     }
                     catch
                     {
@@ -143,7 +162,7 @@ public static class DatabaseManager
                         File.WriteAllText(dbPath + ".bak", externalJson);
                         File.WriteAllText(dbPath, internalJson);
                         File.WriteAllText(hashPath, internalHash);
-                        mergeAction(DeserializeJson(internalJson));
+                        mergeAction(JsonSerializer.Deserialize<T>(internalJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new T());
                     }
                 }
             }
@@ -173,7 +192,7 @@ public static class DatabaseManager
                 if (File.Exists(vendorPath))
                 {
                     // sysfs usually reports in lowercase like "0x1002"
-                    string vendorId = File.ReadAllText(vendorPath).Trim();
+                    string vendorId = File.ReadAllText(vendorPath).Trim().ToLowerInvariant();
                     vendors.Add(vendorId);
                 }
             }
