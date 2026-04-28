@@ -76,7 +76,14 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         var ids = GpuFeatureDetection.GetRawPciIds(_basePath);
         string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "").ToUpper();
 
-        var spec = PciIdLookup.GetSpecs(ids.Device, revId);
+        // Clean and pad the Sub IDs to ensure they are exactly 4 characters each
+        string subVendor = ids.SubVendor.Replace("0x", "").PadLeft(4, '0').ToUpper();
+        string subDevice = ids.SubDevice.Replace("0x", "").PadLeft(4, '0').ToUpper();
+
+        // NVIDIA JSON structure matches [SubDevice][SubVendor]
+        string subSysId = $"{subDevice}{subVendor}";
+
+        var spec = PciIdLookup.GetSpecs(ids.Vendor, ids.Device, revId, subSysId);
 
         string resolvedMemType = spec?.MemoryType ?? _memoryType;
 

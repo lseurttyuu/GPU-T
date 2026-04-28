@@ -26,7 +26,7 @@ public partial class LinuxAmdGpuProbe
         string revId = ReadFile("revision").Replace("0x", "").ToUpper();
         string uniqueId = ReadFile("unique_id", "Unknown").Trim();
 
-        var spec = PciIdLookup.GetSpecs(ids.Device, revId);
+        var spec = PciIdLookup.GetSpecs(ids.Vendor, ids.Device, revId);
 
         double dpmMemMultiplier = 1.0;
 

@@ -38,9 +38,14 @@ public class GpuSpecDto
     [JsonPropertyName("name")] public string Name { get; set; } = "Unknown";
     
     /// <summary>
-    /// Gets or sets the list of revision identifiers for this variant.
+    /// Gets or sets the list of revision identifiers for this variant - used by AMD
     /// </summary>
     [JsonPropertyName("revisions")] public List<string> Revisions { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the list of subsys IDs for this device - used by NVIDIA
+    /// </summary>
+    [JsonPropertyName("subsysids")] public List<string> Subsysids { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the code name of the GPU.
