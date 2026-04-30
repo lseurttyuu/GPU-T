@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "gpus": {
     "6610": [
       {
@@ -5476,6 +5476,29 @@
         "defBoostClock": "2525 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-pro-w7800.c4148"
+      }
+    ],
+    "990F": [
+      {
+        "name": "AMD Radeon HD 8610G",
+        "revisions": [
+          "00"
+        ],
+        "codeName": "Devastator",
+        "technology": "32 nm",
+        "dieSize": "246 mm\u00B2",
+        "releaseDate": "May 23rd, 2013",
+        "transistors": "1303M",
+        "rops": "8",
+        "tmus": "24",
+        "shaders": "384 Unified",
+        "computeUnits": "6 CU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "533 MHz",
+        "defBoostClock": "636 MHz",
+        "defMemClock": "System Shared",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-hd-8610g-igp.c2190"
       }
     ]
   }
