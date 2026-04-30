@@ -176,7 +176,7 @@ public static class DatabaseManager
     /// <summary>
     /// Performs a lightning-fast scan of the sysfs DRM subsystem to extract physical hardware vendor IDs.
     /// </summary>
-    private static HashSet<string> ScanForPresentGpuVendors()
+    public static HashSet<string> ScanForPresentGpuVendors()
     {
         var vendors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         try
