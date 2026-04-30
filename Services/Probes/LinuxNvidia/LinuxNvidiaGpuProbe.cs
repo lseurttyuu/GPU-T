@@ -76,7 +76,38 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         var ids = GpuFeatureDetection.GetRawPciIds(_basePath);
         string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "").ToUpper();
 
-        var spec = PciIdLookup.GetSpecs(ids.Device, revId);
+        // Clean and pad the Sub IDs to ensure they are exactly 4 characters each
+        string subVendor = ids.SubVendor.Replace("0x", "").PadLeft(4, '0').ToUpper();
+        string subDevice = ids.SubDevice.Replace("0x", "").PadLeft(4, '0').ToUpper();
+
+        // NVIDIA JSON structure matches [SubDevice][SubVendor]
+        string subSysId = $"{subDevice}{subVendor}";
+
+        var spec = PciIdLookup.GetSpecs(ids.Vendor, ids.Device, revId, subSysId);
+
+        // MAX-Q HEURISTIC ALGORITHM
+        bool maxqReplaced = false;
+        if (spec != null && spec.Name.Contains("Mobile"))
+        {
+            string maxqName = spec.Name.Replace("Mobile", "Max-Q");
+
+            if (DatabaseManager.MaxqGpus.TryGetValue(maxqName, out var maxqDto))
+            {
+                if (maxqDto.CodeName == spec.CodeName)
+                {
+                    double defaultPower = GetDefaultPowerLimit(_busId);
+                    double threshold = CommonGpuHelpers.ExtractNumber(maxqDto.MaxqThreshold);
+
+                    // Compare valid power numbers
+                    if (defaultPower > 0 && threshold > 0 && defaultPower <= threshold)
+                    {
+                        // We found a Max-Q, adopt the new specs and mark as non-exact
+                        spec = maxqDto.ToGpuSpec(isExactMatch: false);
+                        maxqReplaced = true;
+                    }
+                }
+            }
+        }
 
         string resolvedMemType = spec?.MemoryType ?? _memoryType;
 
@@ -123,8 +154,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             driverVersion = GpuFeatureDetection.GetNvidiaDriverVersion();
         }
 
-        // Prefer DB name when we have an exact revision match
-        if (spec != null && spec.IsExactMatch)
+        // Prefer DB name when we have an exact revision match or Max-Q variant probably present
+        if ((spec != null && spec.IsExactMatch) || (spec != null && maxqReplaced))
             deviceName = spec.Name;
 
         string busInterface = GpuFeatureDetection.GetPcieInfo(_basePath);
@@ -137,7 +168,8 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
         bool isPhysXEnabled = false;
         //If CUDA environment is detected, we assume hardware accelerated PhysX is most probably available as well,
         //since it's been true for many years that NVIDIA includes PhysX support in all their consumer GPUs with driver support.
-        //we don't check the PhysX libraries directly as they don't have to be present unless a PhysX-using game is installed.
+        //we don't check the PhysX libraries directly as they don't have to be present unless a PhysX-using game is installed;
+        //Games provide their own PhysX runtimes, and the GPU's ability to run PhysX is more about driver support and CUDA capability anyway.
         bool isCudaAvailable = isPhysXEnabled = IsNvidiaSmiAvailable() ||
                                GpuFeatureDetection.IsNativeLibraryAvailable("libcuda.so.1") ||
                                GpuFeatureDetection.CheckEglVendorInstalled("10_nvidia.json");
@@ -247,6 +279,60 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
             IsRayTracingAvailable = isRayTracingAvailable,
             IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),
         };
+    }
+
+
+    /// <summary>
+    /// Queries the NVML Sidecar (or nvidia-smi fallback) for the GPU's default power limit in Watts.
+    /// Returns -1 if unavailable or invalid.
+    /// </summary>
+    private double GetDefaultPowerLimit(string pciBusId)
+    {
+        try
+        {
+            // 1. Try our sidecar app
+            string pciArg = !string.IsNullOrEmpty(pciBusId) && pciBusId != "Unknown" ? $" --pci {pciBusId}" : "";
+            string rawData = LinuxNvidiaSidecarHelper.Run("--limits" + pciArg, 1000);
+            
+            if (!string.IsNullOrWhiteSpace(rawData))
+            {
+                var lines = rawData.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var line in lines)
+                {
+                    if (line.StartsWith("Default Power Limit="))
+                    {
+                        string valStr = line.Split('=')[1].Replace("W", "").Trim();
+                        if (double.TryParse(valStr, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double power))
+                            return power;
+                    }
+                }
+            }
+
+            // 2. Fallback to nvidia-smi if sidecar failed or returned nothing
+            string targetArg = !string.IsNullOrEmpty(pciBusId) && pciBusId != "Unknown" ? $"-i {pciBusId} " : "";
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "nvidia-smi",
+                Arguments = $"{targetArg}--query-gpu=power.default_limit --format=csv,noheader",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = System.Diagnostics.Process.Start(psi);
+            string output = process?.StandardOutput.ReadToEnd().Trim() ?? "";
+            process?.WaitForExit();
+            
+            if (!string.IsNullOrEmpty(output) && output != "[Not Supported]" && output != "[N/A]")
+            {
+                string cleanOut = output.Replace("W", "").Trim();
+                if (double.TryParse(cleanOut, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double smiPower))
+                    return smiPower;
+            }
+        }
+        catch { }
+        
+        return -1; // Invalid/Not Found
     }
 
     #endregion

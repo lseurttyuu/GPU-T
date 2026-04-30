@@ -284,6 +284,11 @@ public partial class MainWindowViewModel : ViewModelBase
     /// Indicates if the current GPU is from AMD (used to enable/disable specific UI elements).
     /// </summary>
     [ObservableProperty] private bool _isAmdVendor;
+
+    /// <summary>
+    /// Dynamic label for the Compute Units field, varying by vendor (SM Count for NVIDIA).
+    /// </summary>
+    public string ComputeUnitsLabel => IsNvidiaVendor ? "SM Count" : "Compute Units";
     
     /// <summary>
     /// Index of the currently selected tab in the main view.
@@ -442,6 +447,11 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             _lastUserHeight = value;
         }
+    }
+
+    partial void OnIsNvidiaVendorChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ComputeUnitsLabel));
     }
 
     #endregion

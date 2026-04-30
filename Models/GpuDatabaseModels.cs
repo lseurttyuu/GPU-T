@@ -28,6 +28,26 @@ public class GpuDatabaseRoot
 }
 
 /// <summary>
+/// Represents the root structure of the GPU database for Max-Q GPUs (RTX 3000+).
+/// </summary>
+public class MaxqDatabaseRoot
+{
+    /// <summary>
+    /// Gets or sets the database version.
+    /// </summary>
+    [JsonPropertyName("version")]
+    public int Version { get; set; }
+
+    /// <summary>
+    /// Gets or sets the dictionary mapping GPU keys (names) to lists of Max-Q GPU specifications.
+    /// </summary>
+    [JsonPropertyName("gpus")]
+    public Dictionary<string, GpuSpecDto> Gpus { get; set; } = new(System.StringComparer.OrdinalIgnoreCase);
+}
+
+
+
+/// <summary>
 /// Data transfer object representing a single GPU variant specification.
 /// </summary>
 public class GpuSpecDto
@@ -38,9 +58,19 @@ public class GpuSpecDto
     [JsonPropertyName("name")] public string Name { get; set; } = "Unknown";
     
     /// <summary>
-    /// Gets or sets the list of revision identifiers for this variant.
+    /// Gets or sets the list of revision identifiers for this variant - used by AMD
     /// </summary>
     [JsonPropertyName("revisions")] public List<string> Revisions { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the list of subsys IDs for this device - used by NVIDIA
+    /// </summary>
+    [JsonPropertyName("subsysids")] public List<string> Subsysids { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the Max-Q threshold power value for a certain Nvidia GPU (RTX 3000+).
+    /// </summary>
+    [JsonPropertyName("maxqThreshold")] public string MaxqThreshold { get; set; } = "";
 
     /// <summary>
     /// Gets or sets the code name of the GPU.

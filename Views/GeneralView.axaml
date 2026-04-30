@@ -149,7 +149,7 @@
                 <TextBox Text="{Binding Shaders}" Width="110"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <TextBlock Classes="InnerLabel" Text="Compute Units"/>
+                <TextBlock Classes="InnerLabel" Text="{Binding ComputeUnitsLabel}"/>
                 <TextBox Text="{Binding ComputeUnits}" Width="85"/>
             </StackPanel>
         </Grid>
