@@ -44,18 +44,13 @@ public partial class MainWindow : Window
         // Apply the saved theme preference on startup
         ApplyThemeState(_currentSettings.Theme);
 
-        // If user has chosen to ignore warnings, we skip the check entirely.
-        if (_currentSettings.IgnoreExecWarning)
-            return;
-
-        // Check the missing tools
-        List<string> missingTools = ExecChecker.GetMissingTools();
+        // Check the missing tools based on hardware and current ignore settings
+        List<string> missingTools = ExecChecker.GetMissingTools(_currentSettings);
 
         // Show the warning dialog if necessary
         if (missingTools.Count > 0)
         {
             var warningDialog = new ExecWarningWindow(missingTools);
-            
             warningDialog.Show();
         }
     }

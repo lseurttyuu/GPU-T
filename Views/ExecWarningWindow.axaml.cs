@@ -8,6 +8,9 @@ namespace GPU_T.Views;
 
 public partial class ExecWarningWindow : Window
 {
+    // Store the list locally so we know what was shown when the user clicks OK
+    private readonly List<string> _missingToolsShown = new();
+
     public ExecWarningWindow()
     {
         InitializeComponent();
@@ -16,7 +19,8 @@ public partial class ExecWarningWindow : Window
     // Overloaded constructor accepting the list of missing tools
     public ExecWarningWindow(List<string> missingTools) : this()
     {
-        MissingToolsList.ItemsSource = missingTools;
+        _missingToolsShown = missingTools;
+        MissingToolsList.ItemsSource = _missingToolsShown;
     }
 
     private void OkButton_Click(object? sender, RoutedEventArgs e)
@@ -29,8 +33,10 @@ public partial class ExecWarningWindow : Window
             // Load existing settings to avoid overwriting other potential configurations
             UserSettings settings = UserSettingsManager.LoadSettings();
 
-            // Flag the warning as ignored and save back to disk
-            settings.IgnoreExecWarning = true;
+            // Delegate the logic to the ExecChecker to selectively flip the correct flags
+            ExecChecker.ApplyIgnoreFlags(_missingToolsShown, settings);
+            
+            // Save the updated settings back to disk
             UserSettingsManager.SaveSettings(settings);
         }
 

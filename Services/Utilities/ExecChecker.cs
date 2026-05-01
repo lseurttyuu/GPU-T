@@ -1,40 +1,86 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using GPU_T.Models;
 
 namespace GPU_T.Services;
 
 public static class ExecChecker
 {
-    // Dictionary mapping the actual command (Key) to the user-friendly UI string (Value)
-    private static readonly Dictionary<string, string> RequiredTools = new()
+    // Split dictionaries by vendor applicability
+    private static readonly Dictionary<string, string> CommonTools = new()
     {
         { "vulkaninfo", "vulkaninfo (vulkan-tools)" },
         { "clinfo", "clinfo" },
         { "glxinfo", "glxinfo (mesa-utils)" },
-        { "vainfo", "vainfo" },
         { "lspci", "lspci (pciutils)" }
     };
 
+    private static readonly Dictionary<string, string> AmdTools = new()
+    {
+        { "vainfo", "vainfo" }
+    };
+
+    private static readonly Dictionary<string, string> NvidiaTools = new()
+    {
+        { "nvidia-smi", "nvidia-smi (nvidia-utils)" }
+    };
+
     /// <summary>
-    /// Checks for the presence of required system tools and returns a list of missing ones in a user-friendly format.
+    /// Checks for the presence of required system tools based on current hardware and user settings.
     /// </summary>
-    /// <returns>A list of user-friendly names of missing tools.</returns>
-    public static List<string> GetMissingTools()
+    public static List<string> GetMissingTools(UserSettings settings)
     {
         var missing = new List<string>();
+        
+        // Fetch present hardware vendors
+        var vendors = DatabaseManager.ScanForPresentGpuVendors();
+        bool hasAmd = vendors.Contains("0x1002") || vendors.Contains("1002");
+        bool hasNvidia = (vendors.Contains("0x10de") || vendors.Contains("10de")) && AppConfig.EnableExperimentalGpuSupport;
 
-        foreach (var tool in RequiredTools)
-        {
-            // tool.Key is the command to check (e.g., "vulkaninfo")
-            // tool.Value is the display name (e.g., "vulkaninfo (vulkan-tools)")
-            if (!IsCommandAvailable(tool.Key)) 
-            {
-                missing.Add(tool.Value);
-            }
-        }
+        // 1. Check Common Tools
+        if (!settings.IgnoreExecWarning)
+            CheckDictionary(CommonTools, missing);
+
+        // 2. Check AMD Tools
+        if (hasAmd && !settings.IgnoreExecWarning_AMD)
+            CheckDictionary(AmdTools, missing);
+
+        // 3. Check NVIDIA Tools
+        if (hasNvidia && !settings.IgnoreExecWarning_NVIDIA)
+            CheckDictionary(NvidiaTools, missing);
 
         return missing;
+    }
+
+    private static void CheckDictionary(Dictionary<string, string> tools, List<string> missingList)
+    {
+        foreach (var tool in tools)
+        {
+            if (!IsCommandAvailable(tool.Key)) 
+            {
+                missingList.Add(tool.Value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Flips the appropriate ignore flags in the settings object based on which tools were actually missing.
+    /// </summary>
+    public static void ApplyIgnoreFlags(List<string> missingToolsShown, UserSettings settings)
+    {
+        // If the shown list contained ANY common tools, flag common as ignored
+        if (missingToolsShown.Any(t => CommonTools.Values.Contains(t)))
+            settings.IgnoreExecWarning = true;
+
+        // If the shown list contained ANY AMD tools, flag AMD as ignored
+        if (missingToolsShown.Any(t => AmdTools.Values.Contains(t)))
+            settings.IgnoreExecWarning_AMD = true;
+
+        // If the shown list contained ANY NVIDIA tools, flag NVIDIA as ignored
+        if (missingToolsShown.Any(t => NvidiaTools.Values.Contains(t)))
+            settings.IgnoreExecWarning_NVIDIA = true;
     }
 
     private static bool IsCommandAvailable(string command)
