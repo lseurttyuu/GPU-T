@@ -6,11 +6,14 @@ namespace GPU_T.Nvapi;
 
 /// <summary>
 /// Hardcoded SDK constants matching the nvEncodeAPI.h header used to generate the bindings.
-/// Currently mapped to NVENC SDK v13.0.
+/// Currently mapped to NVENC SDK v13.0 (v12 hack below for better compatibility with older drivers).
 /// </summary>
 internal static class NvencApi
 {
-    public const uint MAJOR_VERSION = 13;
+    // Changed from 13 to 12 for better compatibility with older drivers while still supporting the latest GPU architectures.
+    // The API versioning system allows us to specify the minimum required version while still running on newer drivers that support it.
+    // Should work fine as long as we don't use any structs/functions that were introduced in v13.0 or later.
+    public const uint MAJOR_VERSION = 12;
     public const uint MINOR_VERSION = 0;
     
     // The version format expected inside the structs
