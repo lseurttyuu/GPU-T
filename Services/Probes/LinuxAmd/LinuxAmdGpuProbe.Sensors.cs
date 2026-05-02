@@ -3,6 +3,7 @@ using System.IO;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using GPU_T.Models;
+using GPU_T.Services.Utilities;
 
 namespace GPU_T.Services.Probes.LinuxAmd;
 
@@ -124,7 +125,8 @@ public partial class LinuxAmdGpuProbe
             MemControllerLoad = memLoad,
             MemoryUsedDynamic = memGttMb,
             CpuTemperature = cpuTemp,
-            SystemRamUsed = sysRam
+            SystemRamUsed = sysRam,
+            BusInterface = GpuFeatureDetection.GetPcieInfo(_basePath)
         };
     }
 

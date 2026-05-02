@@ -481,7 +481,9 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 MemOcOffset = memOcOffset,
                 // These read fast local files, so we keep them in the background thread too!
                 CpuTemperature = CommonGpuHelpers.GetCpuTemperature(),
-                SystemRamUsed = CommonGpuHelpers.GetSystemRamUsage()
+                SystemRamUsed = CommonGpuHelpers.GetSystemRamUsage(),
+
+                BusInterface = GpuFeatureDetection.GetPcieInfo(_basePath)
             };
 
             // 3. Thread-safe push back to the cache

@@ -25,12 +25,14 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>
     /// Store a few raw numeric values from the probe that are used for on-the-fly calculations of displayed specs
     /// like pixel fillrate and bandwidth, as well as for adjusting clocks based on overclocking offsets read from the NVAPI sidecar.
+    /// PCIe link status (gen/lanes) as well.
     /// </summary>
     private double _rawDefGpuClock, _rawDefBoostClock, _rawDefMemClock;
     private double _rawRops, _rawTmus, _rawBusWidth;
     private string _rawMemoryType = "";
     private int _lastCoreOffset = 0;
     private int _lastMemOffset = 0;
+    private string _lastBusInterface = "N/A";
 
     /// <summary>
     /// Stores the current lookup URL returned by the GPU probe; used by the Lookup command.

@@ -274,6 +274,13 @@ public partial class MainWindowViewModel
 
         }
 
+        // PCIe link status can change dynamically; if we detect a change, we update the displayed value
+        if(data.BusInterface != _lastBusInterface)
+        {
+            _lastBusInterface = data.BusInterface;
+            BusInterface = _lastBusInterface;
+        }
+
 
     }
 

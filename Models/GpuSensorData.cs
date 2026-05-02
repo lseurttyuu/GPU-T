@@ -29,6 +29,9 @@ public record GpuSensorData
     // plus they can be used to recalculate pixel fillrate and bandwidth values on the fly (main tab)
     public int CoreOcOffset { get; set; }
     public int MemOcOffset { get; set; }
+
+    //Allows to update the PCIe link status dynamically
+    public string BusInterface { get; set; } = "N/A";
     
     //standard system readings
     public double CpuTemperature { get; init; } // °C
