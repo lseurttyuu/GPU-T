@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 11,
   "gpus": {
     "6610": [
       {
@@ -747,6 +747,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1626 MHz",
+        "gameClock": "2045 MHz",
         "defBoostClock": "2495 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6600-le.c4223"
@@ -768,6 +769,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1700 MHz",
+        "gameClock": "1881 MHz",
         "defBoostClock": "2000 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6600s.c3869"
@@ -789,6 +791,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "2068 MHz",
+        "gameClock": "2222 MHz",
         "defBoostClock": "2416 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6650m.c3863"
@@ -810,6 +813,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1626 MHz",
+        "gameClock": "2044 MHz",
         "defBoostClock": "2491 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6600.c3696"
@@ -831,6 +835,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1968 MHz",
+        "gameClock": "2359 MHz",
         "defBoostClock": "2589 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6600-xt.c3774"
@@ -1232,6 +1237,7 @@
         "memoryType": "GDDR6",
         "busWidth": "96 bit",
         "defGpuClock": "1000 MHz",
+        "gameClock": "1181 MHz",
         "defBoostClock": "1445 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5300m.c3462"
@@ -1253,6 +1259,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1607 MHz",
+        "gameClock": "1717 MHz",
         "defBoostClock": "1845 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5500-xt.c3468"
@@ -1274,6 +1281,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1375 MHz",
+        "gameClock": "1448 MHz",
         "defBoostClock": "1645 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5500m.c3460"
@@ -1583,6 +1591,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1500 MHz",
+        "gameClock": "2070 MHz",
         "defBoostClock": "2410 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7600m.c4014"
@@ -1606,6 +1615,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1700 MHz",
+        "gameClock": "2400 MHz",
         "defBoostClock": "2990 MHz",
         "defMemClock": "2518 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-9060.c4326"
@@ -1627,6 +1637,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1700 MHz",
+        "gameClock": "2450 MHz",
         "defBoostClock": "3130 MHz",
         "defMemClock": "2518 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-9060-xt-lp.c4380"
@@ -1650,6 +1661,7 @@
         "memoryType": "GDDR6",
         "busWidth": "64 bit",
         "defGpuClock": "2000 MHz",
+        "gameClock": "2220 MHz",
         "defBoostClock": "2460 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6450m.c4018"
@@ -1671,6 +1683,7 @@
         "memoryType": "GDDR6",
         "busWidth": "64 bit",
         "defGpuClock": "2000 MHz",
+        "gameClock": "2560 MHz",
         "defBoostClock": "2840 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6550m.c4017"
@@ -1692,6 +1705,7 @@
         "memoryType": "GDDR6",
         "busWidth": "64 bit",
         "defGpuClock": "1923 MHz",
+        "gameClock": "1881 MHz",
         "defBoostClock": "2321 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6400.c3813"
@@ -1713,6 +1727,7 @@
         "memoryType": "GDDR6",
         "busWidth": "64 bit",
         "defGpuClock": "2310 MHz",
+        "gameClock": "2610 MHz",
         "defBoostClock": "2815 MHz",
         "defMemClock": "2248 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6500-xt.c3850"
@@ -1734,6 +1749,7 @@
         "memoryType": "GDDR6",
         "busWidth": "64 bit",
         "defGpuClock": "2000 MHz",
+        "gameClock": "2191 MHz",
         "defBoostClock": "2400 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6500m.c3865"
@@ -1757,6 +1773,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1825 MHz",
+        "gameClock": "2015 MHz",
         "defBoostClock": "2250 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6900-xt.c3481"
@@ -1988,6 +2005,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "2068 MHz",
+        "gameClock": "2177 MHz",
         "defBoostClock": "2416 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6600m.c3776"
@@ -2124,6 +2142,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1700 MHz",
+        "gameClock": "1815 MHz",
         "defBoostClock": "2105 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6800.c3713"
@@ -2145,6 +2164,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1825 MHz",
+        "gameClock": "2015 MHz",
         "defBoostClock": "2250 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6800-xt.c3694"
@@ -2166,6 +2186,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1825 MHz",
+        "gameClock": "2015 MHz",
         "defBoostClock": "2250 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6900-xt.c3481"
@@ -2535,6 +2556,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1287 MHz",
+        "gameClock": "1880 MHz",
         "defBoostClock": "2245 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7900-gre.c4166"
@@ -2577,6 +2599,7 @@
         "memoryType": "GDDR6",
         "busWidth": "320 bit",
         "defGpuClock": "1387 MHz",
+        "gameClock": "2025 MHz",
         "defBoostClock": "2394 MHz",
         "defMemClock": "2500 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7900-xt.c3912"
@@ -2598,6 +2621,7 @@
         "memoryType": "GDDR6",
         "busWidth": "384 bit",
         "defGpuClock": "1929 MHz",
+        "gameClock": "2365 MHz",
         "defBoostClock": "2498 MHz",
         "defMemClock": "2500 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7900-xtx.c3941"
@@ -2783,6 +2807,7 @@
         "memoryType": "GDDR6",
         "busWidth": "192 bit",
         "defGpuClock": "2150 MHz",
+        "gameClock": "2495 MHz",
         "defBoostClock": "2600 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6750-xt.c3879"
@@ -2804,6 +2829,7 @@
         "memoryType": "GDDR6",
         "busWidth": "192 bit",
         "defGpuClock": "2321 MHz",
+        "gameClock": "2463 MHz",
         "defBoostClock": "2581 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6850m-xt.c3862"
@@ -2826,6 +2852,7 @@
         "memoryType": "GDDR6",
         "busWidth": "160 bit",
         "defGpuClock": "1941 MHz",
+        "gameClock": "2174 MHz",
         "defBoostClock": "2450 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6700.c3716"
@@ -2848,6 +2875,7 @@
         "memoryType": "GDDR6",
         "busWidth": "192 bit",
         "defGpuClock": "2321 MHz",
+        "gameClock": "2424 MHz",
         "defBoostClock": "2581 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6700-xt.c3695"
@@ -2869,6 +2897,7 @@
         "memoryType": "GDDR6",
         "busWidth": "160 bit",
         "defGpuClock": "1489 MHz",
+        "gameClock": "2300 MHz",
         "defBoostClock": "2400 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6700m.c3775"
@@ -2890,6 +2919,7 @@
         "memoryType": "GDDR6",
         "busWidth": "192 bit",
         "defGpuClock": "2116 MHz",
+        "gameClock": "2300 MHz",
         "defBoostClock": "2390 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6800m.c3786"
@@ -3028,6 +3058,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1452 MHz",
+        "gameClock": "2200 MHz",
         "defBoostClock": "2300 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7400.c4328"
@@ -3051,6 +3082,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "2055 MHz",
+        "gameClock": "2410 MHz",
         "defBoostClock": "2635 MHz",
         "defMemClock": "2190 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6650-xt.c3898"
@@ -3072,6 +3104,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "2068 MHz",
+        "gameClock": "2222 MHz",
         "defBoostClock": "2416 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6650m.c3863"
@@ -3093,6 +3126,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "2068 MHz",
+        "gameClock": "2162 MHz",
         "defBoostClock": "2416 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6650m-xt.c3864"
@@ -3114,6 +3148,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1700 MHz",
+        "gameClock": "1890 MHz",
         "defBoostClock": "2000 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6700s.c3868"
@@ -3135,6 +3170,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1800 MHz",
+        "gameClock": "1975 MHz",
         "defBoostClock": "2100 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6800s.c3867"
@@ -3227,6 +3263,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1660 MHz",
+        "gameClock": "2350 MHz",
         "defBoostClock": "2920 MHz",
         "defMemClock": "2518 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-ai-pro-r9700.c4290"
@@ -3248,6 +3285,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1660 MHz",
+        "gameClock": "2350 MHz",
         "defBoostClock": "2920 MHz",
         "defMemClock": "2518 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-ai-pro-r9700s.c4378"
@@ -3316,6 +3354,7 @@
         "memoryType": "GDDR6",
         "busWidth": "192 bit",
         "defGpuClock": "1420 MHz",
+        "gameClock": "2220 MHz",
         "defBoostClock": "2790 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-9070-gre.c4291"
@@ -3337,6 +3376,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1330 MHz",
+        "gameClock": "2070 MHz",
         "defBoostClock": "2520 MHz",
         "defMemClock": "2518 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-9070.c4250"
@@ -3358,6 +3398,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1660 MHz",
+        "gameClock": "2400 MHz",
         "defBoostClock": "2970 MHz",
         "defMemClock": "2518 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-9070-xt.c4229"
@@ -3381,6 +3422,7 @@
         "memoryType": "GDDR6",
         "busWidth": "192 bit",
         "defGpuClock": "1130 MHz",
+        "gameClock": "1375 MHz",
         "defBoostClock": "1560 MHz",
         "defMemClock": "1500 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5600-oem.c3475"
@@ -3402,6 +3444,7 @@
         "memoryType": "GDDR6",
         "busWidth": "192 bit",
         "defGpuClock": "1130 MHz",
+        "gameClock": "1375 MHz",
         "defBoostClock": "1560 MHz",
         "defMemClock": "1500 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5600-xt.c3474"
@@ -3424,6 +3467,7 @@
         "memoryType": "GDDR6",
         "busWidth": "192 bit",
         "defGpuClock": "1035 MHz",
+        "gameClock": "1190 MHz",
         "defBoostClock": "1265 MHz",
         "defMemClock": "1500 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5600m.c3492"
@@ -3445,6 +3489,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1465 MHz",
+        "gameClock": "1625 MHz",
         "defBoostClock": "1725 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5700.c3437"
@@ -3467,6 +3512,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1605 MHz",
+        "gameClock": "1755 MHz",
         "defBoostClock": "1905 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5700-xt.c3339"
@@ -3488,6 +3534,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1680 MHz",
+        "gameClock": "1830 MHz",
         "defBoostClock": "1980 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-5700-xt-50th-anniversary.c3438"
@@ -4484,6 +4531,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1720 MHz",
+        "gameClock": "2350 MHz",
         "defBoostClock": "2695 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7650-gre.c4258"
@@ -4526,6 +4574,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1720 MHz",
+        "gameClock": "2250 MHz",
         "defBoostClock": "2655 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7600.c4153"
@@ -4548,6 +4597,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1280 MHz",
+        "gameClock": "2023 MHz",
         "defBoostClock": "2469 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7600m-xt.c4013"
@@ -4569,6 +4619,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1500 MHz",
+        "gameClock": "1865 MHz",
         "defBoostClock": "2200 MHz",
         "defMemClock": "2000 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7600s.c4016"
@@ -4590,6 +4641,7 @@
         "memoryType": "GDDR6",
         "busWidth": "128 bit",
         "defGpuClock": "1500 MHz",
+        "gameClock": "2200 MHz",
         "defBoostClock": "2500 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7700s.c4015"
@@ -5001,6 +5053,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1900 MHz",
+        "gameClock": "2400 MHz",
         "defBoostClock": "2600 MHz",
         "defMemClock": "2430 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7700.c4159"
@@ -5022,6 +5075,7 @@
         "memoryType": "GDDR6",
         "busWidth": "192 bit",
         "defGpuClock": "1295 MHz",
+        "gameClock": "2145 MHz",
         "defBoostClock": "2335 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7800m.c4257"
@@ -5043,6 +5097,7 @@
         "memoryType": "GDDR6",
         "busWidth": "192 bit",
         "defGpuClock": "1435 MHz",
+        "gameClock": "2171 MHz",
         "defBoostClock": "2544 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7700-xt.c3911"
@@ -5064,6 +5119,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1295 MHz",
+        "gameClock": "2124 MHz",
         "defBoostClock": "2430 MHz",
         "defMemClock": "2438 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-7800-xt.c3839"
@@ -5133,6 +5189,7 @@
         "memoryType": "GDDR6",
         "busWidth": "256 bit",
         "defGpuClock": "1860 MHz",
+        "gameClock": "2100 MHz",
         "defBoostClock": "2310 MHz",
         "defMemClock": "2250 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-6950-xt.c3875"
