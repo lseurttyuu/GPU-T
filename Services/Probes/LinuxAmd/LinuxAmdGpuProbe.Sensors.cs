@@ -36,7 +36,8 @@ public partial class LinuxAmdGpuProbe
                 }
             }
 
-            if (File.Exists(Path.Combine(_hwmonPath, "fan1_input"))) avail.HasFan = true;
+            if (File.Exists(Path.Combine(_hwmonPath, "fan1_input"))) avail.HasFanRpm = true;
+            if (File.Exists(Path.Combine(_hwmonPath, "pwm1_max")) && File.Exists(Path.Combine(_hwmonPath, "pwm1"))) avail.HasFan = true;
             if (File.Exists(Path.Combine(_hwmonPath, "power1_average")) || 
                 File.Exists(Path.Combine(_hwmonPath, "power1_input"))) avail.HasPower = true;
             if (File.Exists(Path.Combine(_hwmonPath, "in0_input"))) avail.HasVoltage = true;

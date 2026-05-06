@@ -43,6 +43,17 @@ internal static unsafe class TelemetryReader
         public fixed uint padding_2[8];
     }
 
+    /// <summary>
+    /// Structure for NVML fan speed retrieval. Fan index is specified as input, RPM is returned as output.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nvmlFanSpeedInfo_t
+    {
+        public uint version; // NVML version macro
+        public uint fan;     // [Input] The fan index you want to read
+        public uint speed;   // [Output] The RPM returned by the driver
+    }
+
     [DllImport(NvApiLibrary, EntryPoint = "nvapi_QueryInterface")]
     public static extern IntPtr NvAPI_QueryInterface(uint id);
 
@@ -75,6 +86,12 @@ internal static unsafe class TelemetryReader
 
     [DllImport(NvmlLibrary, EntryPoint = "nvmlDeviceGetMemClkVfOffset")]
     private static extern int NvmlDeviceGetMemClkVfOffset(IntPtr device, out int offset);
+
+    [DllImport(NvmlLibrary, EntryPoint = "nvmlDeviceGetNumFans")]
+    private static extern int NvmlDeviceGetNumFans(IntPtr device, out uint numFans);
+
+    [DllImport(NvmlLibrary, EntryPoint = "nvmlDeviceGetFanSpeedRPM")]
+    private static extern int NvmlDeviceGetFanSpeedRPM(IntPtr device, ref nvmlFanSpeedInfo_t fanSpeedInfo);
     
 
     public static int Run(bool isCheck, uint targetBusId, string targetPciString)
@@ -173,11 +190,12 @@ internal static unsafe class TelemetryReader
                 }
             }
 
-            // Read PCIe throughput metrics and OC offsets via NVML
+            // Read PCIe throughput metrics, OC offsets and fan RPM via NVML
             int finalTxKbps = -1;
             int finalRxKbps = -1;
             int coreOcOffset = 0;
             int memOcOffset = 0;
+            int finalFanRpm = -1;
 
             if (!string.IsNullOrEmpty(targetPciString))
             {
@@ -188,6 +206,42 @@ internal static unsafe class TelemetryReader
                         // 0 = TX (Transmit), 1 = RX (Receive). NVML returns values in KB/s.
                         if (NvmlDeviceGetPcieThroughput(nvmlDevice, 0, out uint tx) == 0) finalTxKbps = (int)tx;
                         if (NvmlDeviceGetPcieThroughput(nvmlDevice, 1, out uint rx) == 0) finalRxKbps = (int)rx;
+
+                        // Calculate average Fan RPM (accounts for 1, 2, or 3 fan GPUs)
+                        try 
+                        {
+                            if (NvmlDeviceGetNumFans(nvmlDevice, out uint numFans) == 0 && numFans > 0)
+                            {
+                                uint totalRpm = 0;
+                                uint validFans = 0;
+
+                                // Standard NVML v1 Struct Versioning
+                                uint fanStructVersion = (uint)Marshal.SizeOf<nvmlFanSpeedInfo_t>() | (1u << 24);
+
+                                for (uint i = 0; i < numFans; i++)
+                                {
+                                    var fanInfo = new nvmlFanSpeedInfo_t
+                                    {
+                                        version = fanStructVersion,
+                                        fan = i // Ask for this specific fan index
+                                    };
+
+                                    if (NvmlDeviceGetFanSpeedRPM(nvmlDevice, ref fanInfo) == 0)
+                                    {
+                                        totalRpm += fanInfo.speed;
+                                        validFans++;
+                                    }
+                                }
+
+                                if (validFans > 0)
+                                {
+                                    finalFanRpm = (int)(totalRpm / validFans);
+                                }
+                            }
+                        }
+                        catch { }
+
+
 
                         // Attempt to read GPU and Memory clock offsets for establishing real current clocks. These are returned as MHz values.
                         try
@@ -205,8 +259,8 @@ internal static unsafe class TelemetryReader
                 }
             }
 
-            // Output 7 values: hotspot(degC), vram(degC), voltage(mV), tx(KB/s), rx(KB/s), core_oc_offset(MHz), mem_oc_offset(MHz)
-            Console.WriteLine($"{finalHotspot},{finalVram},{finalVoltageMv},{finalTxKbps},{finalRxKbps},{coreOcOffset},{memOcOffset}");
+            // Output 8 values: hotspot(degC), vram(degC), voltage(mV), tx(KB/s), rx(KB/s), core_oc_offset(MHz), mem_oc_offset(MHz), fan_rpm(RPM)
+            Console.WriteLine($"{finalHotspot},{finalVram},{finalVoltageMv},{finalTxKbps},{finalRxKbps},{coreOcOffset},{memOcOffset},{finalFanRpm}");
             return 0;
 
         }

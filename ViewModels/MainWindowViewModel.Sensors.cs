@@ -120,10 +120,10 @@ public partial class MainWindowViewModel
             list.Add(new SensorItemViewModel("Memory Temperature", "°C", 20, 60, false));
 
         if (support.HasFan)
-        {
             list.Add(new SensorItemViewModel("Fan Speed (%)", "%", 0, 100, true));
+
+        if(support.HasFanRpm)
             list.Add(new SensorItemViewModel("Fan Speed (RPM)", "RPM", 0, 1000, false));
-        }
 
         if (support.HasGpuLoad)
             list.Add(new SensorItemViewModel("GPU Load", "%", 0, 100, true));

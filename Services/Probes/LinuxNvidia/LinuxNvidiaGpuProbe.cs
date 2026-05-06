@@ -411,7 +411,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
 
             // 2. Parse the Data (Exactly as before)
             double gpuTemp = 0, fanPercent = 0, powerW = 0, gpuClock = 0, memClock = 0;
-            int gpuLoad = 0, memLoad = 0, encLoad = 0, decLoad = 0;
+            int gpuLoad = 0, memLoad = 0, encLoad = 0, decLoad = 0, fanRpm = 0;
             double memUsedMb = 0, memTemp = 0, GpuVoltage = 0, hotSpotTemp = 0, pcieTxGb = 0, pcieRxGb = 0;
             int coreOcOffset = 0;
             int memOcOffset = 0;
@@ -439,6 +439,10 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 {
                     if (int.TryParse(parts[5], out int co)) coreOcOffset = co;
                     if (int.TryParse(parts[6], out int mo)) memOcOffset = mo;
+                }
+                if(parts.Length >= 8)
+                {
+                    if (int.TryParse(parts[7], out int rpm) && rpm >= 0) fanRpm = rpm;
                 }
             }
 
@@ -479,6 +483,7 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 DecoderLoad = decLoad, PerfCapReason = perfCap, PcieTx = pcieTxGb, PcieRx = pcieRxGb,
                 CoreOcOffset = coreOcOffset,
                 MemOcOffset = memOcOffset,
+                FanRpm = fanRpm,
                 // These read fast local files, so we keep them in the background thread too!
                 CpuTemperature = CommonGpuHelpers.GetCpuTemperature(),
                 SystemRamUsed = CommonGpuHelpers.GetSystemRamUsage(),
@@ -570,6 +575,10 @@ public class LinuxNvidiaGpuProbe : IGpuProbe
                 {
                     if (int.TryParse(parts[3], out int tx) && tx >= 0) avail.HasPcieTx = true;
                     if (int.TryParse(parts[4], out int rx) && rx >= 0) avail.HasPcieRx = true;
+                }
+                if(parts.Length >= 8)
+                {
+                    if (int.TryParse(parts[7], out int rpm) && rpm >= 0) avail.HasFanRpm = true;
                 }
             }
         }
