@@ -37,7 +37,7 @@ public static class ExecChecker
         // Fetch present hardware vendors
         var vendors = DatabaseManager.ScanForPresentGpuVendors();
         bool hasAmd = vendors.Contains("0x1002") || vendors.Contains("1002");
-        bool hasNvidia = (vendors.Contains("0x10de") || vendors.Contains("10de")) && AppConfig.EnableExperimentalGpuSupport;
+        bool hasNvidia = vendors.Contains("0x10de") || vendors.Contains("10de");
 
         // 1. Check Common Tools
         if (!settings.IgnoreExecWarning)

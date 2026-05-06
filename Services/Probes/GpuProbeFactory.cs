@@ -52,20 +52,20 @@ public static class GpuProbeFactory
 
         string vendorId = GetVendorId(gpuId);
 
-        // For development and testing purposes, we can enable experimental support for Nvidia and Intel.
+        // For development and testing purposes, we can enable experimental support for Intel.
         if(AppConfig.EnableExperimentalGpuSupport)
         {
-            if (vendorId == "0X10DE") // NVIDIA
-            {
-                return new LinuxNvidiaGpuProbe(gpuId, memoryType);
-            }
-
+            
             if (vendorId == "0X8086") // Intel
             {
                 return new LinuxIntelGpuProbe(gpuId);
             }
         }
 
+        if (vendorId == "0X10DE") // NVIDIA
+        {
+            return new LinuxNvidiaGpuProbe(gpuId, memoryType);
+        }
 
         if(vendorId == "0X1002" || vendorId == "0X1022") // AMD
         {

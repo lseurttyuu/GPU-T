@@ -553,21 +553,20 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private string GetVendorLogoPath()
     {
-        // For development/testing purposes, we can enable experimental support for Nvidia and Intel to show their logos and test theme responsiveness.
+        // For development/testing purposes, we can enable experimental support for Intel to show their logo and test theme responsiveness.
         if (AppConfig.EnableExperimentalGpuSupport)
         {
-            if (_currentVendorName == "NVIDIA")
-            {
-                var isDark = Avalonia.Application.Current?.ActualThemeVariant == Avalonia.Styling.ThemeVariant.Dark;
-                return isDark ? "/Assets/nvidia_logo_dark.png" : "/Assets/nvidia_logo.png";
-            }
-
             if (_currentVendorName == "Intel")
             {
                 return "/Assets/intel_logo.png";
             }
         }
 
+        if (_currentVendorName == "NVIDIA")
+        {
+            var isDark = Avalonia.Application.Current?.ActualThemeVariant == Avalonia.Styling.ThemeVariant.Dark;
+            return isDark ? "/Assets/nvidia_logo_dark.png" : "/Assets/nvidia_logo.png";
+        }
 
         if(_currentVendorName == "AMD")
         {
