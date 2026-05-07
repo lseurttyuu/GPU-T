@@ -56,7 +56,7 @@ GPU-T is designed to be a "Single Source of Truth" for your GPU on Linux:
 
 Currently, the application is fully implemented for **AMD Radeon** and **NVIDIA GeForce** GPUs on Linux.
 
-- [x] **AMD Radeon:** GPUs released in 2014 or later, compatible with the open-source `amdgpu` driver. This includes, but is not limited to: RDNA architectures (RX 6000, RX 7000, RX 9000), Vega, Polaris.
+- [x] **AMD Radeon:** GPUs released in 2014 or later, compatible with the open-source `amdgpu` driver. This includes, but is not limited to: RDNA architectures (RX 5000, RX 6000, RX 7000, RX 9000), Vega, Polaris.
 - [x] **NVIDIA GeForce:** GPUs released in 2010 or later, running on proprietary `nvidia` drivers (R535 and later are preferred). Support includes, but is not limited to: GTX 9xx, GTX 10-series, and modern RTX GPUs.
 - [ ] **Intel Arc:** Architecture ready, implementation planned.
 
@@ -88,9 +88,11 @@ am -i gpu-t
 2.  Mark the file as executable: `chmod +x GPU-T.AppImage`.
 3.  Run the application.
 
-*Note: No root privileges are required, as the app reads user-accessible paths in `/sys/class/drm`.*
+*Note 1: No root privileges are required, as the app reads user-accessible paths in `/sys/class/drm`.*
 
-*Note 2: The application has been verified on Debian 13, Mint 22.3, Ubuntu 22.04, Ubuntu 24.04 and Alpine Linux v3.23. It is expected to work on most modern Linux distributions.*
+*Note 2: No need to install the `dotnet` runtime, as it's already bundled within the `.AppImage`.*
+
+*Note 3: The application has been verified on Debian 13, Mint 22.3, Ubuntu 22.04, Ubuntu 24.04 and Alpine Linux v3.23. It is expected to work on most modern Linux distributions.*
 
 ## Prerequisites
 GPU-T relies on standard Linux utilities to fetch API-specific information. Ensure the following are installed on your system (the app works without these, but will show more info / more accurate info with these):
