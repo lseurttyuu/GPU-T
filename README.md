@@ -13,11 +13,15 @@
   <img src="https://img.shields.io/badge/.NET-%209.0-512bd4" alt=".NET">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
+<p align="center">
+  <a href="https://ko-fi.com/P5P71Y95K8"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="ko-fi"></a>
+</p>
 
-GPU-T is a modern desktop utility built with **.NET** and **Avalonia UI** designed to provide detailed information about your video card and GPU. It reads directly from the Linux kernel (`sysfs`), graphics APIs and the custom hardware database to display low-level hardware specifications, real-time sensors, and advanced feature support.
+GPU-T is a modern desktop utility built with **.NET** and **Avalonia UI** designed to provide detailed information about your video card and GPU. It reads directly from the Linux kernel (`sysfs`), graphics APIs and the custom hardware databases to display low-level hardware specifications, real-time sensors, and advanced feature support.
 
 <p align="center">
-  <img src="docs/readme/gpu_t_main_screenshot.png" alt="Screenshots of GPU-T application">
+  <img src="docs/readme/gpu_t_main_screenshot_light_v2.png#gh-light-mode-only" alt="Screenshots of GPU-T application (light mode)">
+  <img src="docs/readme/gpu_t_main_screenshot_dark.png#gh-dark-mode-only" alt="Screenshots of GPU-T application (dark mode)">
 </p>
 
 ## Why create this?
@@ -32,27 +36,29 @@ GPU-T is my attempt (assisted by AI) to fill that void — providing a diagnosti
 
 GPU-T is designed to be a "Single Source of Truth" for your GPU on Linux:
 
-* **Hardware Reconnaissance:** Identifies GPU make, model, revision, die size, transistor count, and release date using a custom, updateable JSON database.
-* **Smart Detection (Experimental):** Implements a "Best Match" algorithm that detects specific silicon revisions (e.g., distinguishing between variants of the same chip ID) and warns if an exact match isn't found. *Note: As the algorithm is still being refined, exact GPU model recognition may vary.*
-* **Real-time Sensors:** Monitors Clock speeds (GPU/VRAM), Temperatures (Hotspot/Edge), Fan speeds, and Board Power Draw (PPT) in real-time. Allows logging sensor data to a file.
-* **Advanced Capabilities:** Checks for support of Vulkan, OpenCL, ROCm, Ray Tracing, etc.
+* **Hardware Reconnaissance:** Identifies GPU make, model, revision, die size, transistor count, and release date using custom, updateable JSON databases.
+* **Smart Detection (Experimental):** Implements a "Best Match" algorithm that detects specific silicon revisions (e.g., distinguishing between variants of the same chip ID) and warns if an exact match isn't found.
+* **Real-time Sensors:** Monitors clock speeds (GPU/VRAM), temperatures (Hotspot/Edge), fan speeds, board power draw (PPT), and other vital metrics in real-time. Includes support for logging sensor data to a file.
+* **Advanced Capabilities:** Checks for support of Vulkan, OpenCL, CUDA, Ray Tracing, etc.
 * **Deep Dive:** 
     * **PCIe Resizable BAR** status detection (via direct PCI resource analysis).
     * **BIOS** and Driver version readout.
     * **Memory** type, vendor, and bus width verification.
     * **Vulkan** version, extensions, and features lookup.
     * **OpenCL** version, vendor, and other capabilities lookup.
-    * **VA-API** status, including encode & decode capabilities lookup.
-* **Vendor-Agnostic Architecture:** Built with a modular architecture. Currently supports **AMD Radeon** GPUs (using `amdgpu` driver), but is designed to support NVIDIA and Intel in the future.
+    * **VA-API** status, including encode & decode capabilities lookup (AMD GPUs).
+    * **CUDA** tech information - metrics and capabilities (NVIDIA GPUs).
+    * **NVENC/NVDEC** encode & decode capabilities lookup (NVIDIA GPUs).
+* **Vendor-Agnostic Architecture:** Built with a modular architecture. Currently supports **AMD Radeon** and **NVIDIA GeForce** GPUs (using `amdgpu` and/or proprietary `nvidia` drivers), but is designed to support Intel in the future.
 * **TechPowerUp Lookup:** Directly open the TechPowerUp website to verify data about your specific GPU model.
 
 ## Supported Hardware
 
-Currently, the application is fully implemented for **AMD Radeon** GPUs on Linux.
+Currently, the application is fully implemented for **AMD Radeon** and **NVIDIA GeForce** GPUs on Linux.
 
-- [x] **AMD Radeon** (RDNA GPUs like RX 6000, RX 7000, Vega, Polaris, etc.)
-- [ ] **NVIDIA GeForce** (Architecture ready, implementation planned - Target: GPU-T v0.2.0)
-- [ ] **Intel Arc** (Architecture ready, implementation planned)
+- [x] **AMD Radeon:** GPUs released in 2014 or later, compatible with the open-source `amdgpu` driver. This includes, but is not limited to: RDNA architectures (RX 5000, RX 6000, RX 7000, RX 9000), Vega, Polaris.
+- [x] **NVIDIA GeForce:** GPUs released in 2010 or later, running on proprietary `nvidia` drivers (R535 and later are preferred). Support includes, but is not limited to: GTX 9xx, GTX 10-series, and modern RTX GPUs.
+- [ ] **Intel Arc:** Architecture ready, implementation planned.
 
 ## Roadmap
 
@@ -82,9 +88,11 @@ am -i gpu-t
 2.  Mark the file as executable: `chmod +x GPU-T.AppImage`.
 3.  Run the application.
 
-*Note: No root privileges are required, as the app reads user-accessible paths in `/sys/class/drm`.*
+*Note 1: No root privileges are required, as the app reads user-accessible paths in `/sys/class/drm`.*
 
-*Note 2: The application has been verified on Debian 13 and Ubuntu 22.04. It is expected to work on most modern Linux distributions.*
+*Note 2: No need to install the `dotnet` runtime, as it's already bundled within the `.AppImage`.*
+
+*Note 3: The application has been verified on Debian 13, Mint 22.3, Ubuntu 22.04, Ubuntu 24.04 and Alpine Linux v3.23. It is expected to work on most modern Linux distributions.*
 
 ## Prerequisites
 GPU-T relies on standard Linux utilities to fetch API-specific information. Ensure the following are installed on your system (the app works without these, but will show more info / more accurate info with these):
@@ -92,8 +100,9 @@ GPU-T relies on standard Linux utilities to fetch API-specific information. Ensu
 * `vulkan-tools` (provides `vulkaninfo`)
 * `clinfo` (for OpenCL detection)
 * `mesa-utils` (provides `glxinfo` for OpenGL)
-* `vainfo` (for Multimedia capabilities readout)
 * `pciutils` (provides `lspci` for ReBAR detection)
+* `vainfo` (for Multimedia capabilities readout - AMD GPUs)
+* `nvidia-smi` (it is included in proprietary NVIDIA drivers; necessary for proper Sensors readout - NVIDIA GPUs)
 
 
 ## Building from Source
@@ -114,13 +123,18 @@ Requirements: **.NET SDK 9.0 or newer**.
     dotnet run
     ```
 
+If you wish to build the app using the Release configuration, keep in mind that the automatic NVAPI/NVML sidecar compilation (`GPU-T.Nvapi.csproj`) is excluded from the standard Release step by default. If you want to learn more about how the custom Release compilation process works for packaging, please head over to [Issue #74](https://github.com/lseurttyuu/GPU-T/issues/74).
+
 ## Architecture
 
 For developers interested in the code, GPU-T uses a clean **MVVM** architecture with a focus on modularity:
 
 * **Services Layer:** Separated into `Probes` (hardware polling), `Advanced` (API providers), and `Utilities`.
-* **Factory Pattern:** A `GpuProbeFactory` determines the GPU vendor at runtime and injects the correct logic (e.g., `LinuxAmdGpuProbe`), making it easy to add Nvidia/Intel support practically without touching the UI code.
-* **Database:** A local JSON database handles static specs, supporting user overrides and updates (when provided) for new hardware definitions. Want to modify the database that your GPU-T uses? Just head over to `~/.local/share/GPU-T/` and modify the JSON file.
+* **Factory Pattern:** A `GpuProbeFactory` determines the GPU vendor at runtime and injects the correct logic (e.g., `LinuxAmdGpuProbe`, `LinuxNvidiaGpuProbe`), making it easy to add Intel support practically without touching the UI code.
+* **Database:** Local JSON databases handle the static hardware specs. They support user overrides and easy updates for new hardware definitions. Want to modify the database GPU-T uses? Just head over to `~/.local/share/GPU-T/` and edit the appropriate JSON file.
+* **Settings:** The app stores various user preferences (like theme selection, window height, etc.) locally. The JSON configuration file is stored safely in `~/.config/GPU-T/`.
+
+Additionally, the project contains a dedicated NVAPI/NVML sidecar app (`GPU-T.Nvapi.csproj` located in the `Nvapi` directory). This sidecar is responsible for advanced sensor readouts and populating the deep-dive information in the Advanced tab for NVIDIA GPUs. It has been completely decoupled from the main application to ensure absolute stability and memory safety.
 
 ## Built With
 
@@ -130,7 +144,15 @@ For developers interested in the code, GPU-T uses a clean **MVVM** architecture 
 
 ## Contributing
 
-Contributions are welcome! If you have an NVIDIA or Intel GPU and want to help implement the NVIDIA/Intel GPUs support, feel free to open a Pull Request. Want to discuss new features? Head over to the Discussions tab.
+Contributions are welcome! If you have an Intel GPU and want to help implement Intel GPU support, feel free to open a Pull Request. Want to discuss new features? Please head over to the Discussions tab.
+
+## Support the Project
+
+GPU-T is developed entirely in my free time. If this tool has saved you time, helped you diagnose a hardware issue, or you just want to support continued development, please consider leaving a tip. 
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P5P71Y95K8)
+
+Your support is incredibly appreciated and helps keep the project going!
 
 ## Acknowledgements, Credits & Disclaimer
 
