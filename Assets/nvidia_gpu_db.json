@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "gpus": {
     "2521": [
       {
@@ -27642,6 +27642,29 @@
         "defBoostClock": "2610 MHz",
         "defMemClock": "1313 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-rtx-4070-ti-super.c4187"
+      },
+      {
+        "name": "NVIDIA GeForce RTX 4070 Ti SUPER",
+        "subsysids": [
+          "89571043"
+        ],
+        "codeName": "AD103",
+        "technology": "5 nm",
+        "dieSize": "379 mm\u00B2",
+        "releaseDate": "Jan 8th, 2024",
+        "transistors": "45900M",
+        "rops": "96",
+        "tmus": "264",
+        "shaders": "8448 Unified",
+        "computeUnits": "66",
+        "rtCores": "66",
+        "tensorCores": "264",
+        "memoryType": "GDDR6X",
+        "busWidth": "256 bit",
+        "defGpuClock": "2340 MHz",
+        "defBoostClock": "2640 MHz",
+        "defMemClock": "1313 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/asus-tuf-rtx-4070-ti-super-gaming-oc.b11617"
       }
     ],
     "1F50": [
@@ -27839,6 +27862,29 @@
         "defBoostClock": "1178 MHz",
         "defMemClock": "1753 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-gtx-960.c2637"
+      },
+      {
+        "name": "NVIDIA GeForce GTX 960",
+        "subsysids": [
+          "36901458"
+        ],
+        "codeName": "GM206",
+        "technology": "28 nm",
+        "dieSize": "228 mm\u00B2",
+        "releaseDate": "Jan 22nd, 2015",
+        "transistors": "2940M",
+        "rops": "32",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "8",
+        "rtCores": "N/A",
+        "tensorCores": "N/A",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1165 MHz",
+        "defBoostClock": "1228 MHz",
+        "defMemClock": "1753 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/gigabyte-gtx-960-ix-oc.b3195"
       }
     ],
     "1C06": [
