@@ -65,7 +65,7 @@ public partial class LinuxAmdGpuProbe
         bool isOpenglAvailable = GpuFeatureDetection.CheckOpenglSupport();
         bool isRayTracingAvailable = GpuFeatureDetection.CheckRayTracingSupportVulkan(ids.Device);
 
-        bool isOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("amdocl64.icd", "mesa.icd");
+        bool isOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("amdocl64.icd", "mesa.icd", "rusticl.icd");
 
         string pixelFill = "N/A";
         string texFill = "N/A";
