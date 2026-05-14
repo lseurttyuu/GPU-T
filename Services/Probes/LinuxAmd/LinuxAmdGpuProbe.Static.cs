@@ -79,11 +79,14 @@ public partial class LinuxAmdGpuProbe
 
         string defaultGpuClockDb = "N/A";
 
+        double actualBoost = 0;
+
         if (maxCoreDpm > 0)
         {
             string coreStr = $"{maxCoreDpm.ToString(CultureInfo.InvariantCulture)} MHz";
             gpuClock = coreStr;
             boostClockDisplay = coreStr;
+            actualBoost = maxCoreDpm;
         }
 
         if (maxMemDpm > 0)
@@ -110,17 +113,41 @@ public partial class LinuxAmdGpuProbe
                 defaultGpuClockDb = spec.GameClock;
             }
 
+            double baseClock = CommonGpuHelpers.ExtractNumber(defaultGpuClockDb);
 
-            if (boostClock > 0 && rops > 0 && tmus > 0)
+            // Calculate the proper Boost Clock dynamically
+            if (maxCoreDpm > 0 && boostClock > 0 && baseClock > 0)
             {
-                pixelFill = $"{(boostClock * rops / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GPixel/s";
-                texFill = $"{(boostClock * tmus / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GTexel/s";
+                double diff = boostClock - baseClock;
+                
+                if (maxCoreDpm / baseClock < 2)
+                {
+                    actualBoost = maxCoreDpm + diff;
+                    boostClockDisplay = $"{actualBoost.ToString(CultureInfo.InvariantCulture)} MHz";
+                } else if(boostClock > maxCoreDpm)
+                {
+                    boostClockDisplay = $"{boostClock.ToString(CultureInfo.InvariantCulture)} MHz";
+                    actualBoost = boostClock;
+                }
+            } //fallback to static boost clock
+            else if (boostClock > 0 && maxCoreDpm <=0)
+            {
+                boostClockDisplay = $"{boostClock.ToString(CultureInfo.InvariantCulture)} MHz";
+                actualBoost = boostClock;
             }
 
-            if (memClock > 0 && busWidth > 0)
+
+            if (actualBoost > 0 && rops > 0 && tmus > 0)
+            {
+                pixelFill = $"{(actualBoost * rops / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GPixel/s";
+                texFill = $"{(actualBoost * tmus / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GTexel/s";
+            }
+
+            double currentMemForBandwidth = maxMemDpm > 0 ? maxMemDpm : memClock;
+            if (currentMemForBandwidth > 0 && busWidth > 0)
             {
                 double multiplier = CommonGpuHelpers.GetMemoryMultiplier(spec.MemoryType);
-                double bandwidthValue = (memClock * multiplier * busWidth) / 8000.0;
+                double bandwidthValue = (currentMemForBandwidth * multiplier * busWidth) / 8000.0;
                 bandwidth = $"{bandwidthValue.ToString("0.0", CultureInfo.InvariantCulture)} GB/s";
             }
         }
