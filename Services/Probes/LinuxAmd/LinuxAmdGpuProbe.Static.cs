@@ -53,8 +53,13 @@ public partial class LinuxAmdGpuProbe
         string driverDate = GpuFeatureDetection.GetKernelDriverDate();
         string vulkanApi = GpuFeatureDetection.GetVulkanApiVersion();
 
+        var odClocks = GetMaxClocksFromOd("pp_od_clk_voltage");
+
         double maxCoreDpm = GetMaxClockFromDpm("pp_dpm_sclk");
-        double maxMemDpm = GetMaxClockFromDpm("pp_dpm_mclk") * dpmMemMultiplier;
+
+        double maxMemDpm = odClocks.Mclk * dpmMemMultiplier;
+        if (maxMemDpm <= 0)
+            maxMemDpm = GetMaxClockFromDpm("pp_dpm_mclk") * dpmMemMultiplier;
 
         bool isRocmAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libhsa-runtime64.so.1") && 
                                                     (Directory.Exists("/opt/rocm") || Directory.Exists("/usr/lib/x86_64-linux-gnu/rocm"));
@@ -115,8 +120,12 @@ public partial class LinuxAmdGpuProbe
 
             double baseClock = CommonGpuHelpers.ExtractNumber(defaultGpuClockDb);
 
-            // Calculate the proper Boost Clock dynamically
-            if (maxCoreDpm > 0 && boostClock > 0 && baseClock > 0)
+            if (odClocks.Sclk > 0)
+            {
+                actualBoost = odClocks.Sclk;
+                boostClockDisplay = $"{odClocks.Sclk.ToString(CultureInfo.InvariantCulture)} MHz";
+            }
+            else if (maxCoreDpm > 0 && boostClock > 0 && baseClock > 0)
             {
                 double diff = boostClock - baseClock;
                 
@@ -280,4 +289,46 @@ public partial class LinuxAmdGpuProbe
         }
         catch { return 0; }
     }
+
+    /// <summary>
+    /// Reads the maximum core and memory clocks from the AMD OD conf file.
+    /// Returns 0 for values it cannot find.
+    /// </summary>
+    private (double Sclk, double Mclk) GetMaxClocksFromOd(string fileName)
+    {
+        try
+        {
+            string path = Path.Combine(_basePath, fileName);
+            if (!File.Exists(path)) return (0, 0);
+
+            string[] lines = File.ReadAllLines(path);
+            double maxSclk = 0;
+            double maxMclk = 0;
+            string currentSection = "";
+
+            foreach (var line in lines)
+            {
+                string trimmed = line.Trim();
+                
+                // Track which section of the file we are currently reading
+                if (trimmed.StartsWith("OD_SCLK:")) { currentSection = "SCLK"; continue; }
+                if (trimmed.StartsWith("OD_MCLK:")) { currentSection = "MCLK"; continue; }
+                if (trimmed.StartsWith("OD_")) { currentSection = "OTHER"; continue; }
+
+                // If we are in the Core or Memory section, parse the MHz value
+                if (currentSection == "SCLK" || currentSection == "MCLK")
+                {
+                    var match = Regex.Match(trimmed, @"(\d+)\s*Mhz", RegexOptions.IgnoreCase);
+                    if (match.Success && double.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double val))
+                    {
+                        if (currentSection == "SCLK" && val > maxSclk) maxSclk = val;
+                        if (currentSection == "MCLK" && val > maxMclk) maxMclk = val;
+                    }
+                }
+            }
+            return (maxSclk, maxMclk);
+        }
+        catch { return (0, 0); }
+    }
+
 }
