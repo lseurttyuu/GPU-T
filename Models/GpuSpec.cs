@@ -14,6 +14,7 @@ public record GpuSpec(
     string MemoryType,
     string BusWidth,
     string DefGpuClock,
+    string GameClock,
     string DefBoostClock,
     string DefMemClock,
     string LookupUrl,

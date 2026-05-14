@@ -121,6 +121,10 @@ public class GpuSpecDto
     /// </summary>
     [JsonPropertyName("defGpuClock")] public string DefGpuClock { get; set; } = "N/A";
     /// <summary>
+    /// Gets or sets the Game Clock, which may be used as the GPU clock for newer AMD GPUs.
+    /// </summary>
+    [JsonPropertyName("gameClock")] public string GameClock { get; set; } = "";
+    /// <summary>
     /// Gets or sets the default boost clock.
     /// </summary>
     [JsonPropertyName("defBoostClock")] public string DefBoostClock { get; set; } = "N/A";
@@ -146,7 +150,7 @@ public class GpuSpecDto
             overrideName ?? Name,
             CodeName, Technology, DieSize, ReleaseDate, Transistors,
             Rops, Tmus, Shaders, ComputeUnits, MemoryType, BusWidth,
-            DefGpuClock, DefBoostClock, DefMemClock, LookupUrl,
+            DefGpuClock, GameClock, DefBoostClock, DefMemClock, LookupUrl,
             isExactMatch
         );
     }

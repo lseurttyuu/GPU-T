@@ -77,6 +77,8 @@ public partial class LinuxAmdGpuProbe
         string boostClockDisplay = "---";
         string memClockDisplay = "---";
 
+        string defaultGpuClockDb = "N/A";
+
         if (maxCoreDpm > 0)
         {
             string coreStr = $"{maxCoreDpm.ToString(CultureInfo.InvariantCulture)} MHz";
@@ -99,6 +101,15 @@ public partial class LinuxAmdGpuProbe
             double busWidth = CommonGpuHelpers.ExtractNumber(spec.BusWidth);
             double rops = CommonGpuHelpers.ExtractNumber(spec.Rops);
             double tmus = CommonGpuHelpers.ExtractNumber(spec.Tmus);
+
+            defaultGpuClockDb = spec?.DefGpuClock ?? "N/A";
+        
+            // Use GameClock if it exists and is valid, otherwise fallback to standard DefGpuClock
+            if (spec != null && !string.IsNullOrWhiteSpace(spec.GameClock) && spec.GameClock != "N/A")
+            {
+                defaultGpuClockDb = spec.GameClock;
+            }
+
 
             if (boostClock > 0 && rops > 0 && tmus > 0)
             {
@@ -145,7 +156,7 @@ public partial class LinuxAmdGpuProbe
             BusWidth = spec?.BusWidth ?? "N/A",
             MemorySize = finalMemorySize,
             Bandwidth = bandwidth,
-            DefaultGpuClock = spec?.DefGpuClock ?? "N/A",
+            DefaultGpuClock = defaultGpuClockDb,
             DefaultBoostClock = spec?.DefBoostClock ?? "N/A",
             DefaultMemoryClock = spec?.DefMemClock ?? "N/A",
 
