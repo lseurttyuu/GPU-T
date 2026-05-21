@@ -9,6 +9,7 @@ Releases_sharun/
 quick-sharun
 qckshrn.sh
 *.user
+*.lscache
 .DS_Store
 Thumbs.db
 appimagetool-x86_64.AppImage

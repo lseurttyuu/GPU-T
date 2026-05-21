@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "gpus": {
     "2521": [
       {
@@ -29569,6 +29569,31 @@
         "defBoostClock": "824 MHz",
         "defMemClock": "1253 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/tesla-k80.c2616"
+      }
+    ],
+    "1DF2": [
+      {
+        "name": "NVIDIA Tesla PG503-216",
+        "subsysids": [
+          "13F610DE"
+        ],
+        "codeName": "GV100",
+        "technology": "12 nm",
+        "dieSize": "815 mm\u00B2",
+        "releaseDate": "Nov 26th, 2019",
+        "transistors": "21100M",
+        "rops": "128",
+        "tmus": "288",
+        "shaders": "4608 Unified",
+        "computeUnits": "80",
+        "rtCores": "N/A",
+        "tensorCores": "640",
+        "memoryType": "HBM2",
+        "busWidth": "4096 bit",
+        "defGpuClock": "1312 MHz",
+        "defBoostClock": "1530 MHz",
+        "defMemClock": "1106 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/tesla-pg503-216.c3790"
       }
     ],
     "1207": [
