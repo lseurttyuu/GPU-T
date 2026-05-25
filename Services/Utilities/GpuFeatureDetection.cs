@@ -594,18 +594,47 @@ public static class GpuFeatureDetection
         return false;
     }
 
-    /// <summary>
+/// <summary>
     /// Checks whether an OpenCL ICD file is installed, searching /etc/OpenCL/vendors/
-    /// and then XDG_DATA_DIRS/OpenCL/vendors/.
+    /// and then XDG_DATA_DIRS/OpenCL/vendors/. Includes a wildcard fallback for AMD versioned ICDs.
     /// </summary>
     public static bool CheckOpenClIcdInstalled(params string[] candidateFilenames)
     {
-        foreach (string filename in candidateFilenames)
+        // 1. Build a complete list of directories to check
+        var dirsToCheck = new List<string> { "/etc/OpenCL/vendors" };
+        
+        string dataDirs = Environment.GetEnvironmentVariable("XDG_DATA_DIRS") ?? "/usr/local/share:/usr/share";
+        foreach (string dir in dataDirs.Split(':'))
         {
-            if (File.Exists(Path.Combine("/etc/OpenCL/vendors", filename)))
-                return true;
+            if (!string.IsNullOrWhiteSpace(dir))
+                dirsToCheck.Add(Path.Combine(dir, "OpenCL/vendors"));
         }
-        return FindInXdgDataDirs("OpenCL/vendors", candidateFilenames);
+
+        // 2. Check each directory
+        foreach (string dir in dirsToCheck)
+        {
+            if (!Directory.Exists(dir)) continue;
+
+            foreach (string filename in candidateFilenames)
+            {
+                // Fast-path: Exact match
+                if (File.Exists(Path.Combine(dir, filename)))
+                    return true;
+
+                // Fallback: AMD often appends build numbers to the ICD file (e.g., amdocl64_70200_43.icd)
+                if (filename.Equals("amdocl64.icd", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        if (Directory.GetFiles(dir, "amdocl64*.icd").Length > 0)
+                            return true;
+                    }
+                    catch { } // Suppress any permission denied exceptions while searching
+                }
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
