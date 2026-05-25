@@ -594,7 +594,7 @@ public static class GpuFeatureDetection
         return false;
     }
 
-/// <summary>
+    /// <summary>
     /// Checks whether an OpenCL ICD file is installed, searching /etc/OpenCL/vendors/
     /// and then XDG_DATA_DIRS/OpenCL/vendors/. Includes a wildcard fallback for AMD versioned ICDs.
     /// </summary>
