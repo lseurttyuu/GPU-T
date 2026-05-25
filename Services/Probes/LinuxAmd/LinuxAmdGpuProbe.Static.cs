@@ -72,33 +72,24 @@ public partial class LinuxAmdGpuProbe
 
         bool isOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("amdocl64.icd", "mesa.icd", "rusticl.icd");
 
-        string pixelFill = "N/A";
-        string texFill = "N/A";
-        string bandwidth = "N/A";
+        //string pixelFill = "N/A";
+        //string texFill = "N/A";
+        //string bandwidth = "N/A";
         string ropsTmus = "N/A";
         string lookupUrl = "";
 
-        string gpuClock = "---";
-        string boostClockDisplay = "---";
-        string memClockDisplay = "---";
+        //string gpuClock = "---";
+        //string boostClockDisplay = "---";
+        //string memClockDisplay = "---";
 
-        string defaultGpuClockDb = "N/A";
+        //string defaultGpuClockDb = "N/A";
 
         double actualBoost = 0;
 
-        if (maxCoreDpm > 0)
-        {
-            string coreStr = $"{maxCoreDpm.ToString(CultureInfo.InvariantCulture)} MHz";
-            gpuClock = coreStr;
-            boostClockDisplay = coreStr;
-            actualBoost = maxCoreDpm;
-        }
+        (string GpuClock, string BoostClock, string MemClock, 
+         string PixelFill, string TexFill, string Bandwidth) dynamicSpecs = ("---", "---", "---", "N/A", "N/A", "N/A");
 
-        if (maxMemDpm > 0)
-        {
-            string memStr = $"{maxMemDpm.ToString(CultureInfo.InvariantCulture)} MHz";
-            memClockDisplay = memStr;
-        }
+        string defaultGpuClockDb = "N/A";
 
         if (spec != null)
         {
@@ -120,45 +111,18 @@ public partial class LinuxAmdGpuProbe
 
             double baseClock = CommonGpuHelpers.ExtractNumber(defaultGpuClockDb);
 
-            if (odClocks.Sclk > 0)
-            {
-                actualBoost = odClocks.Sclk;
-                boostClockDisplay = $"{odClocks.Sclk.ToString(CultureInfo.InvariantCulture)} MHz";
-            }
-            else if (maxCoreDpm > 0 && boostClock > 0 && baseClock > 0)
-            {
-                double diff = boostClock - baseClock;
-                
-                if (maxCoreDpm / baseClock < 2)
-                {
-                    actualBoost = maxCoreDpm + diff;
-                    boostClockDisplay = $"{actualBoost.ToString(CultureInfo.InvariantCulture)} MHz";
-                } else if(boostClock > maxCoreDpm)
-                {
-                    boostClockDisplay = $"{boostClock.ToString(CultureInfo.InvariantCulture)} MHz";
-                    actualBoost = boostClock;
-                }
-            } //fallback to static boost clock
-            else if (boostClock > 0 && maxCoreDpm <=0)
-            {
-                boostClockDisplay = $"{boostClock.ToString(CultureInfo.InvariantCulture)} MHz";
-                actualBoost = boostClock;
-            }
-
-
-            if (actualBoost > 0 && rops > 0 && tmus > 0)
-            {
-                pixelFill = $"{(actualBoost * rops / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GPixel/s";
-                texFill = $"{(actualBoost * tmus / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GTexel/s";
-            }
-
-            double currentMemForBandwidth = maxMemDpm > 0 ? maxMemDpm : memClock;
-            if (currentMemForBandwidth > 0 && busWidth > 0)
-            {
-                double multiplier = CommonGpuHelpers.GetMemoryMultiplier(spec.MemoryType);
-                double bandwidthValue = (currentMemForBandwidth * multiplier * busWidth) / 8000.0;
-                bandwidth = $"{bandwidthValue.ToString("0.0", CultureInfo.InvariantCulture)} GB/s";
-            }
+            // Trigger our new helper to calculate everything dynamically
+            dynamicSpecs = CalculateDynamicSpecs(
+                maxCoreDpm, maxMemDpm, odClocks.Sclk,
+                baseClock, boostClock, memClock,
+                rops, tmus, busWidth, spec.MemoryType);
+        }
+        else
+        {
+            // Even if the DB spec is missing, pass 0s to format the sysfs DPM clock reads correctly!
+            dynamicSpecs = CalculateDynamicSpecs(
+                maxCoreDpm, maxMemDpm, odClocks.Sclk,
+                0, 0, 0, 0, 0, 0, "");
         }
 
         return new GpuStaticData
@@ -186,19 +150,19 @@ public partial class LinuxAmdGpuProbe
             RopsTmus = ropsTmus,
             Shaders = spec?.Shaders ?? "N/A",
             ComputeUnits = spec?.ComputeUnits ?? "N/A",
-            PixelFillrate = pixelFill,
-            TextureFillrate = texFill,
+            PixelFillrate = dynamicSpecs.PixelFill,
+            TextureFillrate = dynamicSpecs.TexFill,
             MemoryType = finalMemType,
             BusWidth = spec?.BusWidth ?? "N/A",
             MemorySize = finalMemorySize,
-            Bandwidth = bandwidth,
+            Bandwidth = dynamicSpecs.Bandwidth,
             DefaultGpuClock = defaultGpuClockDb,
             DefaultBoostClock = spec?.DefBoostClock ?? "N/A",
             DefaultMemoryClock = spec?.DefMemClock ?? "N/A",
 
-            CurrentGpuClock = gpuClock,
-            BoostClock = boostClockDisplay,
-            CurrentMemClock = memClockDisplay,
+            CurrentGpuClock = dynamicSpecs.GpuClock,
+            BoostClock = dynamicSpecs.BoostClock,
+            CurrentMemClock = dynamicSpecs.MemClock,
 
             IsHsaAvailable = isHipAvailable,
             IsRocmAvailable = isRocmAvailable,

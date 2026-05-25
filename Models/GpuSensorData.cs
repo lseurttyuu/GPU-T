@@ -27,8 +27,13 @@ public record GpuSensorData
     
     // Overclocking offsets read from NVAPI sidecar - they allow to show proper clocks at GPU-T runtime
     // plus they can be used to recalculate pixel fillrate and bandwidth values on the fly (main tab)
-    public int CoreOcOffset { get; set; }
-    public int MemOcOffset { get; set; }
+    public int NVIDIA_CoreOcOffset { get; set; }
+    public int NVIDIA_MemOcOffset { get; set; }
+
+    // For AMD GPUs we're probing the actual clocks, not offsets like with NVIDIA
+    public int AMD_CoreReadValue { get; set; }
+    public int AMD_MemReadValue { get; set; }
+    public int AMD_BoostReadValue { get; set; }
 
     //Allows to update the PCIe link status dynamically
     public string BusInterface { get; set; } = "N/A";

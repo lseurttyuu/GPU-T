@@ -152,8 +152,8 @@ public partial class LinuxNvidiaGpuProbe
                 FanPercent = (int)fanPercent, BoardPower = powerW, GpuLoad = gpuLoad, MemControllerLoad = memLoad,
                 MemoryUsed = memUsedMb, GpuVoltage = GpuVoltage, MemoryTemp = memTemp, EncoderLoad = encLoad,
                 DecoderLoad = decLoad, PerfCapReason = perfCap, PcieTx = pcieTxGb, PcieRx = pcieRxGb,
-                CoreOcOffset = coreOcOffset,
-                MemOcOffset = memOcOffset,
+                NVIDIA_CoreOcOffset = coreOcOffset,
+                NVIDIA_MemOcOffset = memOcOffset,
                 FanRpm = fanRpm,
                 // These read fast local files, so we keep them in the background thread too!
                 CpuTemperature = CommonGpuHelpers.GetCpuTemperature(),

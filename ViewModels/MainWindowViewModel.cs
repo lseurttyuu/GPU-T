@@ -30,8 +30,11 @@ public partial class MainWindowViewModel : ViewModelBase
     private double _rawDefGpuClock, _rawDefBoostClock, _rawDefMemClock;
     private double _rawRops, _rawTmus, _rawBusWidth;
     private string _rawMemoryType = "";
-    private int _lastCoreOffset = 0;
-    private int _lastMemOffset = 0;
+    private int _lastNvidiaCoreOffset = 0;
+    private int _lastNvidiaMemOffset = 0;
+    private int _lastAmdCoreRead = 0;
+    private int _lastAmdMemRead = 0;
+    private int _lastAmdBoostRead = 0;
     private string _lastBusInterface = "N/A";
 
     /// <summary>

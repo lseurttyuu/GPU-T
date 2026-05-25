@@ -248,11 +248,11 @@ public partial class MainWindowViewModel
         }
 
         // If we detect a change in overclocking offsets, we recalculate the dynamic specs which depend on them and update the main tab values accordingly.
-        // (Right now NVIDIA only)
-        if(data.CoreOcOffset != _lastCoreOffset || data.MemOcOffset != _lastMemOffset)
+        // (NVIDIA block)
+        if(data.NVIDIA_CoreOcOffset != _lastNvidiaCoreOffset || data.NVIDIA_MemOcOffset != _lastNvidiaMemOffset)
         {
-            _lastCoreOffset = data.CoreOcOffset;
-            _lastMemOffset = data.MemOcOffset;
+            _lastNvidiaCoreOffset = data.NVIDIA_CoreOcOffset;
+            _lastNvidiaMemOffset = data.NVIDIA_MemOcOffset;
 
             //var memOcOffsetEffective = (int)(data.MemOcOffset * GPU_T.Services.Probes.CommonGpuHelpers.GetMemoryMultiplier(_rawMemoryType));
 
@@ -261,7 +261,7 @@ public partial class MainWindowViewModel
                 var dynamicSpecs = GPU_T.Services.Probes.LinuxNvidia.LinuxNvidiaGpuProbe.CalculateDynamicSpecs(
                     _rawDefGpuClock, _rawDefBoostClock, _rawDefMemClock,
                     _rawRops, _rawTmus, _rawBusWidth, _rawMemoryType,
-                    data.CoreOcOffset, data.MemOcOffset);
+                    data.NVIDIA_CoreOcOffset, data.NVIDIA_MemOcOffset);
 
                 // These update the Main Tab ObservableProperties
                 GpuClock = dynamicSpecs.GpuClock;
@@ -273,6 +273,33 @@ public partial class MainWindowViewModel
             }
 
         }
+
+        // If we detect a change in AMD GPU clocks, we recalculate the dynamic specs which depend on them and update the main tab values accordingly.
+        // (AMD block)
+        if(data.AMD_BoostReadValue != _lastAmdBoostRead || data.AMD_CoreReadValue != _lastAmdCoreRead || data.AMD_MemReadValue != _lastAmdMemRead)
+        {
+            _lastAmdBoostRead = data.AMD_BoostReadValue;
+            _lastAmdCoreRead = data.AMD_CoreReadValue;
+            _lastAmdMemRead = data.AMD_MemReadValue;
+
+            if (_currentVendorName == "AMD")
+            {
+                var dynamicSpecs = GPU_T.Services.Probes.LinuxAmd.LinuxAmdGpuProbe.CalculateDynamicSpecs(
+                    data.AMD_CoreReadValue, data.AMD_MemReadValue, data.AMD_BoostReadValue,
+                    _rawDefGpuClock, _rawDefBoostClock, _rawDefMemClock,
+                    _rawRops, _rawTmus, _rawBusWidth, _rawMemoryType);
+
+                // These update the Main Tab ObservableProperties
+                GpuClock = dynamicSpecs.GpuClock;
+                BoostClock = dynamicSpecs.BoostClock;
+                MemoryClock = dynamicSpecs.MemClock;
+                PixelFillrate = dynamicSpecs.PixelFill;
+                TextureFillrate = dynamicSpecs.TexFill;
+                Bandwidth = dynamicSpecs.Bandwidth;
+            }
+        }
+
+
 
         // PCIe link status can change dynamically; if we detect a change, we update the displayed value
         if(data.BusInterface != _lastBusInterface)

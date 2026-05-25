@@ -105,6 +105,18 @@ public partial class LinuxAmdGpuProbe
         double cpuTemp = CommonGpuHelpers.GetCpuTemperature();
         double sysRam = CommonGpuHelpers.GetSystemRamUsage();
 
+
+        double maxCoreDpm = GetMaxClockFromDpm("pp_dpm_sclk");
+
+        var odClocks = GetMaxClocksFromOd("pp_od_clk_voltage");
+
+        double maxMemDpm = odClocks.Mclk * _memClockMultiplier;
+        if (maxMemDpm <= 0)
+            maxMemDpm = GetMaxClockFromDpm("pp_dpm_mclk") * _memClockMultiplier;
+
+        double boostClock = odClocks.Sclk;
+
+
         // Sensor label parsing and assignment logic ensures correct mapping for edge, hotspot, and memory temperatures.
         // Fan percentage is calculated from PWM values if available.
         // Power and voltage readings are normalized to standard units.
@@ -127,6 +139,9 @@ public partial class LinuxAmdGpuProbe
             MemoryUsedDynamic = memGttMb,
             CpuTemperature = cpuTemp,
             SystemRamUsed = sysRam,
+            AMD_CoreReadValue = (int)maxCoreDpm,
+            AMD_MemReadValue = (int)maxMemDpm,
+            AMD_BoostReadValue = (int)boostClock,
             BusInterface = GpuFeatureDetection.GetPcieInfo(_basePath)
         };
     }
