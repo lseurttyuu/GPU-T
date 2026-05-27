@@ -123,6 +123,11 @@ public partial class LinuxNvidiaGpuProbe
         {
             pixelFill = $"{(currentBoostClock_nvapi * rops / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GPixel/s";
             texFill = $"{(currentBoostClock_nvapi * tmus / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GTexel/s";
+        } 
+        else if(currentGpuClock_nvapi > 0 && rops > 0 && tmus > 0)              // fallback for older GPUs without boost clocks
+        {
+            pixelFill = $"{(currentGpuClock_nvapi * rops / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GPixel/s";
+            texFill = $"{(currentGpuClock_nvapi * tmus / 1000.0).ToString("0.0", CultureInfo.InvariantCulture)} GTexel/s";
         }
 
         if (currentMemClock_nvapi > 0 && busWidth > 0)
