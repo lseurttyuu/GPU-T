@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "gpus": {
     "2521": [
       {
@@ -29650,6 +29650,106 @@
         "defBoostClock": "1032 MHz",
         "defMemClock": "1502 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-gtx-760.c1857"
+      }
+    ],
+    "0A22": [
+      {
+        "name": "NVIDIA GeForce 315 OEM",
+        "subsysids": [
+          "00031019"
+        ],
+        "codeName": "GT216",
+        "technology": "40 nm",
+        "dieSize": "100 mm\u00B2",
+        "releaseDate": "Mar 31st, 2010",
+        "transistors": "486M",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "48 Unified",
+        "computeUnits": "6",
+        "rtCores": "N/A",
+        "tensorCores": "N/A",
+        "memoryType": "DDR3",
+        "busWidth": "64 bit",
+        "defGpuClock": "475 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "790 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-315-oem.c609"
+      }
+    ],
+    "0141": [
+      {
+        "name": "NVIDIA GeForce 6600",
+        "subsysids": [
+          "ANY"
+        ],
+        "codeName": "NV43",
+        "technology": "110 nm",
+        "dieSize": "154 mm\u00B2",
+        "releaseDate": "Aug 12th, 2004",
+        "transistors": "146M",
+        "rops": "4",
+        "tmus": "8",
+        "shaders": "N/A",
+        "computeUnits": "N/A",
+        "rtCores": "N/A",
+        "tensorCores": "N/A",
+        "memoryType": "DDR",
+        "busWidth": "128 bit",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "250 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-6600.c714"
+      }
+    ],
+    "01D3": [
+      {
+        "name": "NVIDIA GeForce 7200 GS",
+        "subsysids": [
+          "08321ACC"
+        ],
+        "codeName": "G72",
+        "technology": "90 nm",
+        "dieSize": "81 mm\u00B2",
+        "releaseDate": "Jan 18th, 2006",
+        "transistors": "112M",
+        "rops": "2",
+        "tmus": "4",
+        "shaders": "N/A",
+        "computeUnits": "N/A",
+        "rtCores": "N/A",
+        "tensorCores": "N/A",
+        "memoryType": "DDR2",
+        "busWidth": "64 bit",
+        "defGpuClock": "450 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "334 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-7200-gs.c723"
+      }
+    ],
+    "01DD": [
+      {
+        "name": "NVIDIA GeForce 7500 LE",
+        "subsysids": [
+          "ANY"
+        ],
+        "codeName": "G72",
+        "technology": "90 nm",
+        "dieSize": "81 mm\u00B2",
+        "releaseDate": "Mar 22nd, 2006",
+        "transistors": "112M",
+        "rops": "4",
+        "tmus": "8",
+        "shaders": "N/A",
+        "computeUnits": "N/A",
+        "rtCores": "N/A",
+        "tensorCores": "N/A",
+        "memoryType": "DDR2",
+        "busWidth": "64 bit",
+        "defGpuClock": "475 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "405 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-7500-le.c1772"
       }
     ]
   }
