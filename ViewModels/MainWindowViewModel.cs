@@ -390,9 +390,9 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    /// <summary>
+/// <summary>
     /// Opens a web lookup for the currently selected GPU. Uses explicit lookup URL if available,
-    /// otherwise falls back to a TechPowerUp search query constructed from DeviceName.
+    /// otherwise falls back to a Google search restricted to the TechPowerUp GPU specs database.
     /// </summary>
     [RelayCommand]
     private void LookupWeb()
@@ -403,8 +403,12 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         else
         {
-            string query = DeviceName.Replace(" ", "+");
-            string url = $"https://www.techpowerup.com/gpu-specs/?q={query}";
+            // Use Uri.EscapeDataString to safely encode the device name (handles +, &, spaces, etc.)
+            string query = Uri.EscapeDataString(DeviceName);
+            
+            // Perform a Google search restricted to the TechPowerUp specs domain
+            string url = $"https://www.google.com/search?q=site:techpowerup.com/gpu-specs+{query}";
+            
             ShellHelper.OpenUrl(url);
         }
     }
