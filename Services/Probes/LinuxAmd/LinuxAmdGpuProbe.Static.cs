@@ -49,9 +49,9 @@ public partial class LinuxAmdGpuProbe
         string busInterface = GpuFeatureDetection.GetPcieInfo(_basePath);
         string reBarState = CheckResizableBar();
 
-        string driverVer = GpuFeatureDetection.GetRealDriverVersion();
+        string driverVer = GpuFeatureDetection.GetRealDriverVersion(ids.Device);
         string driverDate = GpuFeatureDetection.GetKernelDriverDate();
-        string vulkanApi = GpuFeatureDetection.GetVulkanApiVersion();
+        string vulkanApi = GpuFeatureDetection.GetVulkanApiVersion(ids.Device);
 
         var odClocks = GetMaxClocksFromOd("pp_od_clk_voltage");
 
@@ -166,7 +166,7 @@ public partial class LinuxAmdGpuProbe
 
             IsHsaAvailable = isHipAvailable,
             IsRocmAvailable = isRocmAvailable,
-            IsVulkanAvailable = vulkanApi != "N/A" || GpuFeatureDetection.CheckVulkanIcdInstalled("radeon_icd.x86_64.json", "radeon_icd.i686.json"),
+            IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "radeon_icd.x86_64.json", "radeon_icd.i686.json"),
             IsOpenClAvailable = isOpenClAvailable,
             IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),
 

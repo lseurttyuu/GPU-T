@@ -130,8 +130,9 @@ public static class GpuFeatureDetection
 
     /// <summary>
     /// Retrieves the Vulkan API version using vulkaninfo --summary.
+    /// If deviceIdHex is provided, it extracts the version specifically for that GPU.
     /// </summary>
-    public static string GetVulkanApiVersion()
+    public static string GetVulkanApiVersion(string deviceIdHex = "")
     {
         try
         {
@@ -144,9 +145,31 @@ public static class GpuFeatureDetection
             {
                 string output = p.StandardOutput.ReadToEnd();
                 p.WaitForExit();
-
-                var match = Regex.Match(output, @"apiVersion\s*=\s*.*?(\d+\.\d+(?:\.\d+)?)");
-                if (match.Success) return match.Groups[1].Value;
+                
+                if (!string.IsNullOrEmpty(deviceIdHex))
+                {
+                    string target = deviceIdHex.Replace("0x", "").Trim().ToUpper();
+                    var gpuBlocks = Regex.Split(output, @"GPU\d+:");
+                    
+                    for (int i = 1; i < gpuBlocks.Length; i++)
+                    {
+                        var block = gpuBlocks[i];
+                        var devMatch = Regex.Match(block, @"deviceID\s*=\s*0x([0-9a-fA-F]+)", RegexOptions.IgnoreCase);
+                        
+                        if (devMatch.Success && devMatch.Groups[1].Value.ToUpper() == target)
+                        {
+                            var apiMatch = Regex.Match(block, @"apiVersion\s*=\s*.*?(\d+\.\d+(?:\.\d+)?)");
+                            if (apiMatch.Success) return apiMatch.Groups[1].Value;
+                        }
+                    }
+                    // Target was specified but not found. Do not return another GPU's API version.
+                }
+                else
+                {
+                    // Fallback to first match ONLY if no specific target was requested
+                    var fallbackMatch = Regex.Match(output, @"apiVersion\s*=\s*.*?(\d+\.\d+(?:\.\d+)?)");
+                    if (fallbackMatch.Success) return fallbackMatch.Groups[1].Value;
+                }
             }
         }
         catch { }
@@ -155,8 +178,9 @@ public static class GpuFeatureDetection
 
     /// <summary>
     /// Retrieves the real driver version using vulkaninfo or kernel version as fallback.
+    /// If deviceIdHex is provided, it extracts the driver specifically for that GPU.
     /// </summary>
-    public static string GetRealDriverVersion()
+    public static string GetRealDriverVersion(string deviceIdHex = "")
     {
         try
         {
@@ -169,12 +193,37 @@ public static class GpuFeatureDetection
             {
                 string vInfo = p.StandardOutput.ReadToEnd();
                 p.WaitForExit();
-                var match = Regex.Match(vInfo, @"driverInfo\s*=\s*(.*)");
-                if (match.Success) return match.Groups[1].Value.Trim();
+                
+                if (!string.IsNullOrEmpty(deviceIdHex))
+                {
+                    string target = deviceIdHex.Replace("0x", "").Trim().ToUpper();
+                    var gpuBlocks = Regex.Split(vInfo, @"GPU\d+:");
+                    
+                    for (int i = 1; i < gpuBlocks.Length; i++)
+                    {
+                        var block = gpuBlocks[i];
+                        var devMatch = Regex.Match(block, @"deviceID\s*=\s*0x([0-9a-fA-F]+)", RegexOptions.IgnoreCase);
+                        
+                        if (devMatch.Success && devMatch.Groups[1].Value.ToUpper() == target)
+                        {
+                            var match = Regex.Match(block, @"driverInfo\s*=\s*(.*)");
+                            if (match.Success) return match.Groups[1].Value.Trim();
+                        }
+                    }
+                    // Target was specified but not found. We intentionally skip the generic 
+                    // first-match fallback so it drops down to the Kernel version at the bottom.
+                }
+                else
+                {
+                    // Fallback to first match ONLY if no specific target was requested
+                    var fallbackMatch = Regex.Match(vInfo, @"driverInfo\s*=\s*(.*)");
+                    if (fallbackMatch.Success) return fallbackMatch.Groups[1].Value.Trim();
+                }
             }
         }
         catch { }
 
+        // The safe fallback for unsupported/missing GPUs
         string kernel = GetKernelVersion();
         if (!string.IsNullOrEmpty(kernel)) return $"{kernel} (Kernel)";
         return "Unknown";
@@ -635,6 +684,50 @@ public static class GpuFeatureDetection
         }
 
         return false;
+    }
+
+
+    /// <summary>
+    /// Checks if Vulkan is supported by verifying the specific GPU deviceID in vulkaninfo --summary.
+    /// Falls back to checking ICD files if vulkaninfo fails or is missing.
+    /// </summary>
+    public static bool CheckVulkanSupport(string deviceIdHex, params string[] candidateFilenames)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo("vulkaninfo", "--summary")
+            {
+                RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true
+            };
+            using var p = Process.Start(psi);
+            if (p != null)
+            {
+                string output = p.StandardOutput.ReadToEnd();
+                p.WaitForExit();
+                
+                // If vulkaninfo ran and gave standard output
+                if (output.Contains("VULKANINFO") || output.Contains("Devices:"))
+                {
+                    string target = deviceIdHex.Replace("0x", "").Trim().ToUpper();
+                    var matches = Regex.Matches(output, @"deviceID\s*=\s*0x([0-9a-fA-F]+)", RegexOptions.IgnoreCase);
+                    
+                    foreach (Match m in matches)
+                    {
+                        if (m.Groups[1].Value.ToUpper() == target)
+                        {
+                            return true;
+                        }
+                    }
+                    
+                    // vulkaninfo ran successfully, but this specific GPU was not listed
+                    return false;
+                }
+            }
+        }
+        catch { }
+
+        // Fallback: vulkaninfo command is missing or broken, try the ICD files
+        return CheckVulkanIcdInstalled(candidateFilenames);
     }
 
     /// <summary>

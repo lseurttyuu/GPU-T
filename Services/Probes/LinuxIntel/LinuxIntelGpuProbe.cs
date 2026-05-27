@@ -103,10 +103,10 @@ public class LinuxIntelGpuProbe : IGpuProbe
         // Memory: integrated GPUs use shared system RAM
         string memorySize = "System Shared";
 
-        string driverVersion = GpuFeatureDetection.GetRealDriverVersion();
+        string driverVersion = GpuFeatureDetection.GetRealDriverVersion(ids.Device);
         string driverDate = GpuFeatureDetection.GetKernelDriverDate();
         string busInterface = GpuFeatureDetection.GetPcieInfo(_basePath);
-        string vulkanApi = GpuFeatureDetection.GetVulkanApiVersion();
+        string vulkanApi = GpuFeatureDetection.GetVulkanApiVersion(ids.Device);
 
         bool isOpenglAvailable = GpuFeatureDetection.CheckOpenglSupport();
         bool isRayTracingAvailable = GpuFeatureDetection.CheckRayTracingSupportVulkan(ids.Device);
@@ -155,7 +155,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
             CurrentMemClock = "N/A",
 
             IsOpenClAvailable = isOpenClAvailable,
-            IsVulkanAvailable = vulkanApi != "N/A" || GpuFeatureDetection.CheckVulkanIcdInstalled("intel_icd.x86_64.json", "intel_icd.i686.json", "intel_hasvk.json"),
+            IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "intel_icd.x86_64.json", "intel_icd.i686.json", "intel_hasvk.json"),
             IsOpenglAvailable = isOpenglAvailable,
             IsRayTracingAvailable = isRayTracingAvailable,
             IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),

@@ -98,7 +98,7 @@ public partial class LinuxNvidiaGpuProbe
             deviceName = spec.Name;
 
         string busInterface = GpuFeatureDetection.GetPcieInfo(_basePath);
-        string vulkanApi = GpuFeatureDetection.GetVulkanApiVersion();
+        string vulkanApi = GpuFeatureDetection.GetVulkanApiVersion(ids.Device);
         string driverDate = GpuFeatureDetection.GetNvidiaDriverDate();
 
         bool isOpenglAvailable = GpuFeatureDetection.CheckOpenglSupport();
@@ -210,7 +210,7 @@ public partial class LinuxNvidiaGpuProbe
 
             IsCudaAvailable = isCudaAvailable,
             IsPhysXEnabled = isPhysXEnabled,
-            IsVulkanAvailable = vulkanApi != "N/A" || GpuFeatureDetection.CheckVulkanIcdInstalled("nvidia_icd.json", "nvidia_icd.x86_64.json"),
+            IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "nvidia_icd.json", "nvidia_icd.x86_64.json"),
             IsOpenClAvailable = isOpenClAvailable,
             IsOpenglAvailable = isOpenglAvailable,
             IsHsaAvailable = false,     //we treat HIP as AMD-specific (user-perspective!)
