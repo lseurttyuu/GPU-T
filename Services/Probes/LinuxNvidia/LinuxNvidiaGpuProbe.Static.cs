@@ -216,7 +216,7 @@ public partial class LinuxNvidiaGpuProbe
             IsHsaAvailable = false,     //we treat HIP as AMD-specific (user-perspective!)
             IsRocmAvailable = false,
             IsRayTracingAvailable = isRayTracingAvailable,
-            IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),
+            IsUefiAvailable = CommonGpuHelpers.CheckGpuUefiSupport(spec?.ReleaseDate),
         };
     }
 

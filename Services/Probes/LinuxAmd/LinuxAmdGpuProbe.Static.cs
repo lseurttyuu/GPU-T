@@ -168,7 +168,7 @@ public partial class LinuxAmdGpuProbe
             IsRocmAvailable = isRocmAvailable,
             IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "radeon_icd.x86_64.json", "radeon_icd.i686.json"),
             IsOpenClAvailable = isOpenClAvailable,
-            IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),
+            IsUefiAvailable = CommonGpuHelpers.CheckGpuUefiSupport(spec?.ReleaseDate),
 
             IsCudaAvailable = false,
             IsRayTracingAvailable = isRayTracingAvailable,
