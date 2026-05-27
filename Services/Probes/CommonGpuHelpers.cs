@@ -12,6 +12,50 @@ namespace GPU_T.Services.Probes;
 /// </summary>
 internal static class CommonGpuHelpers
 {
+    
+    /// <summary>
+    /// Determines if UEFI GOP is both supported by the GPU and actively in use.
+    /// Requires the host OS to be booted in UEFI mode. If true, uses a release date 
+    /// heuristic to prevent false positives on pre-2012 legacy hardware.
+    /// </summary>
+    public static bool CheckGpuUefiSupport(string? releaseDateStr)
+    {
+        // 1. Strict System Check: If the OS is not in UEFI mode, GOP is not in use.
+        if (!System.IO.Directory.Exists("/sys/firmware/efi"))
+        {
+            return false;
+        }
+
+        // 2. Database Check: If the GPU is unknown, default to unchecked to be safe.
+        if (string.IsNullOrWhiteSpace(releaseDateStr) || releaseDateStr == "N/A" || releaseDateStr == "Unknown")
+        {
+            return false;
+        }
+
+        try
+        {
+            // Extract the year from a string like "Oct 7th, 2019" or "2019"
+            var match = System.Text.RegularExpressions.Regex.Match(releaseDateStr, @"\b(19|20)\d{2}\b");
+            if (match.Success && int.TryParse(match.Value, out int year))
+            {
+                // GPUs before 2012 strictly use legacy INT 10h VBIOS.
+                // Even if the motherboard booted UEFI, the GPU itself doesn't have GOP.
+                if (year < 2012)
+                {
+                    return false;
+                }
+
+                // If the GPU is 2012 or newer AND the system is in UEFI mode (passed step 1),
+                // then UEFI GOP is both supported by the hardware and actively in use.
+                return true;
+            }
+        }
+        catch { }
+
+        // Failsafe if parsing breaks
+        return false;
+    }
+    
     /// <summary>
     /// Reads the CPU temperature from hwmon directories (k10temp for AMD, coretemp for Intel).
     /// </summary>

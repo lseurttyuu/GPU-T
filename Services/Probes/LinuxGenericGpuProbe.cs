@@ -136,7 +136,7 @@ public class LinuxGenericGpuProbe : IGpuProbe
 
             IsVulkanAvailable = vulkanApi != "N/A",
             IsOpenglAvailable = isOpenglAvailable,
-            IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),
+            IsUefiAvailable = CommonGpuHelpers.CheckGpuUefiSupport(spec?.ReleaseDate),
             
             // Assume vendor-specific tech is unavailable
             IsCudaAvailable = false,

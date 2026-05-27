@@ -158,7 +158,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
             IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "intel_icd.x86_64.json", "intel_icd.i686.json", "intel_hasvk.json"),
             IsOpenglAvailable = isOpenglAvailable,
             IsRayTracingAvailable = isRayTracingAvailable,
-            IsUefiAvailable = Directory.Exists("/sys/firmware/efi"),
+            IsUefiAvailable = CommonGpuHelpers.CheckGpuUefiSupport(spec?.ReleaseDate),
 
             LookupUrl = lookupUrl,
         };
