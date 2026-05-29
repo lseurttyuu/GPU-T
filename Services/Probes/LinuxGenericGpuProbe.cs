@@ -34,7 +34,7 @@ public class LinuxGenericGpuProbe : IGpuProbe
         string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "").ToUpper();
 
         // 2. Database Lookup
-        var spec = PciIdLookup.GetSpecs(ids.Device, revId);
+        var spec = PciIdLookup.GetSpecs(ids.Vendor, ids.Device, revId);
 
         // 3. Fallback Naming
         string deviceName = "Unknown GPU";
