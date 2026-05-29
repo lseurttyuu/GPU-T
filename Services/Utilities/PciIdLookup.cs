@@ -19,7 +19,10 @@ public static class PciIdLookup
     /// <returns>A <see cref="GpuSpec"/> instance if found; otherwise, null.</returns>
     public static GpuSpec? GetSpecs(string vendorId, string deviceId, string revisionId = "", string subSysId = "")
     {
-        if (DatabaseManager.Database.Gpus.TryGetValue(deviceId, out var variantsList))
+        // Normalize deviceId for lookup - database keys are uppercase and often without 0x
+        string lookupId = deviceId.Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToUpper();
+
+        if (DatabaseManager.Database.Gpus.TryGetValue(lookupId, out var variantsList))
         {
             if (variantsList == null || variantsList.Count == 0) return null;
 
