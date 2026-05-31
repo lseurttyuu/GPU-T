@@ -5,7 +5,6 @@ using System.IO;
 using System.Text.RegularExpressions;
 using GPU_T.Models;
 using GPU_T.Services.Advanced;
-using GPU_T.Services.Advanced.LinuxIntel;
 using GPU_T.Services.Utilities;
 
 namespace GPU_T.Services.Probes.LinuxIntel;
@@ -13,38 +12,19 @@ namespace GPU_T.Services.Probes.LinuxIntel;
 /// <summary>
 /// Probe implementation for Intel GPUs on Linux. Reads i915/xe driver sysfs paths
 /// for frequency data and uses shared helpers for feature detection.
+/// Integrated GPUs have limited sensor availability (no fan, power, VRAM, or load metrics).
 /// </summary>
 public class LinuxIntelGpuProbe : IGpuProbe
 {
     private readonly string _basePath;
     private readonly string _drmPath;
     private readonly string _gpuId;
-    private readonly string _driverName;
 
     public LinuxIntelGpuProbe(string gpuId)
     {
         _gpuId = gpuId;
         _basePath = $"/sys/class/drm/{gpuId}/device";
         _drmPath = $"/sys/class/drm/{gpuId}";
-        _driverName = GetDriverName();
-    }
-
-    private string GetDriverName()
-    {
-        try
-        {
-            string driverLink = Path.Combine(_basePath, "driver");
-            if (Directory.Exists(driverLink) || File.Exists(driverLink))
-            {
-                var target = File.ResolveLinkTarget(driverLink, true);
-                if (target != null) return target.Name;
-
-                // Fallback if ResolveLinkTarget fails
-                return new DirectoryInfo(driverLink).Name;
-            }
-        }
-        catch { }
-        return "Unknown";
     }
 
     #region Static Data
@@ -77,7 +57,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
         string textureFillrate = "N/A";
         string bandwidth = "N/A";
 
-        var spec = PciIdLookup.GetSpecs(ids.Vendor, ids.Device, revId);
+        var spec = PciIdLookup.GetSpecs(ids.Device, revId);
         if (spec != null)
         {
             deviceName = spec.Name;
@@ -112,31 +92,16 @@ public class LinuxIntelGpuProbe : IGpuProbe
             isExactMatch = false;
         }
 
-        // Read clocks
-        string currentGpuClock = "---";
-        string currentBoostClock = "---";
+        // Read clocks from i915 DRM sysfs (gt_*_freq_mhz files are at the DRM card level)
+        string maxGpuClockStr = ReadDrmFile("gt_max_freq_mhz");
+        string boostClockStr = ReadDrmFile("gt_boost_freq_mhz");
+        string curGpuClockStr = ReadDrmFile("gt_cur_freq_mhz");
 
-        if (_driverName == "xe")
-        {
-            string curFreq = ReadDeviceFile("tile0/gt0/freq0/act_freq");
-            if (string.IsNullOrEmpty(curFreq)) curFreq = ReadDeviceFile("tile0/gt0/freq0/cur_freq");
-            if (!string.IsNullOrEmpty(curFreq)) currentGpuClock = $"{curFreq} MHz";
+        string currentGpuClock = !string.IsNullOrEmpty(curGpuClockStr) ? $"{curGpuClockStr} MHz" : "---";
+        string currentBoostClock = currentGpuClock;
 
-            string maxFreq = ReadDeviceFile("tile0/gt0/freq0/rp0_freq");
-            if (!string.IsNullOrEmpty(maxFreq)) currentBoostClock = $"{maxFreq} MHz";
-        }
-        else // i915 or fallback
-        {
-            string curGpuClockStr = ReadDrmFile("gt_cur_freq_mhz");
-            if (!string.IsNullOrEmpty(curGpuClockStr)) currentGpuClock = $"{curGpuClockStr} MHz";
-
-            string boostClockStr = ReadDrmFile("gt_boost_freq_mhz");
-            if (!string.IsNullOrEmpty(boostClockStr)) currentBoostClock = $"{boostClockStr} MHz";
-        }
-
-        // Memory size detection
-        long totalVramBytes = GetTotalVramBytes();
-        string memorySize = totalVramBytes > 0 ? $"{totalVramBytes / (1024 * 1024)} MB" : "System Shared";
+        // Memory: integrated GPUs use shared system RAM
+        string memorySize = "System Shared";
 
         string driverVersion = GpuFeatureDetection.GetRealDriverVersion(ids.Device);
         string driverDate = GpuFeatureDetection.GetKernelDriverDate();
@@ -161,7 +126,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
             DriverDate = driverDate,
             VulkanApi = vulkanApi,
             BusInterface = busInterface,
-            ResizableBarState = GpuFeatureDetection.CheckResizableBar(_basePath, totalVramBytes),
+            ResizableBarState = "N/A",
 
             Revision = revId,
 
@@ -205,37 +170,28 @@ public class LinuxIntelGpuProbe : IGpuProbe
 
     public GpuSensorData LoadSensorData()
     {
+        // GPU clock from i915 DRM sysfs
         double gpuClock = 0;
-        if (_driverName == "xe")
-        {
-            string curFreq = ReadDeviceFile("tile0/gt0/freq0/act_freq");
-            if (string.IsNullOrEmpty(curFreq)) curFreq = ReadDeviceFile("tile0/gt0/freq0/cur_freq");
-            if (!string.IsNullOrEmpty(curFreq)) double.TryParse(curFreq, NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
-        }
-        else
-        {
-            string curFreq = ReadDrmFile("gt_cur_freq_mhz");
-            if (!string.IsNullOrEmpty(curFreq)) double.TryParse(curFreq, NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
-        }
+        string curFreq = ReadDrmFile("gt_cur_freq_mhz");
+        if (!string.IsNullOrEmpty(curFreq))
+            double.TryParse(curFreq, NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
 
+        // GPU temperature: try i915 hwmon first, then thermal zones
         double gpuTemp = GetGpuTemperature();
+
         double cpuTemp = CommonGpuHelpers.GetCpuTemperature();
         double sysRam = CommonGpuHelpers.GetSystemRamUsage();
-
-        double vramUsedMb = GetUsedVramBytes() / (1024.0 * 1024.0);
-        double powerW = GetPowerUsageW();
-        int load = GetGpuLoad();
 
         return new GpuSensorData
         {
             GpuClock = gpuClock,
             MemoryClock = 0,
             GpuTemp = gpuTemp,
-            FanPercent = GetFanPercent(),
-            BoardPower = powerW,
-            GpuLoad = load,
+            FanPercent = 0,
+            BoardPower = 0,
+            GpuLoad = 0,
             MemControllerLoad = 0,
-            MemoryUsed = vramUsedMb,
+            MemoryUsed = 0,
             CpuTemperature = cpuTemp,
             SystemRamUsed = sysRam
         };
@@ -247,16 +203,8 @@ public class LinuxIntelGpuProbe : IGpuProbe
 
     public SensorAvailability GetSensorAvailability()
     {
-        var avail = new SensorAvailability();
-        avail.HasGpuLoad = GetGpuLoad() >= 0;
-        avail.HasPower = GetPowerUsageW() > 0;
-        avail.HasMemUsed = GetTotalVramBytes() > 0;
-        avail.HasFan = GetFanPercent() > 0;
-
-        // Temperature is usually available via hwmon
-        if (GetGpuTemperature() > 0) avail.HasHotSpot = false; // We use GpuTemp
-
-        return avail;
+        // Integrated Intel GPUs have very limited sensor availability
+        return new SensorAvailability();
     }
 
     #endregion
@@ -270,14 +218,13 @@ public class LinuxIntelGpuProbe : IGpuProbe
             "General" => new GeneralProvider(),
             "Vulkan" => new VulkanProvider(),
             "OpenCL" => new OpenClProvider(),
-            "Multimedia" => new LinuxIntelMultimediaProvider(),
             _ => null
         };
     }
 
     public string[] GetAdvancedCategories()
     {
-        return new[] { "General", "Vulkan", "OpenCL", "Multimedia" };
+        return new[] { "General", "Vulkan", "OpenCL" };
     }
 
     #endregion
@@ -299,142 +246,9 @@ public class LinuxIntelGpuProbe : IGpuProbe
         return "";
     }
 
-    /// <summary>
-    /// Reads a file from the device sysfs directory.
-    /// </summary>
-    private string ReadDeviceFile(string filename)
-    {
-        try
-        {
-            string path = Path.Combine(_basePath, filename);
-            if (File.Exists(path))
-                return File.ReadAllText(path).Trim();
-        }
-        catch { }
-        return "";
-    }
-
-    private long GetTotalVramBytes()
-    {
-        if (_driverName == "xe")
-        {
-            string val = ReadDeviceFile("tile0/vram0/capacity");
-            if (long.TryParse(val, out long bytes)) return bytes;
-        }
-        return 0;
-    }
-
-    private long GetUsedVramBytes()
-    {
-        if (_driverName == "xe")
-        {
-            string val = ReadDeviceFile("tile0/vram0/usage");
-            if (long.TryParse(val, out long bytes)) return bytes;
-        }
-        return 0;
-    }
-
-    private double GetPowerUsageW()
-    {
-        // Try hwmon for power
-        try
-        {
-            string baseDir = "/sys/class/hwmon/";
-            if (Directory.Exists(baseDir))
-            {
-                foreach (var dir in Directory.GetDirectories(baseDir))
-                {
-                    string namePath = Path.Combine(dir, "name");
-                    if (File.Exists(namePath))
-                    {
-                        string name = File.ReadAllText(namePath).Trim();
-                        if (name == "i915" || name == "xe")
-                        {
-                            string pwrPath = Path.Combine(dir, "power1_average");
-                            if (!File.Exists(pwrPath)) pwrPath = Path.Combine(dir, "power1_input");
-
-                            if (File.Exists(pwrPath))
-                            {
-                                if (double.TryParse(File.ReadAllText(pwrPath).Trim(), out double val))
-                                    return val / 1000000.0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch { }
-        return 0;
-    }
-
-    private int GetFanPercent()
-    {
-        try
-        {
-            string baseDir = "/sys/class/hwmon/";
-            if (Directory.Exists(baseDir))
-            {
-                foreach (var dir in Directory.GetDirectories(baseDir))
-                {
-                    string namePath = Path.Combine(dir, "name");
-                    if (File.Exists(namePath))
-                    {
-                        string name = File.ReadAllText(namePath).Trim();
-                        if (name == "i915" || name == "xe")
-                        {
-                            string pwmPath = Path.Combine(dir, "pwm1");
-                            string pwmMaxPath = Path.Combine(dir, "pwm1_max");
-                            if (File.Exists(pwmPath) && File.Exists(pwmMaxPath))
-                            {
-                                if (double.TryParse(File.ReadAllText(pwmPath).Trim(), out double cur) &&
-                                    double.TryParse(File.ReadAllText(pwmMaxPath).Trim(), out double max) && max > 0)
-                                {
-                                    return (int)((cur / max) * 100.0);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch { }
-        return 0;
-    }
-
-    private int GetGpuLoad()
-    {
-        // For 'xe' driver, we can try to read engine utilization from sysfs
-        if (_driverName == "xe")
-        {
-            try
-            {
-                string enginesDir = Path.Combine(_basePath, "tile0/gt0/engines");
-                if (Directory.Exists(enginesDir))
-                {
-                    double maxUtilization = 0;
-                    foreach (var dir in Directory.GetDirectories(enginesDir))
-                    {
-                        string utilPath = Path.Combine(dir, "utilization");
-                        if (File.Exists(utilPath))
-                        {
-                            if (double.TryParse(File.ReadAllText(utilPath).Trim(), out double util))
-                            {
-                                if (util > maxUtilization) maxUtilization = util;
-                            }
-                        }
-                    }
-                    if (maxUtilization > 0) return (int)Math.Clamp(maxUtilization, 0, 100);
-                }
-            }
-            catch { }
-        }
-
-        // For i915, global load is not easily available in sysfs without debugfs/root.
-        return -1;
-    }
 
     /// <summary>
-    /// Tries to get the GPU temperature from i915/xe hwmon or thermal zones.
+    /// Tries to get the GPU temperature from i915 hwmon or thermal zones.
     /// </summary>
     private double GetGpuTemperature()
     {
@@ -450,7 +264,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
                     if (File.Exists(namePath))
                     {
                         string name = File.ReadAllText(namePath).Trim();
-                        if (name == "i915" || name == "xe")
+                        if (name == "i915")
                         {
                             string tempPath = Path.Combine(dir, "temp1_input");
                             if (File.Exists(tempPath))
@@ -478,8 +292,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
                     {
                         string type = File.ReadAllText(typePath).Trim();
                         if (type.Contains("gpu", StringComparison.OrdinalIgnoreCase) ||
-                            type.Contains("i915", StringComparison.OrdinalIgnoreCase) ||
-                            type.Contains("xe", StringComparison.OrdinalIgnoreCase))
+                            type.Contains("i915", StringComparison.OrdinalIgnoreCase))
                         {
                             string tempPath = Path.Combine(dir, "temp");
                             if (File.Exists(tempPath))
