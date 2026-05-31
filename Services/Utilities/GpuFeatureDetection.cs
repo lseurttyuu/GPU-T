@@ -430,7 +430,7 @@ public static class GpuFeatureDetection
         // Handle non-standard link widths (e.g., 255 for integrated GPUs)
         if (int.TryParse(maxWidthStr, out int w) && (w > 32 || w <= 0))
         {
-            return "Internal (Integrated)";
+            return "Intel Ring Bus";
         }
 
         string maxGen = "Unknown";
