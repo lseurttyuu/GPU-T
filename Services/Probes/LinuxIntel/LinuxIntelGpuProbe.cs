@@ -190,7 +190,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
             CurrentMemClock = "N/A",
 
             IsOpenClAvailable = isOpenClAvailable,
-            IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "intel_icd.x86_64.json", "intel_icd.i686.json", "intel_hasvk.json"),
+            IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "intel_icd.x86_64.json", "intel_icd.i686.json", "intel_hasvk.json", "intel_xe_icd.x86_64.json", "intel_xe_icd.i686.json"),
             IsOpenglAvailable = isOpenglAvailable,
             IsRayTracingAvailable = isRayTracingAvailable,
             IsUefiAvailable = CommonGpuHelpers.CheckGpuUefiSupport(spec?.ReleaseDate),

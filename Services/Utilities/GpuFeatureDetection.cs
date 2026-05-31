@@ -430,7 +430,9 @@ public static class GpuFeatureDetection
         // Handle non-standard link widths (e.g., 255 for integrated GPUs)
         if (int.TryParse(maxWidthStr, out int w) && (w > 32 || w <= 0))
         {
-            return "Intel Ring Bus";
+            string vendor = ReadSysfsFile(basePath, "vendor").Replace("0x", "").ToUpper();
+            if (vendor == "8086") return "Intel Ring Bus";
+            return "Internal";
         }
 
         string maxGen = "Unknown";

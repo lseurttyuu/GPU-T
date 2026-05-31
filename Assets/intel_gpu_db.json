@@ -3,7 +3,7 @@
   "gpus": {
     "3EA0": [
       {
-        "name": "Intel UHD Graphics 620 Mobile",
+        "name": "UHD Graphics 620 Mobile",
         "revisions": [
           "02"
         ],
@@ -47,13 +47,128 @@
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-750.c3767"
       }
     ],
+    "4680": [
+      {
+        "name": "UHD Graphics 770",
+        "revisions": [
+          "0C"
+        ],
+        "codeName": "Alder Lake-S GT1",
+        "technology": "10 nm",
+        "dieSize": "215 mm²",
+        "releaseDate": "Nov 4th, 2021",
+        "transistors": "N/A",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "32 EU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1450 MHz",
+        "defMemClock": "N/A",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-770.c3848"
+      }
+    ],
+    "A780": [
+      {
+        "name": "UHD Graphics 770",
+        "revisions": [
+          "04"
+        ],
+        "codeName": "Raptor Lake-S GT1",
+        "technology": "10 nm",
+        "dieSize": "257 mm²",
+        "releaseDate": "Oct 20th, 2022",
+        "transistors": "N/A",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "32 EU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "300 MHz",
+        "defBoostClock": "1650 MHz",
+        "defMemClock": "N/A",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-770.c3848"
+      }
+    ],
+    "56A0": [
+      {
+        "name": "Arc A770",
+        "revisions": [
+          "08"
+        ],
+        "codeName": "Alchemist ACM-G10",
+        "technology": "6 nm",
+        "dieSize": "406 mm²",
+        "releaseDate": "Oct 12th, 2022",
+        "transistors": "21700M",
+        "rops": "128",
+        "tmus": "256",
+        "shaders": "4096 Unified",
+        "computeUnits": "32 Xe-Cores",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "2100 MHz",
+        "defBoostClock": "2400 MHz",
+        "defMemClock": "2187 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a770.c3914"
+      }
+    ],
     "56A1": [
+      {
+        "name": "Arc A750",
+        "revisions": [
+          "08"
+        ],
+        "codeName": "Alchemist ACM-G10",
+        "technology": "6 nm",
+        "dieSize": "406 mm²",
+        "releaseDate": "Oct 12th, 2022",
+        "transistors": "21700M",
+        "rops": "112",
+        "tmus": "224",
+        "shaders": "3584 Unified",
+        "computeUnits": "28 Xe-Cores",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "2050 MHz",
+        "defBoostClock": "2400 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a750.c3929"
+      }
+    ],
+    "56A2": [
+      {
+        "name": "Arc A580",
+        "revisions": [
+          "08"
+        ],
+        "codeName": "Alchemist ACM-G10",
+        "technology": "6 nm",
+        "dieSize": "406 mm²",
+        "releaseDate": "Oct 10th, 2023",
+        "transistors": "21700M",
+        "rops": "96",
+        "tmus": "192",
+        "shaders": "3072 Unified",
+        "computeUnits": "24 Xe-Cores",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1700 MHz",
+        "defBoostClock": "2000 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a580.c3912"
+      }
+    ],
+    "56A5": [
       {
         "name": "Arc A380",
         "revisions": [
           "05"
         ],
-        "codeName": "Alchemist DG2-128",
+        "codeName": "Alchemist ACM-G11",
         "technology": "6 nm",
         "dieSize": "157 mm²",
         "releaseDate": "Jun 14th, 2022",
@@ -61,13 +176,36 @@
         "rops": "32",
         "tmus": "64",
         "shaders": "1024 Unified",
-        "computeUnits": "128 EU",
+        "computeUnits": "8 Xe-Cores",
         "memoryType": "GDDR6",
         "busWidth": "96 bit",
         "defGpuClock": "2000 MHz",
         "defBoostClock": "2450 MHz",
         "defMemClock": "1937 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a380.c3913"
+      }
+    ],
+    "56A6": [
+      {
+        "name": "Arc A310",
+        "revisions": [
+          "05"
+        ],
+        "codeName": "Alchemist ACM-G11",
+        "technology": "6 nm",
+        "dieSize": "157 mm²",
+        "releaseDate": "Sep 28th, 2022",
+        "transistors": "7200M",
+        "rops": "24",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "6 Xe-Cores",
+        "memoryType": "GDDR6",
+        "busWidth": "64 bit",
+        "defGpuClock": "2000 MHz",
+        "defBoostClock": "2000 MHz",
+        "defMemClock": "1937 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a310.c3930"
       }
     ],
     "9A49": [
