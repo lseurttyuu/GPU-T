@@ -426,6 +426,13 @@ public static class GpuFeatureDetection
     {
         string maxSpeedStr = ReadSysfsFile(basePath, "max_link_speed");
         string maxWidthStr = ReadSysfsFile(basePath, "max_link_width");
+
+        // Handle non-standard link widths (e.g., 255 for integrated GPUs)
+        if (int.TryParse(maxWidthStr, out int w) && (w > 32 || w <= 0))
+        {
+            return "Internal (Integrated)";
+        }
+
         string maxGen = "Unknown";
         if (double.TryParse(Regex.Match(maxSpeedStr, @"(\d+\.?\d*)").Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double maxSpeedVal))
         {

@@ -23,6 +23,75 @@
         "defMemClock": "N/A",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-620-mobile.c2909"
       }
+    ],
+    "4C8A": [
+      {
+        "name": "UHD Graphics 750",
+        "revisions": [
+          "04"
+        ],
+        "codeName": "Rocket Lake GT1",
+        "technology": "14 nm",
+        "dieSize": "N/A",
+        "releaseDate": "Mar 16th, 2021",
+        "transistors": "N/A",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "256 Unified",
+        "computeUnits": "32 EU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "350 MHz",
+        "defBoostClock": "1300 MHz",
+        "defMemClock": "N/A",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-750.c3767"
+      }
+    ],
+    "56A1": [
+      {
+        "name": "Arc A380",
+        "revisions": [
+          "05"
+        ],
+        "codeName": "Alchemist DG2-128",
+        "technology": "6 nm",
+        "dieSize": "157 mm²",
+        "releaseDate": "Jun 14th, 2022",
+        "transistors": "7200M",
+        "rops": "32",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "128 EU",
+        "memoryType": "GDDR6",
+        "busWidth": "96 bit",
+        "defGpuClock": "2000 MHz",
+        "defBoostClock": "2450 MHz",
+        "defMemClock": "1937 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a380.c3913"
+      }
+    ],
+    "9A49": [
+      {
+        "name": "UHD Graphics",
+        "revisions": [
+          "01"
+        ],
+        "codeName": "Tiger Lake GT2",
+        "technology": "10 nm",
+        "dieSize": "N/A",
+        "releaseDate": "Sep 2nd, 2020",
+        "transistors": "N/A",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "384 Unified",
+        "computeUnits": "48 EU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "400 MHz",
+        "defBoostClock": "1100 MHz",
+        "defMemClock": "N/A",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics.c3672"
+      }
     ]
   }
 }
