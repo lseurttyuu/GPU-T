@@ -150,23 +150,23 @@ public class LinuxIntelGpuProbe : IGpuProbe
         // Dynamic Spec Calculations (Fillrates & Bandwidth)
         if (spec != null)
         {
-            double busWidth = CommonGpuHelpers.ExtractNumber(spec.BusWidth);
-            double memClock = CommonGpuHelpers.ExtractNumber(spec.DefMemClock);
-            double rops = CommonGpuHelpers.ExtractNumber(spec.Rops);
-            double tmus = CommonGpuHelpers.ExtractNumber(spec.Tmus);
+            double bWidth = CommonGpuHelpers.ExtractNumber(spec.BusWidth);
+            double mClock = CommonGpuHelpers.ExtractNumber(spec.DefMemClock);
+            double ropCount = CommonGpuHelpers.ExtractNumber(spec.Rops);
+            double tmuCount = CommonGpuHelpers.ExtractNumber(spec.Tmus);
             double multiplier = CommonGpuHelpers.GetMemoryMultiplier(spec.MemoryType);
 
-            if (busWidth > 0 && memClock > 0)
+            if (bWidth > 0 && mClock > 0)
             {
-                double bw = (busWidth * memClock * multiplier) / 8000.0;
+                double bw = (bWidth * mClock * multiplier) / 8000.0;
                 bandwidth = $"{bw:F1} GB/s";
             }
 
             double fillClock = activeGpuMHz > 0 ? activeGpuMHz : CommonGpuHelpers.ExtractNumber(spec.DefGpuClock);
             if (fillClock > 0)
             {
-                if (rops > 0) pixelFillrate = $"{(rops * fillClock) / 1000.0:F1} GPixel/s";
-                if (tmus > 0) textureFillrate = $"{(tmus * fillClock) / 1000.0:F1} GTexel/s";
+                if (ropCount > 0) pixelFillrate = $"{(ropCount * fillClock) / 1000.0:F1} GPixel/s";
+                if (tmuCount > 0) textureFillrate = $"{(tmuCount * fillClock) / 1000.0:F1} GTexel/s";
             }
         }
 
