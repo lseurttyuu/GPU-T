@@ -247,6 +247,11 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isCudaEnabled;
 
     /// <summary>
+    /// Indicates availability of oneAPI on the detected GPU.
+    /// </summary>
+    [ObservableProperty] private bool _isOneApiEnabled;
+
+    /// <summary>
     /// Indicates availability of ROCm on the detected GPU.
     /// </summary>
     [ObservableProperty] private bool _isRocmEnabled;
@@ -289,6 +294,11 @@ public partial class MainWindowViewModel : ViewModelBase
     /// Indicates if the current GPU is from AMD (used to enable/disable specific UI elements).
     /// </summary>
     [ObservableProperty] private bool _isAmdVendor;
+
+    /// <summary>
+    /// Indicates if the current GPU is from Intel (used to enable/disable specific UI elements).
+    /// </summary>
+    [ObservableProperty] private bool _isIntelVendor;
 
     /// <summary>
     /// Dynamic label for the Compute Units field, varying by vendor (SM Count for NVIDIA).
@@ -515,6 +525,7 @@ public partial class MainWindowViewModel : ViewModelBase
         IsHsaEnabled = data.IsHsaAvailable; 
         IsOpenClEnabled = data.IsOpenClAvailable;
         IsCudaEnabled = data.IsCudaAvailable;
+        IsOneApiEnabled = data.IsOneApiAvailable;
         IsRocmEnabled = data.IsRocmAvailable;
         IsVulkanEnabled = data.IsVulkanAvailable;
         IsUefiEnabled = data.IsUefiAvailable;
@@ -546,6 +557,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         IsNvidiaVendor = _currentVendorName == "NVIDIA";
         IsAmdVendor = _currentVendorName == "AMD";
+        IsIntelVendor = _currentVendorName == "Intel";
 
         VendorLogo = LoadBitmapFromAssets(GetVendorLogoPath());
 

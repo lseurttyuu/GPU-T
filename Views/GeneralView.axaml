@@ -254,6 +254,7 @@
                      <CheckBox Content="CUDA" IsChecked="{Binding IsCudaEnabled}" IsEnabled="{Binding IsNvidiaVendor}" Classes="GpuZ" Margin="11,0,0,0"/>
                      <CheckBox Content="ROCm" IsChecked="{Binding IsRocmEnabled}" IsEnabled="{Binding IsAmdVendor}" Classes="GpuZ" Margin="11,0,0,0"/>
                      <CheckBox Content="HIP" IsChecked="{Binding IsHsaEnabled}" IsEnabled="{Binding IsAmdVendor}" Classes="GpuZ" Margin="11,0,0,0"/>
+                     <CheckBox Content="oneAPI" IsChecked="{Binding IsOneApiEnabled}" IsEnabled="{Binding IsIntelVendor}" Classes="GpuZ" Margin="11,0,0,0"/>
                  </StackPanel>
             </StackPanel>
         </Grid>

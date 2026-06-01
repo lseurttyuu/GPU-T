@@ -159,14 +159,14 @@ public class LinuxIntelGpuProbe : IGpuProbe
             if (bWidth > 0 && mClock > 0)
             {
                 double bw = (bWidth * mClock * multiplier) / 8000.0;
-                bandwidth = $"{bw:F1} GB/s";
+                bandwidth = bw.ToString("F1", CultureInfo.InvariantCulture) + " GB/s";
             }
 
             double fillClock = activeGpuMHz > 0 ? activeGpuMHz : CommonGpuHelpers.ExtractNumber(spec.DefGpuClock);
             if (fillClock > 0)
             {
-                if (ropCount > 0) pixelFillrate = $"{(ropCount * fillClock) / 1000.0:F1} GPixel/s";
-                if (tmuCount > 0) textureFillrate = $"{(tmuCount * fillClock) / 1000.0:F1} GTexel/s";
+                if (ropCount > 0) pixelFillrate = ((ropCount * fillClock) / 1000.0).ToString("F1", CultureInfo.InvariantCulture) + " GPixel/s";
+                if (tmuCount > 0) textureFillrate = ((tmuCount * fillClock) / 1000.0).ToString("F1", CultureInfo.InvariantCulture) + " GTexel/s";
             }
         }
 
@@ -180,6 +180,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
 
         // OpenCL: check for Intel ICD
         bool isOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("intel.icd", "intel_icd.x86_64.icd");
+        bool isOneApiAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libze_intel_gpu.so.1");
 
         return new GpuStaticData
         {
@@ -222,6 +223,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
             CurrentMemClock = "N/A",
 
             IsOpenClAvailable = isOpenClAvailable,
+            IsOneApiAvailable = isOneApiAvailable,
             IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "intel_icd.x86_64.json", "intel_icd.i686.json", "intel_hasvk.json", "intel_xe_icd.x86_64.json", "intel_xe_icd.i686.json"),
             IsOpenglAvailable = isOpenglAvailable,
             IsRayTracingAvailable = isRayTracingAvailable,
@@ -258,10 +260,19 @@ public class LinuxIntelGpuProbe : IGpuProbe
         double powerW = GetPowerUsageW();
         int load = GetGpuLoad();
 
+        double memClock = 0;
+        if (_driverName == "xe")
+        {
+            // Try to find memory frequency for discrete Arc GPUs
+            string curMemFreq = ReadDeviceFile("tile0/vram0/freq0/act_freq");
+            if (string.IsNullOrEmpty(curMemFreq)) curMemFreq = ReadDeviceFile("tile0/vram0/freq0/cur_freq");
+            if (!string.IsNullOrEmpty(curMemFreq)) double.TryParse(curMemFreq, NumberStyles.Any, CultureInfo.InvariantCulture, out memClock);
+        }
+
         return new GpuSensorData
         {
             GpuClock = gpuClock,
-            MemoryClock = 0,
+            MemoryClock = memClock,
             GpuTemp = gpuTemp,
             FanPercent = GetFanPercent(),
             BoardPower = powerW,
@@ -284,6 +295,16 @@ public class LinuxIntelGpuProbe : IGpuProbe
         avail.HasPower = GetPowerUsageW() > 0;
         avail.HasMemUsed = GetTotalVramBytes() > 0;
         avail.HasFan = GetFanPercent() > 0;
+
+        if (_driverName == "xe")
+        {
+            // Discrete Arc GPUs on 'xe' often expose memory frequency
+            string memFreq = ReadDeviceFile("tile0/vram0/freq0/act_freq");
+            if (!string.IsNullOrEmpty(memFreq))
+            {
+                // We'll treat this as a signal that Memory Clock sensor is available
+            }
+        }
 
         // Temperature is usually available via hwmon
         if (GetGpuTemperature() > 0) avail.HasHotSpot = false; // We use GpuTemp

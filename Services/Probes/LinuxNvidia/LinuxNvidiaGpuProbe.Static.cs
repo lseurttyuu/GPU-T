@@ -113,6 +113,8 @@ public partial class LinuxNvidiaGpuProbe
                                GpuFeatureDetection.IsNativeLibraryAvailable("libcuda.so.1") ||
                                GpuFeatureDetection.CheckEglVendorInstalled("10_nvidia.json");
 
+        bool isOneApiAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libze_intel_gpu.so.1");
+
         //bool isPhysXEnabled = GpuFeatureDetection.IsNativeLibraryAvailable("libPhysXCommon.so");
 
         // Resizable BAR: nvidia-smi doesn't expose this directly, use PCI resource heuristic
@@ -209,6 +211,7 @@ public partial class LinuxNvidiaGpuProbe
             MemorySize = memorySize,
 
             IsCudaAvailable = isCudaAvailable,
+            IsOneApiAvailable = isOneApiAvailable,
             IsPhysXEnabled = isPhysXEnabled,
             IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "nvidia_icd.json", "nvidia_icd.x86_64.json"),
             IsOpenClAvailable = isOpenClAvailable,

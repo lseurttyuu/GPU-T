@@ -140,6 +140,7 @@ public class LinuxGenericGpuProbe : IGpuProbe
             
             // Assume vendor-specific tech is unavailable
             IsCudaAvailable = false,
+            IsOneApiAvailable = false,
             IsPhysXEnabled = false,
             IsOpenClAvailable = false,
             IsRayTracingAvailable = false

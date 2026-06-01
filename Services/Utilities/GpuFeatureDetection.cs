@@ -515,6 +515,14 @@ public static class GpuFeatureDetection
     {
         try
         {
+            // Intel iGPUs or other internal graphics that don't report VRAM through standard PCIe BARs
+            string vendor = ReadSysfsFile(basePath, "vendor").Replace("0x", "").ToUpper();
+            string maxWidthStr = ReadSysfsFile(basePath, "max_link_width");
+            if (vendor == "8086" && int.TryParse(maxWidthStr, out int w) && (w > 32 || w <= 0))
+            {
+                return "Internal";
+            }
+
             if (totalVramBytes == 0) return "N/A";
 
             string resourceContent = ReadSysfsFile(basePath, "resource");

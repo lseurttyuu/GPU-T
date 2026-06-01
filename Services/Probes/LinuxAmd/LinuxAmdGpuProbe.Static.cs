@@ -71,6 +71,7 @@ public partial class LinuxAmdGpuProbe
         bool isRayTracingAvailable = GpuFeatureDetection.CheckRayTracingSupportVulkan(ids.Device);
 
         bool isOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("amdocl64.icd", "mesa.icd", "rusticl.icd");
+        bool isOneApiAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libze_intel_gpu.so.1");
 
         //string pixelFill = "N/A";
         //string texFill = "N/A";
@@ -166,6 +167,7 @@ public partial class LinuxAmdGpuProbe
 
             IsHsaAvailable = isHipAvailable,
             IsRocmAvailable = isRocmAvailable,
+            IsOneApiAvailable = isOneApiAvailable,
             IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "radeon_icd.x86_64.json", "radeon_icd.i686.json"),
             IsOpenClAvailable = isOpenClAvailable,
             IsUefiAvailable = CommonGpuHelpers.CheckGpuUefiSupport(spec?.ReleaseDate),
