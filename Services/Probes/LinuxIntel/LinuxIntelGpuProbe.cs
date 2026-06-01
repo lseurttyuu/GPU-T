@@ -336,31 +336,18 @@ public class LinuxIntelGpuProbe : IGpuProbe
 
     private double GetPowerUsageW()
     {
-        // Try hwmon for power
+        string hwmonPath = GetSpecificHwmonPath();
+        if (string.IsNullOrEmpty(hwmonPath)) return 0;
+
         try
         {
-            string baseDir = "/sys/class/hwmon/";
-            if (Directory.Exists(baseDir))
-            {
-                foreach (var dir in Directory.GetDirectories(baseDir))
-                {
-                    string namePath = Path.Combine(dir, "name");
-                    if (File.Exists(namePath))
-                    {
-                        string name = File.ReadAllText(namePath).Trim();
-                        if (name == "i915" || name == "xe")
-                        {
-                            string pwrPath = Path.Combine(dir, "power1_average");
-                            if (!File.Exists(pwrPath)) pwrPath = Path.Combine(dir, "power1_input");
+            string pwrPath = Path.Combine(hwmonPath, "power1_average");
+            if (!File.Exists(pwrPath)) pwrPath = Path.Combine(hwmonPath, "power1_input");
 
-                            if (File.Exists(pwrPath))
-                            {
-                                if (double.TryParse(File.ReadAllText(pwrPath).Trim(), out double val))
-                                    return val / 1000000.0;
-                            }
-                        }
-                    }
-                }
+            if (File.Exists(pwrPath))
+            {
+                if (double.TryParse(File.ReadAllText(pwrPath).Trim(), out double val))
+                    return val / 1000000.0;
             }
         }
         catch { }
@@ -369,31 +356,19 @@ public class LinuxIntelGpuProbe : IGpuProbe
 
     private int GetFanPercent()
     {
+        string hwmonPath = GetSpecificHwmonPath();
+        if (string.IsNullOrEmpty(hwmonPath)) return 0;
+
         try
         {
-            string baseDir = "/sys/class/hwmon/";
-            if (Directory.Exists(baseDir))
+            string pwmPath = Path.Combine(hwmonPath, "pwm1");
+            string pwmMaxPath = Path.Combine(hwmonPath, "pwm1_max");
+            if (File.Exists(pwmPath) && File.Exists(pwmMaxPath))
             {
-                foreach (var dir in Directory.GetDirectories(baseDir))
+                if (double.TryParse(File.ReadAllText(pwmPath).Trim(), out double cur) &&
+                    double.TryParse(File.ReadAllText(pwmMaxPath).Trim(), out double max) && max > 0)
                 {
-                    string namePath = Path.Combine(dir, "name");
-                    if (File.Exists(namePath))
-                    {
-                        string name = File.ReadAllText(namePath).Trim();
-                        if (name == "i915" || name == "xe")
-                        {
-                            string pwmPath = Path.Combine(dir, "pwm1");
-                            string pwmMaxPath = Path.Combine(dir, "pwm1_max");
-                            if (File.Exists(pwmPath) && File.Exists(pwmMaxPath))
-                            {
-                                if (double.TryParse(File.ReadAllText(pwmPath).Trim(), out double cur) &&
-                                    double.TryParse(File.ReadAllText(pwmMaxPath).Trim(), out double max) && max > 0)
-                                {
-                                    return (int)((cur / max) * 100.0);
-                                }
-                            }
-                        }
-                    }
+                    return (int)((cur / max) * 100.0);
                 }
             }
         }
@@ -438,32 +413,21 @@ public class LinuxIntelGpuProbe : IGpuProbe
     /// </summary>
     private double GetGpuTemperature()
     {
-        // Try hwmon directories for an i915-named sensor
-        try
+        // Try specific hwmon linked to this device
+        string hwmonPath = GetSpecificHwmonPath();
+        if (!string.IsNullOrEmpty(hwmonPath))
         {
-            string baseDir = "/sys/class/hwmon/";
-            if (Directory.Exists(baseDir))
+            try
             {
-                foreach (var dir in Directory.GetDirectories(baseDir))
+                string tempPath = Path.Combine(hwmonPath, "temp1_input");
+                if (File.Exists(tempPath))
                 {
-                    string namePath = Path.Combine(dir, "name");
-                    if (File.Exists(namePath))
-                    {
-                        string name = File.ReadAllText(namePath).Trim();
-                        if (name == "i915" || name == "xe")
-                        {
-                            string tempPath = Path.Combine(dir, "temp1_input");
-                            if (File.Exists(tempPath))
-                            {
-                                if (double.TryParse(File.ReadAllText(tempPath).Trim(), out double val))
-                                    return val / 1000.0;
-                            }
-                        }
-                    }
+                    if (double.TryParse(File.ReadAllText(tempPath).Trim(), out double val))
+                        return val / 1000.0;
                 }
             }
+            catch { }
         }
-        catch { }
 
         // Fallback: scan thermal zones for an Intel GPU zone
         try
@@ -495,6 +459,52 @@ public class LinuxIntelGpuProbe : IGpuProbe
         catch { }
 
         return 0;
+    }
+
+    /// <summary>
+    /// Attempts to find the hwmon directory specifically linked to this GPU.
+    /// </summary>
+    private string GetSpecificHwmonPath()
+    {
+        try
+        {
+            // Path 1: Check device-internal hwmon directory (modern kernels)
+            string internalHwmon = Path.Combine(_basePath, "hwmon");
+            if (Directory.Exists(internalHwmon))
+            {
+                var dirs = Directory.GetDirectories(internalHwmon, "hwmon*");
+                if (dirs.Length > 0) return dirs[0];
+            }
+
+            // Path 2: Global scan with device link verification
+            string baseDir = "/sys/class/hwmon/";
+            if (Directory.Exists(baseDir))
+            {
+                foreach (var dir in Directory.GetDirectories(baseDir))
+                {
+                    string namePath = Path.Combine(dir, "name");
+                    if (File.Exists(namePath))
+                    {
+                        string name = File.ReadAllText(namePath).Trim();
+                        if (name == "i915" || name == "xe")
+                        {
+                            // Verify this hwmon actually belongs to our PCI device
+                            string deviceLink = Path.Combine(dir, "device");
+                            if (Directory.Exists(deviceLink) || File.Exists(deviceLink))
+                            {
+                                string realPath = Path.GetFullPath(deviceLink);
+                                if (realPath.Contains(_basePath, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    return dir;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
+        return "";
     }
 
     #endregion
