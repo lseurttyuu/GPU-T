@@ -562,14 +562,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private string GetVendorLogoPath()
     {
-        // For development/testing purposes, we can enable experimental support for Intel to show their logo and test theme responsiveness.
-        if (AppConfig.EnableExperimentalGpuSupport)
+        if (_currentVendorName == "Intel")
         {
-            if (_currentVendorName == "Intel")
-            {
-                return "/Assets/intel_logo.png";
-            }
+            return "/Assets/intel_logo.png";
         }
+
 
         if (_currentVendorName == "NVIDIA")
         {
