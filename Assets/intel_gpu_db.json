@@ -208,6 +208,98 @@
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a310.c3930"
       }
     ],
+    "5690": [
+      {
+        "name": "Arc A770M",
+        "revisions": [
+          "08"
+        ],
+        "codeName": "Alchemist ACM-G10",
+        "technology": "6 nm",
+        "dieSize": "406 mm²",
+        "releaseDate": "Jun 1st, 2022",
+        "transistors": "21700M",
+        "rops": "128",
+        "tmus": "256",
+        "shaders": "4096 Unified",
+        "computeUnits": "32 Xe-Cores",
+        "memoryType": "GDDR6",
+        "busWidth": "256 bit",
+        "defGpuClock": "1650 MHz",
+        "defBoostClock": "2050 MHz",
+        "defMemClock": "2000 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a770m.c3905"
+      }
+    ],
+    "5691": [
+      {
+        "name": "Arc A730M",
+        "revisions": [
+          "08"
+        ],
+        "codeName": "Alchemist ACM-G10",
+        "technology": "6 nm",
+        "dieSize": "406 mm²",
+        "releaseDate": "Jun 1st, 2022",
+        "transistors": "21700M",
+        "rops": "96",
+        "tmus": "192",
+        "shaders": "3072 Unified",
+        "computeUnits": "24 Xe-Cores",
+        "memoryType": "GDDR6",
+        "busWidth": "192 bit",
+        "defGpuClock": "1100 MHz",
+        "defBoostClock": "1425 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a730m.c3906"
+      }
+    ],
+    "5693": [
+      {
+        "name": "Arc A370M",
+        "revisions": [
+          "05"
+        ],
+        "codeName": "Alchemist ACM-G11",
+        "technology": "6 nm",
+        "dieSize": "157 mm²",
+        "releaseDate": "Mar 30th, 2022",
+        "transistors": "7200M",
+        "rops": "32",
+        "tmus": "64",
+        "shaders": "1024 Unified",
+        "computeUnits": "8 Xe-Cores",
+        "memoryType": "GDDR6",
+        "busWidth": "64 bit",
+        "defGpuClock": "1550 MHz",
+        "defBoostClock": "2050 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a370m.c3907"
+      }
+    ],
+    "5694": [
+      {
+        "name": "Arc A350M",
+        "revisions": [
+          "05"
+        ],
+        "codeName": "Alchemist ACM-G11",
+        "technology": "6 nm",
+        "dieSize": "157 mm²",
+        "releaseDate": "Mar 30th, 2022",
+        "transistors": "7200M",
+        "rops": "24",
+        "tmus": "48",
+        "shaders": "768 Unified",
+        "computeUnits": "6 Xe-Cores",
+        "memoryType": "GDDR6",
+        "busWidth": "64 bit",
+        "defGpuClock": "1150 MHz",
+        "defBoostClock": "2050 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a350m.c3908"
+      }
+    ],
     "9A49": [
       {
         "name": "UHD Graphics",

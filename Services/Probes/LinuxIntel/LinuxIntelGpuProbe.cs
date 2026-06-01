@@ -115,12 +115,17 @@ public class LinuxIntelGpuProbe : IGpuProbe
         // Read clocks
         string currentGpuClock = "---";
         string currentBoostClock = "---";
+        double activeGpuMHz = 0;
 
         if (_driverName == "xe")
         {
             string curFreq = ReadDeviceFile("tile0/gt0/freq0/act_freq");
             if (string.IsNullOrEmpty(curFreq)) curFreq = ReadDeviceFile("tile0/gt0/freq0/cur_freq");
-            if (!string.IsNullOrEmpty(curFreq)) currentGpuClock = $"{curFreq} MHz";
+            if (!string.IsNullOrEmpty(curFreq))
+            {
+                currentGpuClock = $"{curFreq} MHz";
+                double.TryParse(curFreq, out activeGpuMHz);
+            }
 
             string maxFreq = ReadDeviceFile("tile0/gt0/freq0/rp0_freq");
             if (!string.IsNullOrEmpty(maxFreq)) currentBoostClock = $"{maxFreq} MHz";
@@ -128,7 +133,11 @@ public class LinuxIntelGpuProbe : IGpuProbe
         else // i915 or fallback
         {
             string curGpuClockStr = ReadDrmFile("gt_cur_freq_mhz");
-            if (!string.IsNullOrEmpty(curGpuClockStr)) currentGpuClock = $"{curGpuClockStr} MHz";
+            if (!string.IsNullOrEmpty(curGpuClockStr))
+            {
+                currentGpuClock = $"{curGpuClockStr} MHz";
+                double.TryParse(curGpuClockStr, out activeGpuMHz);
+            }
 
             string boostClockStr = ReadDrmFile("gt_boost_freq_mhz");
             if (!string.IsNullOrEmpty(boostClockStr)) currentBoostClock = $"{boostClockStr} MHz";
@@ -137,6 +146,29 @@ public class LinuxIntelGpuProbe : IGpuProbe
         // Memory size detection
         long totalVramBytes = GetTotalVramBytes();
         string memorySize = totalVramBytes > 0 ? $"{totalVramBytes / (1024 * 1024)} MB" : "System Shared";
+
+        // Dynamic Spec Calculations (Fillrates & Bandwidth)
+        if (spec != null)
+        {
+            double busWidth = CommonGpuHelpers.ExtractNumber(spec.BusWidth);
+            double memClock = CommonGpuHelpers.ExtractNumber(spec.DefMemClock);
+            double rops = CommonGpuHelpers.ExtractNumber(spec.Rops);
+            double tmus = CommonGpuHelpers.ExtractNumber(spec.Tmus);
+            double multiplier = CommonGpuHelpers.GetMemoryMultiplier(spec.MemoryType);
+
+            if (busWidth > 0 && memClock > 0)
+            {
+                double bw = (busWidth * memClock * multiplier) / 8000.0;
+                bandwidth = $"{bw:F1} GB/s";
+            }
+
+            double fillClock = activeGpuMHz > 0 ? activeGpuMHz : CommonGpuHelpers.ExtractNumber(spec.DefGpuClock);
+            if (fillClock > 0)
+            {
+                if (rops > 0) pixelFillrate = $"{(rops * fillClock) / 1000.0:F1} GPixel/s";
+                if (tmus > 0) textureFillrate = $"{(tmus * fillClock) / 1000.0:F1} GTexel/s";
+            }
+        }
 
         string driverVersion = GpuFeatureDetection.GetRealDriverVersion(ids.Device);
         string driverDate = GpuFeatureDetection.GetKernelDriverDate();
