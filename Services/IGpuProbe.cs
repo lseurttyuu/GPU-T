@@ -80,6 +80,8 @@ public record GpuStaticData
     public bool IsCudaAvailable { get; init; }
     /// <summary>Indicates if oneAPI is available.</summary>
     public bool IsOneApiAvailable { get; init; }
+    /// <summary>Indicates if SYCL is available.</summary>
+    public bool IsSyclAvailable { get; init; }
     /// <summary>Indicates if ROCm is available.</summary>
     public bool IsRocmAvailable { get; init; }
     /// <summary>Indicates if HSA is available.</summary>

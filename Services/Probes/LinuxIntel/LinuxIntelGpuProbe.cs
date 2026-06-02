@@ -77,7 +77,9 @@ public class LinuxIntelGpuProbe : IGpuProbe
         string textureFillrate = "N/A";
         string bandwidth = "N/A";
 
-        var spec = PciIdLookup.GetSpecs(ids.Vendor, ids.Device, revId);
+        // Ensure revision ID is padded for consistent database lookup
+        string paddedRev = revId.PadLeft(2, '0').ToUpper();
+        var spec = PciIdLookup.GetSpecs(ids.Vendor, ids.Device, paddedRev);
         if (spec != null)
         {
             deviceName = spec.Name;
@@ -146,6 +148,16 @@ public class LinuxIntelGpuProbe : IGpuProbe
         // Memory size detection
         long totalVramBytes = GetTotalVramBytes();
         string memorySize = totalVramBytes > 0 ? $"{totalVramBytes / (1024 * 1024)} MB" : "System Shared";
+        // Attempt database fallback for memory size if sysfs returns 0
+        if (totalVramBytes == 0 && spec != null && spec.MemoryType != "N/A" && spec.MemoryType != "System Shared")
+        {
+             // Extract memory size from spec.MemoryType if it contains "GB" or "MB"
+             var match = Regex.Match(spec.MemoryType, @"(\d+\s*(GB|MB))", RegexOptions.IgnoreCase);
+             if (match.Success)
+             {
+                 memorySize = match.Groups[1].Value;
+             }
+        }
 
         // Dynamic Spec Calculations (Fillrates & Bandwidth)
         if (spec != null)
@@ -178,9 +190,18 @@ public class LinuxIntelGpuProbe : IGpuProbe
         bool isOpenglAvailable = GpuFeatureDetection.CheckOpenglSupport();
         bool isRayTracingAvailable = GpuFeatureDetection.CheckRayTracingSupportVulkan(ids.Device);
 
-        // OpenCL: check for Intel ICD
+        // Intel-specific computing technologies
         bool isOpenClAvailable = GpuFeatureDetection.CheckOpenClIcdInstalled("intel.icd", "intel_icd.x86_64.icd");
         bool isOneApiAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libze_intel_gpu.so.1");
+        // SYCL: On Linux, Intel SYCL is typically implemented over Level Zero (oneAPI) or standalone libsycl
+        bool isSyclAvailable = isOneApiAvailable || GpuFeatureDetection.IsNativeLibraryAvailable("libsycl.so.7") || GpuFeatureDetection.IsNativeLibraryAvailable("libsycl.so");
+
+        string biosVersion = "N/A";
+        if (_driverName == "xe")
+        {
+            string gmd = ReadDeviceFile("gmd_id");
+            if (!string.IsNullOrEmpty(gmd)) biosVersion = $"GMD {gmd}";
+        }
 
         return new GpuStaticData
         {
@@ -189,7 +210,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
             DeviceId = $"{ids.Vendor} {ids.Device} - {ids.SubVendor} {ids.SubDevice}",
             Subvendor = PciIdLookup.LookupVendorName(ids.SubVendor),
             BusId = busId,
-            BiosVersion = "N/A",
+            BiosVersion = biosVersion,
             DriverVersion = driverVersion,
             DriverDate = driverDate,
             VulkanApi = vulkanApi,
@@ -224,6 +245,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
 
             IsOpenClAvailable = isOpenClAvailable,
             IsOneApiAvailable = isOneApiAvailable,
+            IsSyclAvailable = isSyclAvailable,
             IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "intel_icd.x86_64.json", "intel_icd.i686.json", "intel_hasvk.json", "intel_xe_icd.x86_64.json", "intel_xe_icd.i686.json"),
             IsOpenglAvailable = isOpenglAvailable,
             IsRayTracingAvailable = isRayTracingAvailable,

@@ -252,6 +252,11 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isOneApiEnabled;
 
     /// <summary>
+    /// Indicates availability of SYCL on the detected GPU.
+    /// </summary>
+    [ObservableProperty] private bool _isSyclEnabled;
+
+    /// <summary>
     /// Indicates availability of ROCm on the detected GPU.
     /// </summary>
     [ObservableProperty] private bool _isRocmEnabled;
@@ -526,6 +531,7 @@ public partial class MainWindowViewModel : ViewModelBase
         IsOpenClEnabled = data.IsOpenClAvailable;
         IsCudaEnabled = data.IsCudaAvailable;
         IsOneApiEnabled = data.IsOneApiAvailable;
+        IsSyclEnabled = data.IsSyclAvailable;
         IsRocmEnabled = data.IsRocmAvailable;
         IsVulkanEnabled = data.IsVulkanAvailable;
         IsUefiEnabled = data.IsUefiAvailable;

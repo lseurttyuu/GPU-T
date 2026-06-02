@@ -13,7 +13,7 @@ public partial class LinuxNvidiaGpuProbe
     public GpuStaticData LoadStaticData()
     {
         var ids = GpuFeatureDetection.GetRawPciIds(_basePath);
-        string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "").ToUpper();
+        string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "").PadLeft(2, '0').ToUpper();
 
         // Clean and pad the Sub IDs to ensure they are exactly 4 characters each
         string subVendor = ids.SubVendor.Replace("0x", "").PadLeft(4, '0').ToUpper();
@@ -113,8 +113,6 @@ public partial class LinuxNvidiaGpuProbe
                                GpuFeatureDetection.IsNativeLibraryAvailable("libcuda.so.1") ||
                                GpuFeatureDetection.CheckEglVendorInstalled("10_nvidia.json");
 
-        bool isOneApiAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libze_intel_gpu.so.1");
-
         //bool isPhysXEnabled = GpuFeatureDetection.IsNativeLibraryAvailable("libPhysXCommon.so");
 
         // Resizable BAR: nvidia-smi doesn't expose this directly, use PCI resource heuristic
@@ -211,7 +209,8 @@ public partial class LinuxNvidiaGpuProbe
             MemorySize = memorySize,
 
             IsCudaAvailable = isCudaAvailable,
-            IsOneApiAvailable = isOneApiAvailable,
+            IsOneApiAvailable = false,
+            IsSyclAvailable = false,
             IsPhysXEnabled = isPhysXEnabled,
             IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "nvidia_icd.json", "nvidia_icd.x86_64.json"),
             IsOpenClAvailable = isOpenClAvailable,

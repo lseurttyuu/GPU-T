@@ -477,18 +477,29 @@ public static class GpuFeatureDetection
             {
                 string speedStr = ReadSysfsFile(basePath, "current_link_speed");
                 string widthStr = ReadSysfsFile(basePath, "current_link_width");
-                currentWidth = widthStr;
-                var match = Regex.Match(speedStr, @"(\d+\.?\d*)");
-                if (match.Success)
+
+                if (speedStr != "N/A" && widthStr != "N/A")
                 {
-                    double speedGt = double.Parse(match.Value, CultureInfo.InvariantCulture);
-                    currentGen = SpeedToGen(speedGt);
+                    currentWidth = widthStr;
+                    var match = Regex.Match(speedStr, @"(\d+\.?\d*)");
+                    if (match.Success)
+                    {
+                        double speedGt = double.Parse(match.Value, CultureInfo.InvariantCulture);
+                        currentGen = SpeedToGen(speedGt);
+                    }
+                }
+                else
+                {
+                    // If current speed/width are N/A, they might be in a low-power state or intermittent.
+                    // Fall back to max values as a last resort instead of "N/A @ x? ?"
+                    currentWidth = maxWidthStr;
+                    currentGen = maxGen;
                 }
             }
             catch
             {
                 currentWidth = maxWidthStr ?? "Unknown";
-                currentGen = "Unknown";
+                currentGen = maxGen;
             }
         }
         return $"{capability} @ x{currentWidth} {currentGen}";

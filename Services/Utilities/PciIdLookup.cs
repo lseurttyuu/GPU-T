@@ -45,6 +45,9 @@ public static class PciIdLookup
 
             // Fallback: present a combined name of all known variants to indicate a best-effort match.
             var baseVariant = variantsList[0];
+
+            // If we have multiple variants but no exact match, use the first one's URL if it's likely a generic version,
+            // or just the first one's specs with a combined name.
             var combinedName = string.Join(" / ", variantsList.Select(v => v.Name).Distinct());
 
             return baseVariant.ToGpuSpec(isExactMatch: false, overrideName: combinedName);
