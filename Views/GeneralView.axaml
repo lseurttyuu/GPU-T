@@ -250,12 +250,12 @@
                  <TextBlock Classes="Label" Text="Computing"/>
                  
                  <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                     <CheckBox Content="OpenCL" IsChecked="{Binding IsOpenClEnabled}" Classes="GpuZ"/>
-                     <CheckBox Content="CUDA" IsChecked="{Binding IsCudaEnabled}" IsEnabled="{Binding IsNvidiaVendor}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="ROCm" IsChecked="{Binding IsRocmEnabled}" IsEnabled="{Binding IsAmdVendor}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="HIP" IsChecked="{Binding IsHsaEnabled}" IsEnabled="{Binding IsAmdVendor}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="oneAPI" IsChecked="{Binding IsOneApiEnabled}" IsEnabled="{Binding IsIntelVendor}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="SYCL" IsChecked="{Binding IsSyclEnabled}" IsEnabled="{Binding IsIntelVendor}" Classes="GpuZ" Margin="11,0,0,0"/>
+                     <CheckBox Content="OpenCL" IsChecked="{Binding IsOpenClEnabled}" IsEnabled="{Binding IsOpenClEnabled}" Classes="GpuZ"/>
+                     <CheckBox Content="CUDA" IsChecked="{Binding IsCudaEnabled}" IsEnabled="{Binding IsCudaEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
+                     <CheckBox Content="ROCm" IsChecked="{Binding IsRocmEnabled}" IsEnabled="{Binding IsRocmEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
+                     <CheckBox Content="HIP" IsChecked="{Binding IsHsaEnabled}" IsEnabled="{Binding IsHsaEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
+                     <CheckBox Content="oneAPI" IsChecked="{Binding IsOneApiEnabled}" IsEnabled="{Binding IsOneApiEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
+                     <CheckBox Content="SYCL" IsChecked="{Binding IsSyclEnabled}" IsEnabled="{Binding IsSyclEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
                  </StackPanel>
             </StackPanel>
         </Grid>
@@ -266,10 +266,10 @@
                  <TextBlock Classes="Label" Text="Technologies"/>
                  
                  <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                     <CheckBox Content="Vulkan" IsChecked="{Binding IsVulkanEnabled}" Classes="GpuZ"/>
-                     <CheckBox Content="Ray Tracing" IsChecked="{Binding IsRayTracingEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="PhysX" IsChecked="{Binding IsPhysXEnabled}" IsEnabled="{Binding IsNvidiaVendor}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="OpenGL" IsChecked="{Binding IsOpenglEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
+                     <CheckBox Content="Vulkan" IsChecked="{Binding IsVulkanEnabled}" IsEnabled="{Binding IsVulkanEnabled}" Classes="GpuZ"/>
+                     <CheckBox Content="Ray Tracing" IsChecked="{Binding IsRayTracingEnabled}" IsEnabled="{Binding IsRayTracingEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
+                     <CheckBox Content="PhysX" IsChecked="{Binding IsPhysXEnabled}" IsEnabled="{Binding IsPhysXEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
+                     <CheckBox Content="OpenGL" IsChecked="{Binding IsOpenglEnabled}" IsEnabled="{Binding IsOpenglEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
                  </StackPanel>
             </StackPanel>
         </Grid>

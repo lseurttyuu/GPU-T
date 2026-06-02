@@ -4,10 +4,12 @@
     "1616": [
       {
         "name": "HD Graphics 5500",
-        "revisions": [ "09" ],
+        "revisions": [
+          "09"
+        ],
         "codeName": "Broadwell GT2",
         "technology": "14 nm",
-        "dieSize": "133 mm²",
+        "dieSize": "133 mm\u00b2",
         "releaseDate": "Jan 5th, 2015",
         "transistors": "1300M",
         "rops": "2",
@@ -25,12 +27,14 @@
     "1912": [
       {
         "name": "HD Graphics 530",
-        "revisions": [ "06" ],
+        "revisions": [
+          "06"
+        ],
         "codeName": "Skylake GT2",
         "technology": "14 nm",
-        "dieSize": "122 mm²",
+        "dieSize": "122 mm\u00b2",
         "releaseDate": "Aug 5th, 2015",
-        "transistors": "Unknown",
+        "transistors": "N/A",
         "rops": "8",
         "tmus": "16",
         "shaders": "192 Unified",
@@ -46,12 +50,14 @@
     "5912": [
       {
         "name": "HD Graphics 630",
-        "revisions": [ "04" ],
+        "revisions": [
+          "04"
+        ],
         "codeName": "Kaby Lake GT2",
         "technology": "14 nm",
-        "dieSize": "126 mm²",
+        "dieSize": "126 mm\u00b2",
         "releaseDate": "Jan 3rd, 2017",
-        "transistors": "Unknown",
+        "transistors": "N/A",
         "rops": "3",
         "tmus": "24",
         "shaders": "192 Unified",
@@ -67,12 +73,15 @@
     "3E9B": [
       {
         "name": "UHD Graphics 630",
-        "revisions": [ "00", "02" ],
+        "revisions": [
+          "00",
+          "02"
+        ],
         "codeName": "Coffee Lake GT2",
         "technology": "14 nm",
-        "dieSize": "149 mm²",
+        "dieSize": "149 mm\u00b2",
         "releaseDate": "Oct 5th, 2017",
-        "transistors": "Unknown",
+        "transistors": "N/A",
         "rops": "3",
         "tmus": "24",
         "shaders": "192 Unified",
@@ -88,12 +97,16 @@
     "3EA0": [
       {
         "name": "UHD Graphics 620 Mobile",
-        "revisions": [ "00", "01", "02" ],
+        "revisions": [
+          "00",
+          "01",
+          "02"
+        ],
         "codeName": "Whiskey Lake GT2",
         "technology": "14 nm",
-        "dieSize": "126 mm²",
+        "dieSize": "126 mm\u00b2",
         "releaseDate": "Aug 28th, 2018",
-        "transistors": "Unknown",
+        "transistors": "N/A",
         "rops": "3",
         "tmus": "24",
         "shaders": "192 Unified",
@@ -109,12 +122,14 @@
     "8A52": [
       {
         "name": "Iris Plus Graphics G7",
-        "revisions": [ "07" ],
+        "revisions": [
+          "07"
+        ],
         "codeName": "Ice Lake GT2",
         "technology": "10 nm",
-        "dieSize": "122 mm²",
+        "dieSize": "122 mm\u00b2",
         "releaseDate": "Aug 1st, 2019",
-        "transistors": "Unknown",
+        "transistors": "N/A",
         "rops": "8",
         "tmus": "32",
         "shaders": "512 Unified",
@@ -130,12 +145,16 @@
     "9A49": [
       {
         "name": "Iris Xe Graphics",
-        "revisions": [ "01", "02", "03" ],
+        "revisions": [
+          "01",
+          "02",
+          "03"
+        ],
         "codeName": "Tiger Lake GT2",
         "technology": "10 nm",
-        "dieSize": "146 mm²",
+        "dieSize": "146 mm\u00b2",
         "releaseDate": "Sep 2nd, 2020",
-        "transistors": "Unknown",
+        "transistors": "N/A",
         "rops": "8",
         "tmus": "48",
         "shaders": "768 Unified",
@@ -151,12 +170,18 @@
     "4C8A": [
       {
         "name": "UHD Graphics 750",
-        "revisions": [ "04" ],
+        "revisions": [
+          "00",
+          "01",
+          "02",
+          "03",
+          "04"
+        ],
         "codeName": "Rocket Lake GT1",
         "technology": "14 nm",
-        "dieSize": "276 mm²",
+        "dieSize": "276 mm\u00b2",
         "releaseDate": "Mar 16th, 2021",
-        "transistors": "Unknown",
+        "transistors": "N/A",
         "rops": "8",
         "tmus": "16",
         "shaders": "256 Unified",
@@ -172,12 +197,18 @@
     "4680": [
       {
         "name": "UHD Graphics 770",
-        "revisions": [ "0C" ],
+        "revisions": [
+          "0C",
+          "00",
+          "02",
+          "04",
+          "08"
+        ],
         "codeName": "Alder Lake-S GT1",
         "technology": "10 nm",
-        "dieSize": "215 mm²",
+        "dieSize": "215 mm\u00b2",
         "releaseDate": "Nov 4th, 2021",
-        "transistors": "Unknown",
+        "transistors": "N/A",
         "rops": "8",
         "tmus": "16",
         "shaders": "256 Unified",
@@ -193,12 +224,14 @@
     "A780": [
       {
         "name": "UHD Graphics 770",
-        "revisions": [ "04" ],
+        "revisions": [
+          "04"
+        ],
         "codeName": "Raptor Lake-S GT1",
         "technology": "10 nm",
-        "dieSize": "257 mm²",
+        "dieSize": "257 mm\u00b2",
         "releaseDate": "Oct 20th, 2022",
-        "transistors": "Unknown",
+        "transistors": "N/A",
         "rops": "8",
         "tmus": "16",
         "shaders": "256 Unified",
@@ -214,10 +247,12 @@
     "56A0": [
       {
         "name": "Arc A770",
-        "revisions": [ "08" ],
+        "revisions": [
+          "08"
+        ],
         "codeName": "Alchemist ACM-G10",
         "technology": "6 nm",
-        "dieSize": "406 mm²",
+        "dieSize": "406 mm\u00b2",
         "releaseDate": "Oct 12th, 2022",
         "transistors": "21700M",
         "rops": "128",
@@ -235,10 +270,12 @@
     "56A1": [
       {
         "name": "Arc A750",
-        "revisions": [ "08" ],
+        "revisions": [
+          "08"
+        ],
         "codeName": "Alchemist ACM-G10",
         "technology": "6 nm",
-        "dieSize": "406 mm²",
+        "dieSize": "406 mm\u00b2",
         "releaseDate": "Oct 12th, 2022",
         "transistors": "21700M",
         "rops": "112",
@@ -256,10 +293,12 @@
     "56A2": [
       {
         "name": "Arc A580",
-        "revisions": [ "08" ],
+        "revisions": [
+          "08"
+        ],
         "codeName": "Alchemist ACM-G10",
         "technology": "6 nm",
-        "dieSize": "406 mm²",
+        "dieSize": "406 mm\u00b2",
         "releaseDate": "Oct 10th, 2023",
         "transistors": "21700M",
         "rops": "96",
@@ -277,10 +316,12 @@
     "56A5": [
       {
         "name": "Arc A380",
-        "revisions": [ "05" ],
+        "revisions": [
+          "05"
+        ],
         "codeName": "Alchemist ACM-G11",
         "technology": "6 nm",
-        "dieSize": "157 mm²",
+        "dieSize": "157 mm\u00b2",
         "releaseDate": "Jun 14th, 2022",
         "transistors": "7200M",
         "rops": "32",
@@ -298,10 +339,12 @@
     "56A6": [
       {
         "name": "Arc A310",
-        "revisions": [ "05" ],
+        "revisions": [
+          "05"
+        ],
         "codeName": "Alchemist ACM-G11",
         "technology": "6 nm",
-        "dieSize": "157 mm²",
+        "dieSize": "157 mm\u00b2",
         "releaseDate": "Sep 28th, 2022",
         "transistors": "7200M",
         "rops": "24",
@@ -319,10 +362,12 @@
     "5690": [
       {
         "name": "Arc A770M",
-        "revisions": [ "08" ],
+        "revisions": [
+          "08"
+        ],
         "codeName": "Alchemist ACM-G10",
         "technology": "6 nm",
-        "dieSize": "406 mm²",
+        "dieSize": "406 mm\u00b2",
         "releaseDate": "Jun 1st, 2022",
         "transistors": "21700M",
         "rops": "128",
@@ -340,10 +385,12 @@
     "5691": [
       {
         "name": "Arc A730M",
-        "revisions": [ "08" ],
+        "revisions": [
+          "08"
+        ],
         "codeName": "Alchemist ACM-G10",
         "technology": "6 nm",
-        "dieSize": "406 mm²",
+        "dieSize": "406 mm\u00b2",
         "releaseDate": "Jun 1st, 2022",
         "transistors": "21700M",
         "rops": "96",
@@ -361,10 +408,12 @@
     "5693": [
       {
         "name": "Arc A370M",
-        "revisions": [ "05" ],
+        "revisions": [
+          "05"
+        ],
         "codeName": "Alchemist ACM-G11",
         "technology": "6 nm",
-        "dieSize": "157 mm²",
+        "dieSize": "157 mm\u00b2",
         "releaseDate": "Mar 30th, 2022",
         "transistors": "7200M",
         "rops": "32",
@@ -382,10 +431,12 @@
     "5694": [
       {
         "name": "Arc A350M",
-        "revisions": [ "05" ],
+        "revisions": [
+          "05"
+        ],
         "codeName": "Alchemist ACM-G11",
         "technology": "6 nm",
-        "dieSize": "157 mm²",
+        "dieSize": "157 mm\u00b2",
         "releaseDate": "Mar 30th, 2022",
         "transistors": "7200M",
         "rops": "24",
@@ -398,6 +449,29 @@
         "defBoostClock": "2050 MHz",
         "defMemClock": "1750 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/arc-a350m.c3908"
+      }
+    ],
+    "4C8B": [
+      {
+        "name": "UHD Graphics 730",
+        "revisions": [
+          "04"
+        ],
+        "codeName": "Rocket Lake GT1",
+        "technology": "14 nm",
+        "dieSize": "276 mm\u00b2",
+        "releaseDate": "Mar 16th, 2021",
+        "transistors": "N/A",
+        "rops": "8",
+        "tmus": "16",
+        "shaders": "192 Unified",
+        "computeUnits": "24 EU",
+        "memoryType": "System Shared",
+        "busWidth": "System Shared",
+        "defGpuClock": "350 MHz",
+        "defBoostClock": "1200 MHz",
+        "defMemClock": "N/A",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/uhd-graphics-730.c3766"
       }
     ]
   }

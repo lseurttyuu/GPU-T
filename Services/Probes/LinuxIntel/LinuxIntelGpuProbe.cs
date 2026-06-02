@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using GPU_T.Models;
 using GPU_T.Services.Advanced;
 using GPU_T.Services.Advanced.LinuxIntel;
@@ -20,6 +21,16 @@ public class LinuxIntelGpuProbe : IGpuProbe
     private readonly string _drmPath;
     private readonly string _gpuId;
     private readonly string _driverName;
+
+    private class ProbeStateCache
+    {
+        public bool HasInitialData = false;
+        public GpuSensorData LastData = new();
+        public bool IsUpdating = false;
+        public readonly object LockObj = new object();
+    }
+
+    private static readonly Dictionary<string, ProbeStateCache> _stateCache = new();
 
     public LinuxIntelGpuProbe(string gpuId)
     {
@@ -261,49 +272,119 @@ public class LinuxIntelGpuProbe : IGpuProbe
 
     public GpuSensorData LoadSensorData()
     {
-        double gpuClock = 0;
-        if (_driverName == "xe")
-        {
-            string curFreq = ReadDeviceFile("tile0/gt0/freq0/act_freq");
-            if (string.IsNullOrEmpty(curFreq)) curFreq = ReadDeviceFile("tile0/gt0/freq0/cur_freq");
-            if (!string.IsNullOrEmpty(curFreq)) double.TryParse(curFreq, NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
-        }
-        else
-        {
-            string curFreq = ReadDrmFile("gt_cur_freq_mhz");
-            if (!string.IsNullOrEmpty(curFreq)) double.TryParse(curFreq, NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
-        }
+        var cache = GetState();
 
-        double gpuTemp = GetGpuTemperature();
-        double cpuTemp = CommonGpuHelpers.GetCpuTemperature();
-        double sysRam = CommonGpuHelpers.GetSystemRamUsage();
+        bool needsInitialFetch = false;
+        bool needsAsyncFetch = false;
 
-        double vramUsedMb = GetUsedVramBytes() / (1024.0 * 1024.0);
-        double powerW = GetPowerUsageW();
-        int load = GetGpuLoad();
-
-        double memClock = 0;
-        if (_driverName == "xe")
+        lock (cache.LockObj)
         {
-            // Try to find memory frequency for discrete Arc GPUs
-            string curMemFreq = ReadDeviceFile("tile0/vram0/freq0/act_freq");
-            if (string.IsNullOrEmpty(curMemFreq)) curMemFreq = ReadDeviceFile("tile0/vram0/freq0/cur_freq");
-            if (!string.IsNullOrEmpty(curMemFreq)) double.TryParse(curMemFreq, NumberStyles.Any, CultureInfo.InvariantCulture, out memClock);
+            if (!cache.HasInitialData)
+            {
+                needsInitialFetch = true;
+                cache.IsUpdating = true;
+            }
         }
 
-        return new GpuSensorData
+        if (needsInitialFetch)
         {
-            GpuClock = gpuClock,
-            MemoryClock = memClock,
-            GpuTemp = gpuTemp,
-            FanPercent = GetFanPercent(),
-            BoardPower = powerW,
-            GpuLoad = load,
-            MemControllerLoad = 0,
-            MemoryUsed = vramUsedMb,
-            CpuTemperature = cpuTemp,
-            SystemRamUsed = sysRam
-        };
+            BackgroundFetchSensors(cache);
+            lock (cache.LockObj)
+            {
+                cache.HasInitialData = true;
+            }
+        }
+
+        lock (cache.LockObj)
+        {
+            if (!cache.IsUpdating)
+            {
+                needsAsyncFetch = true;
+                cache.IsUpdating = true;
+            }
+        }
+
+        if (needsAsyncFetch)
+        {
+            var probeInstance = this;
+            Task.Run(() => probeInstance.BackgroundFetchSensors(cache));
+        }
+
+        lock (cache.LockObj)
+        {
+            return cache.LastData;
+        }
+    }
+
+    private void BackgroundFetchSensors(ProbeStateCache cache)
+    {
+        try
+        {
+            double gpuClock = 0;
+            if (_driverName == "xe")
+            {
+                string curFreq = ReadDeviceFile("tile0/gt0/freq0/act_freq");
+                if (string.IsNullOrEmpty(curFreq)) curFreq = ReadDeviceFile("tile0/gt0/freq0/cur_freq");
+                if (!string.IsNullOrEmpty(curFreq)) double.TryParse(curFreq, NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
+            }
+            else
+            {
+                string curFreq = ReadDrmFile("gt_cur_freq_mhz");
+                if (!string.IsNullOrEmpty(curFreq)) double.TryParse(curFreq, NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
+            }
+
+            double gpuTemp = GetGpuTemperature();
+            double cpuTemp = CommonGpuHelpers.GetCpuTemperature();
+            double sysRam = CommonGpuHelpers.GetSystemRamUsage();
+
+            double vramUsedMb = GetUsedVramBytes() / (1024.0 * 1024.0);
+            double powerW = GetPowerUsageW();
+            int load = GetGpuLoad();
+
+            double memClock = 0;
+            if (_driverName == "xe")
+            {
+                string curMemFreq = ReadDeviceFile("tile0/vram0/freq0/act_freq");
+                if (string.IsNullOrEmpty(curMemFreq)) curMemFreq = ReadDeviceFile("tile0/vram0/freq0/cur_freq");
+                if (!string.IsNullOrEmpty(curMemFreq)) double.TryParse(curMemFreq, NumberStyles.Any, CultureInfo.InvariantCulture, out memClock);
+            }
+
+            var newData = new GpuSensorData
+            {
+                GpuClock = gpuClock,
+                MemoryClock = memClock,
+                GpuTemp = gpuTemp,
+                FanPercent = GetFanPercent(),
+                BoardPower = powerW,
+                GpuLoad = load,
+                MemControllerLoad = 0,
+                MemoryUsed = vramUsedMb,
+                CpuTemperature = cpuTemp,
+                SystemRamUsed = sysRam
+            };
+
+            lock (cache.LockObj)
+            {
+                cache.LastData = newData;
+            }
+        }
+        finally
+        {
+            lock (cache.LockObj)
+            {
+                cache.IsUpdating = false;
+            }
+        }
+    }
+
+    private ProbeStateCache GetState()
+    {
+        if (!_stateCache.TryGetValue(_gpuId, out var state))
+        {
+            state = new ProbeStateCache();
+            _stateCache[_gpuId] = state;
+        }
+        return state;
     }
 
     #endregion
