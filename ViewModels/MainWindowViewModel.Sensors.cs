@@ -301,6 +301,22 @@ public partial class MainWindowViewModel
 
 
 
+        // (Intel block)
+        if (_currentVendorName == "Intel")
+        {
+            var dynamicSpecs = GPU_T.Services.Probes.LinuxIntel.LinuxIntelGpuProbe.CalculateDynamicSpecs(
+                data.GpuClock,
+                _rawDefGpuClock, _rawDefBoostClock, _rawDefMemClock,
+                _rawRops, _rawTmus, _rawBusWidth, _rawMemoryType);
+
+            GpuClock = dynamicSpecs.GpuClock;
+            BoostClock = dynamicSpecs.BoostClock;
+            MemoryClock = dynamicSpecs.MemClock;
+            PixelFillrate = dynamicSpecs.PixelFill;
+            TextureFillrate = dynamicSpecs.TexFill;
+            Bandwidth = dynamicSpecs.Bandwidth;
+        }
+
         // PCIe link status can change dynamically; if we detect a change, we update the displayed value
         if(data.BusInterface != _lastBusInterface)
         {

@@ -552,11 +552,13 @@ public partial class MainWindowViewModel : ViewModelBase
         _rawBusWidth = GPU_T.Services.Probes.CommonGpuHelpers.ExtractNumber(BusWidth);
         _rawMemoryType = data.MemoryType;
 
-       if (data.DeviceName.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase))
+        // Robust vendor detection using normalized VendorId
+        string vId = data.VendorId.Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToUpper();
+        if (vId == "10DE")
             _currentVendorName = "NVIDIA";
-        else if (data.DeviceName.Contains("Intel", StringComparison.OrdinalIgnoreCase))
+        else if (vId == "8086")
             _currentVendorName = "Intel";
-        else if(data.DeviceName.Contains("AMD", StringComparison.OrdinalIgnoreCase) || data.DeviceName.Contains("ATI", StringComparison.OrdinalIgnoreCase))
+        else if (vId == "1002" || vId == "1022")
             _currentVendorName = "AMD";
         else
             _currentVendorName = "Unknown";

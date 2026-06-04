@@ -108,7 +108,7 @@ public static class GpuFeatureDetection
                 if (trimmed.StartsWith("deviceID"))
                 {
                     var parts = trimmed.Split('=');
-                    if (parts.Length > 1) currentDevice = parts[1].Trim().Replace("0x", "").ToUpper();
+                    if (parts.Length > 1) currentDevice = parts[1].Trim().Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToUpper();
                 }
 
                 if (trimmed.Contains("VK_KHR_ray_tracing_pipeline") || trimmed.Contains("VK_KHR_ray_query"))
@@ -148,7 +148,7 @@ public static class GpuFeatureDetection
                 
                 if (!string.IsNullOrEmpty(deviceIdHex))
                 {
-                    string target = deviceIdHex.Replace("0x", "").Trim().ToUpper();
+                    string target = deviceIdHex.Replace("0x", "", StringComparison.OrdinalIgnoreCase).Trim().ToUpper();
                     var gpuBlocks = Regex.Split(output, @"GPU\d+:");
                     
                     for (int i = 1; i < gpuBlocks.Length; i++)
@@ -196,7 +196,7 @@ public static class GpuFeatureDetection
                 
                 if (!string.IsNullOrEmpty(deviceIdHex))
                 {
-                    string target = deviceIdHex.Replace("0x", "").Trim().ToUpper();
+                    string target = deviceIdHex.Replace("0x", "", StringComparison.OrdinalIgnoreCase).Trim().ToUpper();
                     var gpuBlocks = Regex.Split(vInfo, @"GPU\d+:");
                     
                     for (int i = 1; i < gpuBlocks.Length; i++)
@@ -430,7 +430,7 @@ public static class GpuFeatureDetection
         // Handle non-standard link widths (e.g., 255 for integrated GPUs)
         if (int.TryParse(maxWidthStr, out int w) && (w > 32 || w <= 0))
         {
-            string vendor = ReadSysfsFile(basePath, "vendor").Replace("0x", "").ToUpper();
+            string vendor = ReadSysfsFile(basePath, "vendor").Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToUpper();
             if (vendor == "8086") return "Intel Ring Bus";
             return "Internal";
         }
@@ -527,7 +527,7 @@ public static class GpuFeatureDetection
         try
         {
             // Intel iGPUs or other internal graphics that don't report VRAM through standard PCIe BARs
-            string vendor = ReadSysfsFile(basePath, "vendor").Replace("0x", "").ToUpper();
+            string vendor = ReadSysfsFile(basePath, "vendor").Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToUpper();
             string maxWidthStr = ReadSysfsFile(basePath, "max_link_width");
             if (vendor == "8086" && int.TryParse(maxWidthStr, out int w) && (w > 32 || w <= 0))
             {
@@ -595,10 +595,10 @@ public static class GpuFeatureDetection
     {
         try
         {
-            string v = ReadSysfsFile(basePath, "vendor").Replace("0x", "").ToUpper();
-            string d = ReadSysfsFile(basePath, "device").Replace("0x", "").ToUpper();
-            string sv = ReadSysfsFile(basePath, "subsystem_vendor").Replace("0x", "").ToUpper();
-            string sd = ReadSysfsFile(basePath, "subsystem_device").Replace("0x", "").ToUpper();
+            string v = ReadSysfsFile(basePath, "vendor").Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToUpper();
+            string d = ReadSysfsFile(basePath, "device").Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToUpper();
+            string sv = ReadSysfsFile(basePath, "subsystem_vendor").Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToUpper();
+            string sd = ReadSysfsFile(basePath, "subsystem_device").Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToUpper();
             return (v, d, sv, sd);
         }
         catch
@@ -736,7 +736,7 @@ public static class GpuFeatureDetection
                 // If vulkaninfo ran and gave standard output
                 if (output.Contains("VULKANINFO") || output.Contains("Devices:"))
                 {
-                    string target = deviceIdHex.Replace("0x", "").Trim().ToUpper();
+                    string target = deviceIdHex.Replace("0x", "", StringComparison.OrdinalIgnoreCase).Trim().ToUpper();
                     var matches = Regex.Matches(output, @"deviceID\s*=\s*0x([0-9a-fA-F]+)", RegexOptions.IgnoreCase);
                     
                     foreach (Match m in matches)

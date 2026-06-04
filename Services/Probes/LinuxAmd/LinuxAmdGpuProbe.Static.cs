@@ -23,7 +23,7 @@ public partial class LinuxAmdGpuProbe
         }
 
         var ids = GetRawIds();
-        string revId = ReadFile("revision").Replace("0x", "").PadLeft(2, '0').ToUpper();
+        string revId = ReadFile("revision").Replace("0x", "", StringComparison.OrdinalIgnoreCase).PadLeft(2, '0').ToUpper();
         string uniqueId = ReadFile("unique_id", "Unknown").Trim();
 
         var spec = PciIdLookup.GetSpecs(ids.Vendor, ids.Device, revId);
@@ -130,6 +130,7 @@ public partial class LinuxAmdGpuProbe
             DeviceName = spec?.Name ?? "Unknown AMD GPU",
             IsExactMatch = spec?.IsExactMatch ?? true,
             DeviceId = $"{ids.Vendor} {ids.Device} - {ids.SubVendor} {ids.SubDevice}",
+            VendorId = ids.Vendor,
             Subvendor = PciIdLookup.LookupVendorName(ids.SubVendor),
             BusId = GpuFeatureDetection.GetBusId(_basePath),
             BiosVersion = ReadFile("vbios_version", "Unknown"),

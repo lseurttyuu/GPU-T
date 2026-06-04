@@ -63,7 +63,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
     public GpuStaticData LoadStaticData()
     {
         var ids = GpuFeatureDetection.GetRawPciIds(_basePath);
-        string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "").ToUpper();
+        string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToUpper();
 
         string busId = GpuFeatureDetection.GetBusId(_basePath);
 
@@ -219,6 +219,7 @@ public class LinuxIntelGpuProbe : IGpuProbe
             DeviceName = deviceName,
             IsExactMatch = isExactMatch,
             DeviceId = $"{ids.Vendor} {ids.Device} - {ids.SubVendor} {ids.SubDevice}",
+            VendorId = ids.Vendor,
             Subvendor = PciIdLookup.LookupVendorName(ids.SubVendor),
             BusId = busId,
             BiosVersion = biosVersion,
@@ -661,6 +662,51 @@ public class LinuxIntelGpuProbe : IGpuProbe
         }
         catch { }
         return "";
+    }
+
+    public static (string GpuClock, string BoostClock, string MemClock, string PixelFill, string TexFill, string Bandwidth)
+        CalculateDynamicSpecs(
+            double activeGpuMHz,
+            double defGpuClock, double defBoostClock, double defMemClock,
+            double rops, double tmus, double busWidth, string memoryType)
+    {
+        string gpuClock = "---";
+        string boostClockDisplay = "---";
+        string memClockDisplay = "---";
+        string pixelFill = "N/A";
+        string texFill = "N/A";
+        string bandwidth = "N/A";
+
+        if (activeGpuMHz > 0)
+        {
+            gpuClock = $"{activeGpuMHz.ToString(CultureInfo.InvariantCulture)} MHz";
+        }
+
+        if (defBoostClock > 0)
+        {
+            boostClockDisplay = $"{defBoostClock.ToString(CultureInfo.InvariantCulture)} MHz";
+        }
+
+        if (defMemClock > 0)
+        {
+            memClockDisplay = $"{defMemClock.ToString(CultureInfo.InvariantCulture)} MHz";
+        }
+
+        double fillClock = activeGpuMHz > 0 ? activeGpuMHz : defGpuClock;
+        if (fillClock > 0)
+        {
+            if (rops > 0) pixelFill = ((rops * fillClock) / 1000.0).ToString("F1", CultureInfo.InvariantCulture) + " GPixel/s";
+            if (tmus > 0) texFill = ((tmus * fillClock) / 1000.0).ToString("F1", CultureInfo.InvariantCulture) + " GTexel/s";
+        }
+
+        if (defMemClock > 0 && busWidth > 0)
+        {
+            double multiplier = CommonGpuHelpers.GetMemoryMultiplier(memoryType);
+            double bw = (busWidth * defMemClock * multiplier) / 8000.0;
+            bandwidth = bw.ToString("F1", CultureInfo.InvariantCulture) + " GB/s";
+        }
+
+        return (gpuClock, boostClockDisplay, memClockDisplay, pixelFill, texFill, bandwidth);
     }
 
     #endregion

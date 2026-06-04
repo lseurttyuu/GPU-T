@@ -25,8 +25,8 @@
             <RowDefinition Height="24"/> 
             <RowDefinition Height="24"/> 
             <RowDefinition Height="8"/>  
-            <RowDefinition Height="Auto"/> 
-            <RowDefinition Height="Auto"/> 
+            <RowDefinition Height="Auto" MinHeight="24"/>
+            <RowDefinition Height="Auto" MinHeight="24"/>
         </Grid.RowDefinitions>
 
         <!-- Vendor logo visual bound to VendorLogo; positioned to avoid overlapping labels. -->
@@ -245,33 +245,35 @@
         <Border Grid.Row="16" Height="0" Background="#A0A0A0" Margin="0,3,0,2" VerticalAlignment="Center"/>
 
         <!-- Computing capabilities section is non-interactive in this view; uses bindings for display-only flags. -->
-        <Grid Grid.Row="17" Margin="0,4" IsHitTestVisible="False">
-            <StackPanel Orientation="Horizontal">
-                 <TextBlock Classes="Label" Text="Computing"/>
-                 
-                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                     <CheckBox Content="OpenCL" IsChecked="{Binding IsOpenClEnabled}" IsEnabled="{Binding IsOpenClEnabled}" Classes="GpuZ"/>
-                     <CheckBox Content="CUDA" IsChecked="{Binding IsCudaEnabled}" IsEnabled="{Binding IsCudaEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="ROCm" IsChecked="{Binding IsRocmEnabled}" IsEnabled="{Binding IsRocmEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="HIP" IsChecked="{Binding IsHsaEnabled}" IsEnabled="{Binding IsHsaEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="oneAPI" IsChecked="{Binding IsOneApiEnabled}" IsEnabled="{Binding IsOneApiEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="SYCL" IsChecked="{Binding IsSyclEnabled}" IsEnabled="{Binding IsSyclEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
-                 </StackPanel>
-            </StackPanel>
+        <Grid Grid.Row="17" Margin="0,2" IsHitTestVisible="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="95"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Classes="Label" Text="Computing" VerticalAlignment="Top" Margin="0,4,0,0"/>
+            <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+                <CheckBox Content="OpenCL" IsChecked="{Binding IsOpenClEnabled}" IsEnabled="{Binding IsOpenClEnabled}" Classes="GpuZ" Margin="0,0,8,0"/>
+                <CheckBox Content="CUDA" IsChecked="{Binding IsCudaEnabled}" IsEnabled="{Binding IsCudaEnabled}" Classes="GpuZ" Margin="0,0,8,0"/>
+                <CheckBox Content="ROCm" IsChecked="{Binding IsRocmEnabled}" IsEnabled="{Binding IsRocmEnabled}" Classes="GpuZ" Margin="0,0,8,0"/>
+                <CheckBox Content="HIP" IsChecked="{Binding IsHsaEnabled}" IsEnabled="{Binding IsHsaEnabled}" Classes="GpuZ" Margin="0,0,8,0"/>
+                <CheckBox Content="oneAPI" IsChecked="{Binding IsOneApiEnabled}" IsEnabled="{Binding IsOneApiEnabled}" Classes="GpuZ" Margin="0,0,8,0"/>
+                <CheckBox Content="SYCL" IsChecked="{Binding IsSyclEnabled}" IsEnabled="{Binding IsSyclEnabled}" Classes="GpuZ" Margin="0,0,8,0"/>
+            </WrapPanel>
         </Grid>
 
         <!-- Technology flags area is display-only and reflects capability support exposed by the view model. -->
-        <Grid Grid.Row="18" Margin="0,4" IsHitTestVisible="False">
-            <StackPanel Orientation="Horizontal">
-                 <TextBlock Classes="Label" Text="Technologies"/>
-                 
-                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                     <CheckBox Content="Vulkan" IsChecked="{Binding IsVulkanEnabled}" IsEnabled="{Binding IsVulkanEnabled}" Classes="GpuZ"/>
-                     <CheckBox Content="Ray Tracing" IsChecked="{Binding IsRayTracingEnabled}" IsEnabled="{Binding IsRayTracingEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="PhysX" IsChecked="{Binding IsPhysXEnabled}" IsEnabled="{Binding IsPhysXEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
-                     <CheckBox Content="OpenGL" IsChecked="{Binding IsOpenglEnabled}" IsEnabled="{Binding IsOpenglEnabled}" Classes="GpuZ" Margin="11,0,0,0"/>
-                 </StackPanel>
-            </StackPanel>
+        <Grid Grid.Row="18" Margin="0,2" IsHitTestVisible="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="95"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Classes="Label" Text="Technologies" VerticalAlignment="Top" Margin="0,4,0,0"/>
+            <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+                <CheckBox Content="Vulkan" IsChecked="{Binding IsVulkanEnabled}" IsEnabled="{Binding IsVulkanEnabled}" Classes="GpuZ" Margin="0,0,8,0"/>
+                <CheckBox Content="Ray Tracing" IsChecked="{Binding IsRayTracingEnabled}" IsEnabled="{Binding IsRayTracingEnabled}" Classes="GpuZ" Margin="0,0,8,0"/>
+                <CheckBox Content="PhysX" IsChecked="{Binding IsPhysXEnabled}" IsEnabled="{Binding IsPhysXEnabled}" Classes="GpuZ" Margin="0,0,8,0"/>
+                <CheckBox Content="OpenGL" IsChecked="{Binding IsOpenglEnabled}" IsEnabled="{Binding IsOpenglEnabled}" Classes="GpuZ" Margin="0,0,8,0"/>
+            </WrapPanel>
         </Grid>
     </Grid>
 </UserControl>

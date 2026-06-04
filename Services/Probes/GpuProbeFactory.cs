@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -49,20 +50,19 @@ public static class GpuProbeFactory
     /// <returns>An <see cref="IGpuProbe"/> instance for the detected vendor.</returns>
     public static IGpuProbe Create(string gpuId, string memoryType = "")
     {
+        string vendorId = GetVendorId(gpuId).Replace("0x", "", StringComparison.OrdinalIgnoreCase);
 
-        string vendorId = GetVendorId(gpuId);
-
-        if (vendorId == "0X8086") // Intel
+        if (vendorId == "8086") // Intel
         {
             return new LinuxIntelGpuProbe(gpuId);
         }
 
-        if (vendorId == "0X10DE") // NVIDIA
+        if (vendorId == "10DE") // NVIDIA
         {
             return new LinuxNvidiaGpuProbe(gpuId, memoryType);
         }
 
-        if(vendorId == "0X1002" || vendorId == "0X1022") // AMD
+        if(vendorId == "1002" || vendorId == "1022") // AMD
         {
             return new LinuxAmdGpuProbe(gpuId, memoryType);
         }
