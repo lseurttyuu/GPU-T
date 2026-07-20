@@ -15,6 +15,8 @@ public record GpuStaticData
     public bool IsExactMatch { get; init; } = true;
     /// <summary>PCI device identifier.</summary>
     public string DeviceId { get; init; } = "Unknown";
+    /// <summary>PCI Vendor identifier (e.g. 8086).</summary>
+    public string VendorId { get; init; } = "";
     /// <summary>Unique device identifier.</summary>
     public string UniqueId { get; init; } = "Unknown";
     /// <summary>Subvendor identifier.</summary>
@@ -78,6 +80,10 @@ public record GpuStaticData
     public bool IsOpenClAvailable { get; init; }
     /// <summary>Indicates if CUDA is available.</summary>
     public bool IsCudaAvailable { get; init; }
+    /// <summary>Indicates if oneAPI is available.</summary>
+    public bool IsOneApiAvailable { get; init; }
+    /// <summary>Indicates if SYCL is available.</summary>
+    public bool IsSyclAvailable { get; init; }
     /// <summary>Indicates if ROCm is available.</summary>
     public bool IsRocmAvailable { get; init; }
     /// <summary>Indicates if HSA is available.</summary>
