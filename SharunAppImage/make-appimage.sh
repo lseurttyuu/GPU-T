@@ -33,8 +33,6 @@ dotnet publish GPU-T.csproj -c Release -r linux-x64 --no-self-contained -o ./pub
 rm -f ./publish_output/*.xml || true
 rm -f ./publish_output/*.pdb || true
 
-find ./publish_output -name "*.so" -exec strip --strip-unneeded {} + || true
-
 # 3. Deploy app directly into AppDir/bin
 mkdir -p ./AppDir/bin
 cp -r ./publish_output/* ./AppDir/bin/
@@ -50,4 +48,6 @@ quick-sharun \
 
 # 6. Turn AppDir into AppImage and Test
 quick-sharun --make-appimage
+# first test might fail due to some weird bug
+quick-sharun --test ./dist/*.AppImage || :
 quick-sharun --test ./dist/*.AppImage

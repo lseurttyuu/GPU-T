@@ -12,6 +12,7 @@ pacman -Sy --noconfirm \
     mesa \
     mesa-utils \
     libva-utils \
+    patchelf \
     pciutils \
     desktop-file-utils \
     hicolor-icon-theme \
