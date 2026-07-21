@@ -4,9 +4,9 @@ set -eu
 echo "Installing build tools and application dependencies..."
 echo "---------------------------------------------------------------"
 pacman -Sy --noconfirm \
-    dotnet-sdk-9.0 \
+    dotnet-sdk-10.0 \
     dotnet-host \
-    dotnet-runtime-9.0 \
+    dotnet-runtime-10.0 \
     vulkan-tools \
     clinfo \
     mesa \
