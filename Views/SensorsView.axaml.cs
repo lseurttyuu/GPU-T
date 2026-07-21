@@ -44,17 +44,18 @@ public partial class SensorsView : UserControl
 		}
 	}
 
-	private async void LogCheckBox_Checked(object? sender, RoutedEventArgs e)
+	private async void LogCheckBox_IsCheckedChanged(object? sender, RoutedEventArgs e)
 	{
-		var checkbox = sender as CheckBox;
-		
-		// The UserControl's DataContext is inherited from the window, which provides logging control via MainWindowViewModel.
-		if (DataContext is MainWindowViewModel vm)
+		// Cleanly ensure we have both the CheckBox and the ViewModel before proceeding
+		if (sender is not CheckBox checkbox || DataContext is not MainWindowViewModel vm)
+			return;
+
+		if (checkbox.IsChecked == true)
 		{
 			// If logging is not yet active, prompt the user to select a destination file.
 			if (!vm.IsLogEnabled)
 			{
-				// Acquire top-level to obtain the platform StorageProvider; this can be null in detached visual trees.
+				// Acquire top-level to obtain the platform StorageProvider.
 				var topLevel = TopLevel.GetTopLevel(this);
 				if (topLevel == null) return;
 
@@ -73,24 +74,21 @@ public partial class SensorsView : UserControl
 
 				if (file != null)
 				{
-					// Convert the selected storage item to a local path for the ViewModel to use; this is platform-dependent.
-					string path = file.Path.LocalPath;
-					vm.StartLogging(path);
+					// Convert the selected storage item to a local path for the ViewModel to use.
+					vm.StartLogging(file.Path.LocalPath);
 				}
 				else
 				{
-					// User cancelled the dialog; revert the checkbox UI state to reflect no active logging.
-					if (checkbox != null) checkbox.IsChecked = false;
+					// User cancelled the dialog; revert the checkbox UI state.
+					// Note: Setting this to false will immediately re-trigger this event, 
+					// which smoothly routes into the 'false' block below to ensure a clean state.
+					checkbox.IsChecked = false;
 				}
 			}
 		}
-	}
-
-	private void LogCheckBox_Unchecked(object? sender, RoutedEventArgs e)
-	{
-		// Instruct the ViewModel to stop logging when the checkbox is cleared.
-		if (DataContext is MainWindowViewModel vm)
+		else if (checkbox.IsChecked == false)
 		{
+			// Instruct the ViewModel to stop logging when the checkbox is cleared.
 			vm.StopLogging();
 		}
 	}

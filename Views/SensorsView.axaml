@@ -96,10 +96,9 @@
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                 <CheckBox Content="Log to file" 
-                          Classes="GpuZ"
-                          IsChecked="{Binding IsLogEnabled, Mode=OneWay}"
-                          Checked="LogCheckBox_Checked"
-                          Unchecked="LogCheckBox_Unchecked"/>
+                        Classes="GpuZ"
+                        IsChecked="{Binding IsLogEnabled, Mode=OneWay}"
+                        IsCheckedChanged="LogCheckBox_IsCheckedChanged"/>
             </StackPanel>
             
             <TextBlock Grid.Column="2" 
