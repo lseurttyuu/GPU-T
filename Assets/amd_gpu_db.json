@@ -1,5 +1,5 @@
 {
-  "version": 12,
+  "version": 13,
   "gpus": {
     "6610": [
       {
@@ -1964,10 +1964,30 @@
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-550x.c3194"
       },
       {
+        "name": "AMD Radeon RX 550",
+        "revisions": [
+          "C7"
+        ],
+        "codeName": "Lexa",
+        "technology": "14 nm",
+        "dieSize": "103 mm\u00B2",
+        "releaseDate": "Apr 20th, 2017",
+        "transistors": "2200M",
+        "rops": "16",
+        "tmus": "32",
+        "shaders": "512 Unified",
+        "computeUnits": "8 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1100 MHz",
+        "defBoostClock": "1183 MHz",
+        "defMemClock": "1750 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-550.c2947"
+      },
+      {
         "name": "AMD Radeon 540",
         "revisions": [
           "C3",
-          "C7",
           "C9"
         ],
         "codeName": "Lexa",
