@@ -10,7 +10,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-Linux-blue?logo=linux" alt="Platform Linux">
   <img src="https://img.shields.io/badge/Framework-Avalonia%20UI-purple" alt="Avalonia">
-  <img src="https://img.shields.io/badge/.NET-%209.0-512bd4" alt=".NET">
+  <img src="https://img.shields.io/badge/.NET-%2010.0-512bd4" alt=".NET">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 <p align="center">
@@ -107,7 +107,7 @@ GPU-T relies on standard Linux utilities to fetch API-specific information. Ensu
 
 ## Building from Source
 
-Requirements: **.NET SDK 9.0 or newer**.
+Requirements: **.NET SDK 10.0 or newer**.
 
 1.  Clone the repository:
     ```bash
