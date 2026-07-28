@@ -37,9 +37,12 @@ rm -f ./publish_output/*.pdb || true
 mkdir -p ./AppDir/bin
 cp -r ./publish_output/* ./AppDir/bin/
 
-rm -f ./AppDir/bin/libHarfBuzzSharp.so || true
+HARFBUZZ_PATH=$(ldconfig -p | grep libharfbuzz.so.0 | head -n 1 | awk '{print $4}')
 
-ln -s /usr/lib/libharfbuzz.so.0 ./AppDir/bin/libHarfBuzzSharp.so
+cp "$HARFBUZZ_PATH" ./AppDir/bin/libharfbuzz.so.0
+
+rm -f ./AppDir/bin/libHarfBuzzSharp.so || true
+ln -s libharfbuzz.so.0 ./AppDir/bin/libHarfBuzzSharp.so
 
 cp ./SharunAppImage/gpu-t.desktop ./AppDir/
 
@@ -53,5 +56,4 @@ quick-sharun \
 # 6. Turn AppDir into AppImage and Test
 quick-sharun --make-appimage
 # first test might fail due to some weird bug
-quick-sharun --test ./dist/*.AppImage || :
 quick-sharun --test ./dist/*.AppImage
