@@ -37,6 +37,10 @@ rm -f ./publish_output/*.pdb || true
 mkdir -p ./AppDir/bin
 cp -r ./publish_output/* ./AppDir/bin/
 
+rm -f ./AppDir/bin/libHarfBuzzSharp.so || true
+
+ln -s /usr/lib/libharfbuzz.so.0 ./AppDir/bin/libHarfBuzzSharp.so
+
 cp ./SharunAppImage/gpu-t.desktop ./AppDir/
 
 # 4. Build the heavily optimized container
