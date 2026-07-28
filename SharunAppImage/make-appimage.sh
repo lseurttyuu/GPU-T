@@ -54,13 +54,13 @@ cp -r ./publish_output/* ./AppDir/bin/
 # ==============================================================================
 
 # 3.1. Dynamically find the path of the native HarfBuzz on the CI/CD build runner
-HARFBUZZ_PATH=$(ldconfig -p | grep libharfbuzz.so.0 | head -n 1 | awk '{print $4}')
+HARFBUZZ_PATH=$(ldconfig -p | awk '/libharfbuzz.so.0/ {print $4; exit}')
 
 # 3.2. Copy it directly into our AppImage payload
 cp "$HARFBUZZ_PATH" ./AppDir/bin/libharfbuzz.so.0
 
 # 3.3. Delete SkiaSharp's bundled wrapper
-rm -f ./AppDir/bin/libHarfBuzzSharp.so || true
+rm -f ./AppDir/bin/libHarfBuzzSharp.so
 
 # 3.4. Create a RELATIVE symlink. When SkiaSharp asks for 'libHarfBuzzSharp.so', 
 # it gets seamlessly redirected to our bundled 'libharfbuzz.so.0' sitting right 
