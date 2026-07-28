@@ -78,5 +78,4 @@ quick-sharun \
 
 # 6. Turn AppDir into AppImage and Test
 quick-sharun --make-appimage
-# first test might fail due to some weird bug
 quick-sharun --test ./dist/*.AppImage
