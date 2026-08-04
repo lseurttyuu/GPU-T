@@ -11,6 +11,7 @@ export OUTPATH=./dist
 export ICON=./Assets/app_icon.png
 export DEPLOY_VULKAN=0
 export STRACE_MODE=0
+export DEPLOY_COMMON_LIBS=1
 
 mkdir -p ./AppDir/bin
 
