@@ -9,7 +9,6 @@ export ARCH VERSION
 export OUTNAME="GPU-T-${VERSION}-${ARCH}.AppImage"
 export OUTPATH=./dist
 export ICON=./Assets/app_icon.png
-export DEPLOY_DOTNET=1
 export DEPLOY_VULKAN=0
 export STRACE_MODE=0
 
@@ -21,17 +20,23 @@ dotnet publish Nvapi/GPU-T.Nvapi.csproj -c Release -r linux-x64 -o ./AppDir/bin 
     -p:DebugSymbols=false \
     -p:DebugType=None
 
-# 2. Compile the Main App with strict size-reduction flags
+# 2. Compile the Main App as a self-contained donet binary
 echo "Compiling GPU-T Main App..."
-dotnet publish GPU-T.csproj -c Release -r linux-x64 --no-self-contained -o ./publish_output \
+dotnet publish GPU-T.csproj -c Release -r linux-x64 -o ./publish_output \
+    --self-contained true \
+    -p:PublishTrimmed=true \
+    -p:TrimMode=partial \
+    -p:JsonSerializerIsReflectionEnabledByDefault=true \
     -p:DebugSymbols=false \
     -p:DebugType=None \
     -p:PublishDocumentationFiles=false \
     -p:SatelliteResourceLanguages="en"
 
 # 2. Aggressive Cleanup
-rm -f ./publish_output/*.xml || true
-rm -f ./publish_output/*.pdb || true
+rm -f ./publish_output/*.xml
+rm -f ./publish_output/*.pdb
+# only loaded for tracing, pulls in liblttng-ust
+rm -f ./publish_output/libcoreclrtraceptprovider.so
 
 # 3. Deploy app directly into AppDir/bin
 mkdir -p ./AppDir/bin
@@ -74,7 +79,8 @@ quick-sharun \
     ./AppDir/bin/* \
     /usr/lib/libSM.so*  \
     /usr/lib/libICE.so* \
-    /usr/lib/libicuuc.so*
+    /usr/lib/libicuuc.so* \
+    /usr/lib/libicui18n.so*
 
 # 6. Turn AppDir into AppImage and Test
 quick-sharun --make-appimage
