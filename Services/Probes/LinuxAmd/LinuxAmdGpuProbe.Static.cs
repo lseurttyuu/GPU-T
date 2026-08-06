@@ -55,11 +55,11 @@ public partial class LinuxAmdGpuProbe
 
         var odClocks = GetMaxClocksFromOd("pp_od_clk_voltage");
 
-        double maxCoreDpm = GetMaxClockFromDpm("pp_dpm_sclk");
+        double maxCoreDpm = GetLastDpmClkStateFromDpm("pp_dpm_sclk");
 
         double maxMemDpm = odClocks.Mclk * dpmMemMultiplier;
         if (maxMemDpm <= 0)
-            maxMemDpm = GetMaxClockFromDpm("pp_dpm_mclk") * dpmMemMultiplier;
+            maxMemDpm = GetLastDpmClkStateFromDpm("pp_dpm_mclk") * dpmMemMultiplier;
 
         bool isRocmAvailable = GpuFeatureDetection.IsNativeLibraryAvailable("libhsa-runtime64.so.1") && 
                                                     (Directory.Exists("/opt/rocm") || Directory.Exists("/usr/lib/x86_64-linux-gnu/rocm"));
@@ -226,9 +226,9 @@ public partial class LinuxAmdGpuProbe
     }
 
     /// <summary>
-    /// Reads the maximum clock value from a DPM file.
+    /// Reads the last (highest) DPM CLK value from a DPM file, returning 0 if unavailable.
     /// </summary>
-    private double GetMaxClockFromDpm(string fileName)
+    private double GetLastDpmClkStateFromDpm(string fileName)
     {
         try
         {
@@ -237,15 +237,25 @@ public partial class LinuxAmdGpuProbe
 
             string[] lines = File.ReadAllLines(path);
             double maxClock = 0;
+            int maxIndex = -1;
 
             foreach (var line in lines)
             {
-                var match = Regex.Match(line, @"(\d+)\s*Mhz", RegexOptions.IgnoreCase);
+                // Matches the start of the line, digits, a colon, spaces, digits, spaces, and "Mhz"
+                // Group 1: Index (e.g., "0", "1", "2")
+                // Group 2: Clock value (e.g., "500", "55", "2304")
+                var match = Regex.Match(line, @"^(\d+):\s*(\d+)\s*Mhz", RegexOptions.IgnoreCase);
+                
                 if (match.Success)
                 {
-                    if (double.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double val))
+                    if (int.TryParse(match.Groups[1].Value, out int currentIndex) &&
+                        double.TryParse(match.Groups[2].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double val))
                     {
-                        if (val > maxClock) maxClock = val;
+                        if (currentIndex > maxIndex)
+                        {
+                            maxIndex = currentIndex;
+                            maxClock = val;
+                        }
                     }
                 }
             }

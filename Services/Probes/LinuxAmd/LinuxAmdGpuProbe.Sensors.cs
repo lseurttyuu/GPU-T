@@ -106,13 +106,13 @@ public partial class LinuxAmdGpuProbe
         double sysRam = CommonGpuHelpers.GetSystemRamUsage();
 
 
-        double maxCoreDpm = GetMaxClockFromDpm("pp_dpm_sclk");
+        double maxCoreDpm = GetLastDpmClkStateFromDpm("pp_dpm_sclk");
 
         var odClocks = GetMaxClocksFromOd("pp_od_clk_voltage");
 
         double maxMemDpm = odClocks.Mclk * _memClockMultiplier;
         if (maxMemDpm <= 0)
-            maxMemDpm = GetMaxClockFromDpm("pp_dpm_mclk") * _memClockMultiplier;
+            maxMemDpm = GetLastDpmClkStateFromDpm("pp_dpm_mclk") * _memClockMultiplier;
 
         double boostClock = odClocks.Sclk;
 
