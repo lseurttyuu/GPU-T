@@ -285,8 +285,8 @@ public partial class LinuxAmdGpuProbe
                 string trimmed = line.Trim();
                 
                 // Track which section of the file we are currently reading
-                if (trimmed.StartsWith("OD_SCLK:")) { currentSection = "SCLK"; continue; }
-                if (trimmed.StartsWith("OD_MCLK:")) { currentSection = "MCLK"; continue; }
+                if (trimmed.StartsWith("OD_SCLK")) { currentSection = "SCLK"; continue; }
+                if (trimmed.StartsWith("OD_MCLK")) { currentSection = "MCLK"; continue; }
                 if (trimmed.StartsWith("OD_")) { currentSection = "OTHER"; continue; }
 
                 // If we are in the Core or Memory section, parse the MHz value
