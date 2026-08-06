@@ -244,14 +244,31 @@ public class VulkanProvider : AdvancedDataProvider
     /// <param name="list">Collection to populate.</param>
     private void ParseFeatures(string trimmed, ObservableCollection<AdvancedItemViewModel> list)
     {
-        if (trimmed.Contains("=") && !trimmed.StartsWith("Userspace"))
+        // 1. Intercept the specific Codec "placeholder" Decode/Encode line
+        var match = System.Text.RegularExpressions.Regex.Match(
+            trimmed, 
+            @"^placeholder\s*=\s*(?<key>\S+\s+(?:Decode|Encode))\s*(?<val>.*)$", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        if (match.Success)
         {
-            var kv = trimmed.Split(new[]{'='}, StringSplitOptions.RemoveEmptyEntries);
+            string k = match.Groups["key"].Value.Trim();
+            string val = match.Groups["val"].Value.Trim();
+            
+            AddRow(list, k, val);
+        }
+        // 2. Standard fallback parsing
+        else if (trimmed.Contains("=") && !trimmed.StartsWith("Userspace"))
+        {
+            var kv = trimmed.Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
             if (kv.Length == 2)
             {
                 string k = kv[0].Trim();
                 string val = kv[1].Trim();
-                if (val == "true") val = "Yes"; else if (val == "false") val = "No";
+                
+                if (val == "true") val = "Yes"; 
+                else if (val == "false") val = "No";
+                
                 AddRow(list, k, val);
             }
         }
