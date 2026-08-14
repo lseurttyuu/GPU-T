@@ -26,7 +26,7 @@ jobs:
           fetch-depth: 0
         
       - name: Preparing Arch Container
-        uses: pkgforge-dev/anylinux-setup-action@v1
+        uses: pkgforge-dev/anylinux-setup-action@v2
         
       - name: Install Dependencies & Debloat
         run: /bin/sh ./SharunAppImage/get-dependencies.sh
