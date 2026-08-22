@@ -1,5 +1,5 @@
 {
-  "version": 13,
+  "version": 14,
   "gpus": {
     "6610": [
       {
@@ -1895,6 +1895,27 @@
         "defBoostClock": "N/A",
         "defMemClock": "1500 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-540.c4213"
+      },
+      {
+        "name": "AMD Radeon RX 640",
+        "revisions": [
+          "C1"
+        ],
+        "codeName": "Polaris 23",
+        "technology": "14 nm",
+        "dieSize": "103 mm\u00B2",
+        "releaseDate": "Apr 9th, 2020",
+        "transistors": "2200M",
+        "rops": "16",
+        "tmus": "40",
+        "shaders": "640 Unified",
+        "computeUnits": "10 CU",
+        "memoryType": "GDDR5",
+        "busWidth": "128 bit",
+        "defGpuClock": "1295 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "1500 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/radeon-rx-640-oem.c4110"
       }
     ],
     "6FDF": [
