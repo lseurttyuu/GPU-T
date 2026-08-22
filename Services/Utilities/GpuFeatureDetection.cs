@@ -482,6 +482,16 @@ public static class GpuFeatureDetection
                 currentGen = "Unknown";
             }
         }
+
+        // Ensure current width does not exceed max width
+        int.TryParse(maxWidthStr, out int maxWidthInt);
+        int.TryParse(currentWidth, out int currentWidthInt);
+
+        if(currentWidthInt > maxWidthInt && maxWidthInt > 0)
+        {
+            currentWidth = maxWidthStr;
+        }
+
         return $"{capability} @ x{currentWidth} {currentGen}";
     }
 
