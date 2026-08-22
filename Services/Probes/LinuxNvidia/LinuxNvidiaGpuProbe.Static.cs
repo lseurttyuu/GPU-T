@@ -13,11 +13,11 @@ public partial class LinuxNvidiaGpuProbe
     public GpuStaticData LoadStaticData()
     {
         var ids = GpuFeatureDetection.GetRawPciIds(_basePath);
-        string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "").ToUpper();
+        string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "", StringComparison.OrdinalIgnoreCase).PadLeft(2, '0').ToUpper();
 
         // Clean and pad the Sub IDs to ensure they are exactly 4 characters each
-        string subVendor = ids.SubVendor.Replace("0x", "").PadLeft(4, '0').ToUpper();
-        string subDevice = ids.SubDevice.Replace("0x", "").PadLeft(4, '0').ToUpper();
+        string subVendor = ids.SubVendor.Replace("0x", "", StringComparison.OrdinalIgnoreCase).PadLeft(4, '0').ToUpper();
+        string subDevice = ids.SubDevice.Replace("0x", "", StringComparison.OrdinalIgnoreCase).PadLeft(4, '0').ToUpper();
 
         // NVIDIA JSON structure matches [SubDevice][SubVendor]
         string subSysId = $"{subDevice}{subVendor}";
@@ -174,6 +174,7 @@ public partial class LinuxNvidiaGpuProbe
             DeviceName = deviceName,
             IsExactMatch = spec?.IsExactMatch ?? true,
             DeviceId = $"{ids.Vendor} {ids.Device} - {ids.SubVendor} {ids.SubDevice}",
+            VendorId = ids.Vendor,
             Subvendor = PciIdLookup.LookupVendorName(ids.SubVendor),
             BusId = busId,
             BiosVersion = biosVersion,
@@ -209,6 +210,8 @@ public partial class LinuxNvidiaGpuProbe
             MemorySize = memorySize,
 
             IsCudaAvailable = isCudaAvailable,
+            IsOneApiAvailable = false,
+            IsSyclAvailable = false,
             IsPhysXEnabled = isPhysXEnabled,
             IsVulkanAvailable = GpuFeatureDetection.CheckVulkanSupport(ids.Device, "nvidia_icd.json", "nvidia_icd.x86_64.json"),
             IsOpenClAvailable = isOpenClAvailable,

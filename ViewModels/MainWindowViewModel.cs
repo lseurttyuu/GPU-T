@@ -247,6 +247,16 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isCudaEnabled;
 
     /// <summary>
+    /// Indicates availability of oneAPI on the detected GPU.
+    /// </summary>
+    [ObservableProperty] private bool _isOneApiEnabled;
+
+    /// <summary>
+    /// Indicates availability of SYCL on the detected GPU.
+    /// </summary>
+    [ObservableProperty] private bool _isSyclEnabled;
+
+    /// <summary>
     /// Indicates availability of ROCm on the detected GPU.
     /// </summary>
     [ObservableProperty] private bool _isRocmEnabled;
@@ -289,6 +299,11 @@ public partial class MainWindowViewModel : ViewModelBase
     /// Indicates if the current GPU is from AMD (used to enable/disable specific UI elements).
     /// </summary>
     [ObservableProperty] private bool _isAmdVendor;
+
+    /// <summary>
+    /// Indicates if the current GPU is from Intel (used to enable/disable specific UI elements).
+    /// </summary>
+    [ObservableProperty] private bool _isIntelVendor;
 
     /// <summary>
     /// Dynamic label for the Compute Units field, varying by vendor (SM Count for NVIDIA).
@@ -515,6 +530,8 @@ public partial class MainWindowViewModel : ViewModelBase
         IsHsaEnabled = data.IsHsaAvailable; 
         IsOpenClEnabled = data.IsOpenClAvailable;
         IsCudaEnabled = data.IsCudaAvailable;
+        IsOneApiEnabled = data.IsOneApiAvailable;
+        IsSyclEnabled = data.IsSyclAvailable;
         IsRocmEnabled = data.IsRocmAvailable;
         IsVulkanEnabled = data.IsVulkanAvailable;
         IsUefiEnabled = data.IsUefiAvailable;
@@ -535,17 +552,20 @@ public partial class MainWindowViewModel : ViewModelBase
         _rawBusWidth = GPU_T.Services.Probes.CommonGpuHelpers.ExtractNumber(BusWidth);
         _rawMemoryType = data.MemoryType;
 
-       if (data.DeviceName.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase))
+        // Robust vendor detection using normalized VendorId
+        string vId = data.VendorId.Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToUpper();
+        if (vId == "10DE")
             _currentVendorName = "NVIDIA";
-        else if (data.DeviceName.Contains("Intel", StringComparison.OrdinalIgnoreCase))
+        else if (vId == "8086")
             _currentVendorName = "Intel";
-        else if(data.DeviceName.Contains("AMD", StringComparison.OrdinalIgnoreCase) || data.DeviceName.Contains("ATI", StringComparison.OrdinalIgnoreCase))
+        else if (vId == "1002" || vId == "1022")
             _currentVendorName = "AMD";
         else
             _currentVendorName = "Unknown";
 
         IsNvidiaVendor = _currentVendorName == "NVIDIA";
         IsAmdVendor = _currentVendorName == "AMD";
+        IsIntelVendor = _currentVendorName == "Intel";
 
         VendorLogo = LoadBitmapFromAssets(GetVendorLogoPath());
 
@@ -562,14 +582,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private string GetVendorLogoPath()
     {
-        // For development/testing purposes, we can enable experimental support for Intel to show their logo and test theme responsiveness.
-        if (AppConfig.EnableExperimentalGpuSupport)
+        if (_currentVendorName == "Intel")
         {
-            if (_currentVendorName == "Intel")
-            {
-                return "/Assets/intel_logo.png";
-            }
+            return "/Assets/intel_logo.png";
         }
+
 
         if (_currentVendorName == "NVIDIA")
         {

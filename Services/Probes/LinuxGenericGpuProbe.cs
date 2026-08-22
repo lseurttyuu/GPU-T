@@ -31,10 +31,10 @@ public class LinuxGenericGpuProbe : IGpuProbe
     {
         // 1. Hardware Identification
         var ids = GpuFeatureDetection.GetRawPciIds(_basePath);
-        string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "").ToUpper();
+        string revId = GpuFeatureDetection.ReadSysfsFile(_basePath, "revision", "N/A").Replace("0x", "", StringComparison.OrdinalIgnoreCase).PadLeft(2, '0').ToUpper();
 
         // 2. Database Lookup
-        var spec = PciIdLookup.GetSpecs(ids.Device, revId);
+        var spec = PciIdLookup.GetSpecs(ids.Vendor, ids.Device, revId);
 
         // 3. Fallback Naming
         string deviceName = "Unknown GPU";
@@ -96,6 +96,7 @@ public class LinuxGenericGpuProbe : IGpuProbe
             DeviceName = deviceName,
             IsExactMatch = spec?.IsExactMatch ?? false,
             DeviceId = $"{ids.Vendor} {ids.Device} - {ids.SubVendor} {ids.SubDevice}",
+            VendorId = ids.Vendor,
             Subvendor = PciIdLookup.LookupVendorName(ids.SubVendor),
             BusId = _busId,
             
@@ -140,6 +141,8 @@ public class LinuxGenericGpuProbe : IGpuProbe
             
             // Assume vendor-specific tech is unavailable
             IsCudaAvailable = false,
+            IsOneApiAvailable = false,
+            IsSyclAvailable = false,
             IsPhysXEnabled = false,
             IsOpenClAvailable = false,
             IsRayTracingAvailable = false
