@@ -85,13 +85,39 @@ public static class GpuProbeFactory
     {
         try
         {
-            string path = $"/sys/class/drm/{gpuId}/device/vendor";
-            if (File.Exists(path))
+            string basePath = $"/sys/class/drm/{gpuId}/device";
+            string vendorPath = Path.Combine(basePath, "vendor");
+
+            // 1. Standard fast-path (works for 99% of modern drivers)
+            if (File.Exists(vendorPath))
             {
-                return File.ReadAllText(path).Trim().ToUpper();
+                return File.ReadAllText(vendorPath).Trim().ToUpper();
+            }
+
+            // 2. Smart path-resolving fallback for simple-framebuffer or legacy drivers
+            DirectoryInfo currentDir = new DirectoryInfo($"/sys/class/drm/{gpuId}");
+            if (currentDir.Exists)
+            {
+                // Resolve the symlink to the physical PCI hierarchy
+                FileSystemInfo? resolvedTarget = currentDir.ResolveLinkTarget(true);
+                DirectoryInfo? searchDir = resolvedTarget as DirectoryInfo ?? currentDir;
+
+                // Walk up the directory tree, look for the "vendor" file in parent directories
+                while (searchDir != null)
+                {
+                    vendorPath = Path.Combine(searchDir.FullName, "vendor");
+                    if (File.Exists(vendorPath))
+                    {
+                        return File.ReadAllText(vendorPath).Trim().ToUpper();
+                    }
+                    
+                    searchDir = searchDir.Parent;
+                }
             }
         }
-        catch { }
+        catch 
+        { }
+        
         return "";
     }
 }
