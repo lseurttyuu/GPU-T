@@ -43,6 +43,35 @@ public partial class LinuxNvidiaGpuProbe : IGpuProbe
         _memoryType = memoryType;
         _basePath = $"/sys/class/drm/{gpuId}/device";
 
+        // Workaround for legacy proprietary drivers / simple-framebuffer bindings
+        if (!File.Exists(Path.Combine(_basePath, "vendor")))
+        {
+            DirectoryInfo currentDir = new DirectoryInfo($"/sys/class/drm/{gpuId}");
+
+            if (currentDir.Exists)
+            {
+                // Resolve the sysfs symlink to get the absolute physical path
+                // (e.g., /sys/devices/pci0000:00/.../simple-framebuffer.0/drm/card0)
+                FileSystemInfo? resolvedTarget = currentDir.ResolveLinkTarget(true);
+                
+                // Convert back to DirectoryInfo (fallback to currentDir if it wasn't a symlink)
+                DirectoryInfo? searchDir = resolvedTarget as DirectoryInfo ?? currentDir;
+
+                // Path-Resolving algo: walk up the tree until we find the PCI device root
+                while (searchDir != null)
+                {
+                    if (File.Exists(Path.Combine(searchDir.FullName, "vendor")))
+                    {
+                        // Found the actual hardware device directory
+                        _basePath = searchDir.FullName;
+                        break;
+                    }
+                    // Move one directory level up
+                    searchDir = searchDir.Parent;
+                }
+            }
+        }
+
         if (Directory.Exists($"{_basePath}/hwmon"))
         {
             var dirs = Directory.GetDirectories($"{_basePath}/hwmon");
