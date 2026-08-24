@@ -63,10 +63,14 @@ public partial class LinuxNvidiaGpuProbe
         try
         {
             // 1. Parallel Execution: Launch smi and nvapi simultaneously
-            Task<List<string>?> smiTask = Task.Run(() => QueryNvidiaSmi(
-                "temperature.gpu,fan.speed,power.draw,clocks.current.graphics," +
-                "clocks.current.memory,utilization.gpu,utilization.memory,memory.used," +
-                "temperature.memory,utilization.encoder,utilization.decoder,clocks_throttle_reasons.active"));
+            string[] smiFields = new[]
+            {
+                "temperature.gpu", "fan.speed", "power.draw", "clocks.current.graphics",
+                "clocks.current.memory", "utilization.gpu", "utilization.memory", "memory.used",
+                "temperature.memory", "utilization.encoder", "utilization.decoder", "clocks_throttle_reasons.active"
+            };
+
+            Task<Dictionary<string, string>?> smiTask = Task.Run(() => SmartQueryNvidiaSmi(smiFields, cache));
 
             Task<string> nvapiTask = Task.FromResult("");
             if (cache.IsNvapiSupported == true)
@@ -80,7 +84,7 @@ public partial class LinuxNvidiaGpuProbe
             var smiData = smiTask.Result;
             string readData = nvapiTask.Result;
 
-            // 2. Parse the Data (Exactly as before)
+            // 2. Parse the Data
             double gpuTemp = 0, fanPercent = 0, powerW = 0, gpuClock = 0, memClock = 0;
             int gpuLoad = 0, memLoad = 0, encLoad = 0, decLoad = 0, fanRpm = 0;
             double memUsedMb = 0, memTemp = 0, GpuVoltage = 0, hotSpotTemp = 0, pcieTxGb = 0, pcieRxGb = 0;
@@ -117,27 +121,35 @@ public partial class LinuxNvidiaGpuProbe
                 }
             }
 
-            // Parse nvidia-smi output if available
-            if (smiData != null && smiData.Count >= 12)
+            // Parse nvidia-smi dictionary output if available
+            if (smiData != null)
             {
-                double.TryParse(CleanSmiValue(smiData[0]), NumberStyles.Any, CultureInfo.InvariantCulture, out gpuTemp);
-                double.TryParse(CleanSmiValue(smiData[1]), NumberStyles.Any, CultureInfo.InvariantCulture, out fanPercent);
-                double.TryParse(CleanSmiValue(smiData[2]), NumberStyles.Any, CultureInfo.InvariantCulture, out powerW);
-                double.TryParse(CleanSmiValue(smiData[3]), NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
-                double.TryParse(CleanSmiValue(smiData[4]), NumberStyles.Any, CultureInfo.InvariantCulture, out memClock);
-                memClock = NormalizeMemoryClock(memClock, _memoryType);
+                if (smiData.TryGetValue("temperature.gpu", out var valGpuTemp)) double.TryParse(CleanSmiValue(valGpuTemp), NumberStyles.Any, CultureInfo.InvariantCulture, out gpuTemp);
+                if (smiData.TryGetValue("fan.speed", out var valFan)) double.TryParse(CleanSmiValue(valFan), NumberStyles.Any, CultureInfo.InvariantCulture, out fanPercent);
+                if (smiData.TryGetValue("power.draw", out var valPower)) double.TryParse(CleanSmiValue(valPower), NumberStyles.Any, CultureInfo.InvariantCulture, out powerW);
+                if (smiData.TryGetValue("clocks.current.graphics", out var valGpuClk)) double.TryParse(CleanSmiValue(valGpuClk), NumberStyles.Any, CultureInfo.InvariantCulture, out gpuClock);
+                
+                if (smiData.TryGetValue("clocks.current.memory", out var valMemClk)) 
+                {
+                    double.TryParse(CleanSmiValue(valMemClk), NumberStyles.Any, CultureInfo.InvariantCulture, out memClock);
+                    memClock = NormalizeMemoryClock(memClock, _memoryType);
+                }
 
-                int.TryParse(CleanSmiValue(smiData[5]), out gpuLoad);
-                int.TryParse(CleanSmiValue(smiData[6]), out memLoad);
-                double.TryParse(CleanSmiValue(smiData[7]), NumberStyles.Any, CultureInfo.InvariantCulture, out memUsedMb);
+                if (smiData.TryGetValue("utilization.gpu", out var valGpuLoad)) int.TryParse(CleanSmiValue(valGpuLoad), out gpuLoad);
+                if (smiData.TryGetValue("utilization.memory", out var valMemLoad)) int.TryParse(CleanSmiValue(valMemLoad), out memLoad);
+                if (smiData.TryGetValue("memory.used", out var valMemUsed)) double.TryParse(CleanSmiValue(valMemUsed), NumberStyles.Any, CultureInfo.InvariantCulture, out memUsedMb);
 
                 // If memory temperature not provided by NVAPI, fallback to nvidia-smi
-                if (memTemp == 0) double.TryParse(CleanSmiValue(smiData[8]), NumberStyles.Any, CultureInfo.InvariantCulture, out memTemp);
+                if (memTemp == 0 && smiData.TryGetValue("temperature.memory", out var valMemTemp)) double.TryParse(CleanSmiValue(valMemTemp), NumberStyles.Any, CultureInfo.InvariantCulture, out memTemp);
 
-                int.TryParse(CleanSmiValue(smiData[9]), out encLoad);
-                int.TryParse(CleanSmiValue(smiData[10]), out decLoad);
-                perfCap = CleanSmiValue(smiData[11], "None");
-                if (string.IsNullOrEmpty(perfCap)) perfCap = "None";
+                if (smiData.TryGetValue("utilization.encoder", out var valEnc)) int.TryParse(CleanSmiValue(valEnc), out encLoad);
+                if (smiData.TryGetValue("utilization.decoder", out var valDec)) int.TryParse(CleanSmiValue(valDec), out decLoad);
+                
+                if (smiData.TryGetValue("clocks_throttle_reasons.active", out var valPerf)) 
+                {
+                    perfCap = CleanSmiValue(valPerf, "None");
+                    if (string.IsNullOrEmpty(perfCap)) perfCap = "None";
+                }
             }
             else
             {
@@ -198,18 +210,25 @@ public partial class LinuxNvidiaGpuProbe
         // Probe nvidia-smi for sensor support
         if (IsNvidiaSmiAvailable())
         {
-            var smiData = QueryNvidiaSmi("temperature.gpu,fan.speed,power.draw,utilization.gpu,utilization.memory,memory.used,temperature.memory,utilization.encoder,utilization.decoder,clocks_throttle_reasons.active");
-            if (smiData != null && smiData.Count >= 10)
+            string[] smiFields = new[]
             {
-                avail.HasFan = !string.IsNullOrEmpty(CleanSmiValue(smiData[1]));
-                avail.HasPower = !string.IsNullOrEmpty(CleanSmiValue(smiData[2]));
-                avail.HasGpuLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[3]));
-                avail.HasMemControllerLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[4]));
-                avail.HasMemUsed = !string.IsNullOrEmpty(CleanSmiValue(smiData[5]));
-                avail.HasMemTemp = !string.IsNullOrEmpty(CleanSmiValue(smiData[6]));
-                avail.HasEncoderLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[7]));
-                avail.HasDecoderLoad = !string.IsNullOrEmpty(CleanSmiValue(smiData[8]));
-                avail.HasPerfCapReason = !string.IsNullOrEmpty(CleanSmiValue(smiData[9]));
+                "temperature.gpu", "fan.speed", "power.draw", "utilization.gpu",
+                "utilization.memory", "memory.used", "temperature.memory",
+                "utilization.encoder", "utilization.decoder", "clocks_throttle_reasons.active"
+            };
+
+            var smiData = SmartQueryNvidiaSmi(smiFields, cache);
+            if (smiData != null)
+            {
+                avail.HasFan = smiData.TryGetValue("fan.speed", out var valFan) && !string.IsNullOrEmpty(CleanSmiValue(valFan));
+                avail.HasPower = smiData.TryGetValue("power.draw", out var valPow) && !string.IsNullOrEmpty(CleanSmiValue(valPow));
+                avail.HasGpuLoad = smiData.TryGetValue("utilization.gpu", out var valGLoad) && !string.IsNullOrEmpty(CleanSmiValue(valGLoad));
+                avail.HasMemControllerLoad = smiData.TryGetValue("utilization.memory", out var valMLoad) && !string.IsNullOrEmpty(CleanSmiValue(valMLoad));
+                avail.HasMemUsed = smiData.TryGetValue("memory.used", out var valMUsed) && !string.IsNullOrEmpty(CleanSmiValue(valMUsed));
+                avail.HasMemTemp = smiData.TryGetValue("temperature.memory", out var valMTemp) && !string.IsNullOrEmpty(CleanSmiValue(valMTemp));
+                avail.HasEncoderLoad = smiData.TryGetValue("utilization.encoder", out var valEnc) && !string.IsNullOrEmpty(CleanSmiValue(valEnc));
+                avail.HasDecoderLoad = smiData.TryGetValue("utilization.decoder", out var valDec) && !string.IsNullOrEmpty(CleanSmiValue(valDec));
+                avail.HasPerfCapReason = smiData.TryGetValue("clocks_throttle_reasons.active", out var valPerf) && !string.IsNullOrEmpty(CleanSmiValue(valPerf));
             }
         }
         // Probe hwmon sysfs as a fallback for basic sensors
@@ -222,7 +241,7 @@ public partial class LinuxNvidiaGpuProbe
         // Probe NVAPI sidecar for advanced sensors if available
         if (!cache.IsNvapiSupported.HasValue)
         {
-            string checkResult=LinuxNvidiaSidecarHelper.Run(LinuxNvidiaSidecarHelper.BuildTelemetryArgs("--check", _busId));
+            string checkResult = LinuxNvidiaSidecarHelper.Run(LinuxNvidiaSidecarHelper.BuildTelemetryArgs("--check", _busId));
             cache.IsNvapiSupported = (checkResult != null);
         }
 
@@ -258,5 +277,75 @@ public partial class LinuxNvidiaGpuProbe
         }
 
         return avail;
+    }
+
+    /// <summary>
+    /// Builds the query, stripping known invalid fields. 
+    /// Returns a Dictionary mapping the requested field name to its string value.
+    /// </summary>
+    private Dictionary<string, string>? SmartQueryNvidiaSmi(string[] requestedFields, ProbeStateCache cache)
+    {
+        List<string>? rawResult = null;
+        List<string> activeQueryFields = new List<string>();
+        
+        int maxRetries = requestedFields.Length;
+        int retries = 0;
+
+        while (retries <= maxRetries)
+        {
+            retries++;
+            activeQueryFields.Clear();
+
+            lock (cache.LockObj)
+            {
+                foreach (var field in requestedFields)
+                {
+                    if (!cache.UnsupportedSmiFields.Contains(field))
+                    {
+                        activeQueryFields.Add(field);
+                    }
+                }
+            }
+
+            if (activeQueryFields.Count == 0) return null;
+
+            string queryStr = string.Join(",", activeQueryFields);
+            rawResult = QueryNvidiaSmi(queryStr);
+
+            if (rawResult == null || rawResult.Count == 0) return null;
+
+            string firstElement = rawResult[0];
+            if (firstElement.StartsWith("Field \"") && firstElement.Contains("\" is not a valid field"))
+            {
+                int startQuote = firstElement.IndexOf('"') + 1;
+                int endQuote = firstElement.IndexOf('"', startQuote);
+                
+                if (startQuote > 0 && endQuote > startQuote)
+                {
+                    string badField = firstElement.Substring(startQuote, endQuote - startQuote);
+                    
+                    lock (cache.LockObj)
+                    {
+                        cache.UnsupportedSmiFields.Add(badField);
+                    }
+                    continue; 
+                }
+            }
+            break;
+        }
+
+        if (rawResult == null) return null;
+
+        // Map the fields to their corresponding results
+        var resultDict = new Dictionary<string, string>();
+        for (int i = 0; i < activeQueryFields.Count; i++)
+        {
+            if (i < rawResult.Count)
+            {
+                resultDict[activeQueryFields[i]] = rawResult[i];
+            }
+        }
+
+        return resultDict;
     }
 }
