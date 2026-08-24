@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "gpus": {
     "2521": [
       {
@@ -29750,6 +29750,31 @@
         "defBoostClock": "N/A",
         "defMemClock": "405 MHz",
         "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-7500-le.c1772"
+      }
+    ],
+    "0427": [
+      {
+        "name": "NVIDIA GeForce 8400M GS",
+        "subsysids": [
+          "ANY"
+        ],
+        "codeName": "G86S",
+        "technology": "80 nm",
+        "dieSize": "127 mm\u00B2",
+        "releaseDate": "May 9th, 2007",
+        "transistors": "210M",
+        "rops": "4",
+        "tmus": "8",
+        "shaders": "16 Unified",
+        "computeUnits": "2",
+        "rtCores": "N/A",
+        "tensorCores": "N/A",
+        "memoryType": "DDR2",
+        "busWidth": "64 bit",
+        "defGpuClock": "400 MHz",
+        "defBoostClock": "N/A",
+        "defMemClock": "400 MHz",
+        "lookupUrl": "https://www.techpowerup.com/gpu-specs/geforce-8400m-gs.c1696"
       }
     ]
   }
