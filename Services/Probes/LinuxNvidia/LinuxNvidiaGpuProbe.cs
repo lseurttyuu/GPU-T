@@ -28,6 +28,9 @@ public partial class LinuxNvidiaGpuProbe : IGpuProbe
         public GpuSensorData LastData = new();
         public bool IsUpdating = false;
         public readonly object LockObj = new object();
+
+        // Tracks blacklisted nvidia-smi fields for selected GPU
+        public HashSet<string> UnsupportedSmiFields = new();
     }
 
     private static readonly Dictionary<string, ProbeStateCache> _stateCache = new();
