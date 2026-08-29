@@ -24,12 +24,14 @@ public class GeneralProvider : AdvancedDataProvider
 
         bool isAmd = false;
         bool isNvidia = false;
+        bool isIntel = false;
         string gpuId = selectedGpu?.Id ?? "card0";
         if (selectedGpu != null)
         {
             var gpuVendor = GpuProbeFactory.GetVendorId(gpuId);
             isAmd = (gpuVendor == "0X1002" || gpuVendor == "0X1022"); // AMD Vendor IDs
             isNvidia = (gpuVendor == "0X10DE"); // NVIDIA Vendor ID
+            isIntel = (gpuVendor == "0X8086"); // Intel Vendor ID
         }
 
         AddRow(list, "System", "", true);
@@ -61,7 +63,7 @@ public class GeneralProvider : AdvancedDataProvider
         catch {}
         AddRow(list, "Kernel Driver", driverModule);
 
-        CheckOpengl(list, isAmd, isNvidia);
+        CheckOpengl(list, isAmd, isNvidia, isIntel);
 
         // FIRMWARE (AMD Only)
         if (isAmd)
@@ -75,7 +77,7 @@ public class GeneralProvider : AdvancedDataProvider
     /// Queries OpenGL and Mesa information using glxinfo and adds relevant details to the list.
     /// Adapts the driver output based on GPU vendor.
     /// </summary>
-    private void CheckOpengl(ObservableCollection<AdvancedItemViewModel> list, bool isAmd, bool isNvidia)
+    private void CheckOpengl(ObservableCollection<AdvancedItemViewModel> list, bool isAmd, bool isNvidia, bool isIntel)
     {
         try
         {
@@ -111,7 +113,7 @@ public class GeneralProvider : AdvancedDataProvider
                 AddRow(list, "OpenGL Version", glVersion);
 
                 // Dynamically inject the proprietary NVIDIA driver instead of empty Mesa strings
-                if (isAmd)
+                if (isAmd || isIntel)
                 {
                     AddRow(list, "Mesa Version", !string.IsNullOrEmpty(mesaVersion) ? mesaVersion : "Unknown");
                 }
